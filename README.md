@@ -174,10 +174,10 @@ implementation file `nissy.cpp`. This interface wraps the calls to the
 C functions in an object-oriented C++ interface for more convenient use.
 
 The `cpp/examples` folder contains some examples for how to use this
-interface. You can build them with e.g.
+interface. You can build them and run them with the build tool, for example:
 
 ```
-g++ -std=c++20 cpp/nissy.cpp cpp/examples/solve_h48h3k2.cpp nissy.o
+./build cpp cpp/examples/solve_h48h3k2.cpp
 ```
 
 NOTE: If you prefer to use a C-style API, you'll have to write

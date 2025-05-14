@@ -24,25 +24,32 @@
 #
 # And the empty string value will take precedence.
 
-# Specify the compiler to use.
-# The default value is "cc".
-CC=${CC-${NISSY_BUILD_CC}}
+# Specify the C compiler to use.
+CC=${CC-${NISSY_BUILD_CC:-"cc"}}
 
-# Specify the compiler to use when building WASM target.
-# The default value is "emcc".
-EMCC=${EMCC-${NISSY_BUILD_EMCC}}
+# Specify the C++ compiler for the C++ examples.
+CXX=${CXX-${NISSY_BUILD_CXX:-"c++"}}
 
-# Specify the nodejs command for running tests for the WASM target.
-# The default value is "node".
-NODE=${NODE-${NISSY_BUILD_NODE}}
+# Specify the compiler to use when building for WASM.
+EMCC=${EMCC-${NISSY_BUILD_EMCC:-"emcc"}}
+
+# Specify the nodejs command for running tests for WASM.
+NODE=${NODE-${NISSY_BUILD_NODE:-"node"}}
 
 # The maximum number of threads to use for multi-threaded operations.
 # This is also used as default value in case an operation allows
 # specifying how many threads to use.
 # The number n must be between 1 and 128.
 # The default value is 16.
-# (TODO: in the future this will be determined base on the system).
 THREADS=${THREADS-${NISSY_BUILD_THREADS}}
+
+detectthreads() {
+	# TODO: detect based on system
+	# Is 'getconf NPROCESSORD_ONLN' portable? Is it threads or cores?
+	echo "16"
+}
+
+[ -z "$THREADS" ] && THREADS="$(detectthreads)"
 
 # You can use this variable to build for a different architecture, for example
 # if you want to cross-compile or to use the portable version.
@@ -50,22 +57,6 @@ THREADS=${THREADS-${NISSY_BUILD_THREADS}}
 # specified, the script will automatically detect the best architecture for the
 # system. The architecture "PORTABLE" will work on any system.
 ARCH=${ARCH-${NISSY_BUILD_ARCH}}
-
-# SANITIZE="option1,option2,..." adds the options "-fsanitize=option1",
-# "-fsanitize=option2", ... to the C compiler command in debug mode.
-# By default none is used because these options are not available on all
-# systems. It is advisable to set the NISSY_BUILD_SANITIZE options in your
-# shell's configuration file if your system does support them.
-SANITIZE=${SANITIZE-${NISSY_BUILD_SANITIZE}}
-
-# Optimization flags. By default, -O3 is used.
-OPTIMIZE=${OPTIMIZE-${NISSY_BUILD_OPTIMIZE}}
-
-detectthreads() {
-	# TODO: detect based on system
-	# Is 'getconf NPROCESSORD_ONLN' portable? Is it threads or cores?
-	echo "16"
-}
 
 greparch() {
 	$CC -march=native -dM -E - </dev/null 2>/dev/null | grep "$1"
@@ -75,34 +66,44 @@ detectarch() {
 	[ -n "$(greparch __AVX2__)" ] && detected="AVX2"
 	[ -n "$(greparch __ARM_NEON)" ] && detected="NEON"
 	[ -z "$detected" ] && detected="PORTABLE"
-
 	echo "$detected"
 }
 
-validatecc() {
-	if ! (command -v "$CC" >/dev/null 2>&1) ; then
-		echo "Error: compiler '$CC' not found"
+[ -z "$ARCH" ] && ARCH="$(detectarch)"
+
+# SANITIZE="option1,option2,..." adds the options "-fsanitize=option1",
+# "-fsanitize=option2", ... to the C compiler command in debug mode.
+# By default none is used because these options are not available on all
+# systems. It is advisable to set the NISSY_BUILD_SANITIZE options in your
+# shell's configuration file if your system does support them.
+SANITIZE=${SANITIZE-${NISSY_BUILD_SANITIZE:-""}}
+
+# Optimization flags.
+OPTIMIZE=${OPTIMIZE-${NISSY_BUILD_OPTIMIZE:-"-O3"}}
+
+validate_command() {
+	command="$1"
+	if ! (command -v "$command" >/dev/null 2>&1) ; then
+		echo "Error: command '$command' not found"
 		exit 1
 	fi
 }
 
-validatethreads() {
-	if [ "$THREADS" -le 0 ] || [ "$THREADS" -gt 128 ]; then
+validate_threads() {
+	threads="$1"
+	if [ "$threads" -le 0 ] || [ "$threads" -gt 128 ]; then
 		echo "Error: number of threads must be between 1 and 128"
 		exit 1
 	fi
 }
 
-validatearch() {
-	case "$ARCH" in
+validate_arch() {
+	arch="$1"
+	case "$arch" in
 	AVX2|NEON|PORTABLE)
 		;;
-	"")
-		ARCH=$(detectarch)
-		echo "Selected architecture '$ARCH'"
-		;;
 	*)
-		echo "Error: architecture '$ARCH' not supported"
+		echo "Error: architecture '$arch' not supported"
 		echo "Supported architectures: AVX2, NEON, PORTABLE"
 		exit 1
 		;;
@@ -116,27 +117,20 @@ parsesanitize() {
 	done
 }
 
-# Set variables to default values if unset
-CC=${CC:-"cc"}
-EMCC=${EMCC:-"emcc"}
-NODE=${NODE:-"node"}
-THREADS=${THREADS:-"$(detectthreads)"}
-ARCH=${ARCH:-"$(detectarch)"}
-OPTIMIZE=${OPTIMIZE:-"-O3"}
-
-# Validate variales
-validatecc
-validatethreads
-validatearch
-
+# Build flags
 CFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -lpthread"
 [ "$ARCH" = "AVX2" ] && CFLAGS="$CFLAGS -mavx2"
 WFLAGS="-pedantic -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 OFLAGS="$OPTIMIZE"
 DFLAGS="-DDEBUG -g3 $(parsesanitize "$SANITIZE")"
 MFLAGS="-DTHREADS=$THREADS -D$ARCH"
+CPPFLAGS="-std=c++20"
+
+# Build flags for emscripten (WASM target)
 WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L"
 WASMMFLAGS="-DTHREADS=$THREADS -DWASMSIMD"
+WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE \
+	-sLINKABLE -sEXPORT_ALL -sEXPORTED_RUNTIME_METHODS=cwrap"
 
 if (command -v "python3-config" >/dev/null 2>&1) ; then
 	PYTHON3_INCLUDES="$(python3-config --includes)"
@@ -147,13 +141,12 @@ else
 fi
 
 build_help() {
-	echo "Build system for nissy"
+	echo "Build system for nissy. Usage:"
 	echo ""
-	echo "usage:"
 	echo "$0 TARGET             # build the given TARGET"
 	echo "$0                    # same as '$0 nissy'"
 	echo "$0 test [PATTERN]     # run unit tests (matching PATTERN)"
-	echo "$0 wasmtest [PATTERN] # same as test, but for WASM target"
+	echo "$0 webtest [PATTERN]  # same as test, but for WASM build"
 	echo "$0 tool PATTERN       # run the tool matching PATTERN"
 	echo ""
 	echo "targets:"
@@ -163,7 +156,8 @@ build_help() {
 	echo "sharedlib   Build the shared library libnissy.so"
 	echo "python      Build the Python module for nissy"
 	echo "shell       Build a basic nissy shell (./run)"
-	echo "wasm        Build the WebAssembly module for nissy"
+	echo "web         Build the WebAssembly / JavaScript module for nissy"
+	echo "cpp FILES   Build and run the given FILES including cpp/nissy.h"
 	echo ""
 	echo "help        Show this help message"
 	echo "config      Show build configuration and exit"
@@ -195,10 +189,15 @@ odflags() {
 }
 
 build_clean() {
-	run rm -rf -- *.o *.so *.a run runtest runtool
+	run rm -rf -- *.o *.so *.a run runtest runtool runcpp \
+		web/nissy_web_module.*
 }
 
 build_nissy() {
+	validate_command "$CC"
+	validate_threads "$THREADS"
+	validate_arch "$ARCH"
+
 	run $CC $CFLAGS $WFLAGS $MFLAGS $(odflags) -c -o nissy.o src/nissy.c
 }
 
@@ -208,6 +207,10 @@ build_lib() {
 }
 
 build_sharedlib() {
+	validate_command "$CC"
+	validate_threads "$THREADS"
+	validate_arch "$ARCH"
+
 	run $CC $CFLAGS $WFLAGS $MFLAGS $(odflags) -shared -c -o nissy.o \
 		src/nissy.c
 }
@@ -228,9 +231,28 @@ build_python() {
 		-o nissy_pthon_module.so nissy.o python/nissy_module.c
 }
 
-build_wasm() {
+build_cpp() {
+	validate_command "$CXX"
+	if [ -z "$@" ]; then
+		echo "Please provide one or more valid C++ source files"
+		echo "usage: ./build cpp FILES"
+	fi
+
+	build_nissy
+	run $CXX -std=c++20 -o runcpp cpp/nissy.cpp nissy.o $@
+	run ./runcpp
+}
+
+build_web() {
+	validate_command "$EMCC"
+	validate_threads "$THREADS"
+	validate_arch "$ARCH"
+
 	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $(odflags) -c \
 		-o nissy.o src/nissy.c
+	run $EMCC -lembind $CPPFLAGS $(odflags) $WASMLINKFLAGS \
+		-o web/nissy_web_module.mjs \
+		cpp/nissy.cpp web/wrapper.cpp nissy.o
 }
 
 dotest() {
@@ -285,8 +307,8 @@ build_test() {
 	rm runtest
 }
 
-build_wasmtest() {
-	obj="wasm"
+build_webtest() {
+	obj="web"
 	testobj="runtest.js"
 	testbuild="$EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $DFLAGS -o $testobj"
 	testrun="$NODE $testobj"
@@ -294,15 +316,12 @@ build_wasmtest() {
 	rm -f runtest.js runtest.wasm
 }
 
-tool_usage() {
-	echo "usage: ./build tool PATTERN"
-}
-
 build_tool() {
 	pattern="$1"
 
 	if [ -z "$pattern" ]; then
-		tool_usage
+		echo "Please provide a valid PATTERN to select a tool"
+		echo "usage: ./build tool PATTERN"
 		exit 1
 	fi
 	shift
@@ -361,7 +380,7 @@ fi
 
 case "$target" in
 help|config|clean|\
-nissy|lib|sharedlib|shell|python|wasm|test|wasmtest|tool)
+nissy|lib|sharedlib|shell|python|cpp|web|test|webtest|tool)
 	mkdir -p tables tools/results
 	(build_"$target" $@) || exit 1
 	exit 0

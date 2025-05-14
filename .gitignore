@@ -18,8 +18,11 @@ test/.DS_Store
 test/run
 test/run.DSYM
 runtest
+runcpp
 runtest.js
 runtest.wasm
+wasm/*.wasm
+wasm/nissy_raw_module.js
 runtool
 tools/.DS_Store
 run.DSYM
