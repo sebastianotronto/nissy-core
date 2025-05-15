@@ -33,9 +33,9 @@ namespace nissy {
 		bool ok() const;
 
 		static const error OK;
-		static const error UNSOLVABLE;
+		static const error UNSOLVABLE_WARNING;
+		static const error UNSOLVABLE_ERROR;
 		static const error INVALID_CUBE;
-		static const error UNSOLVABLE_CUBE;
 		static const error INVALID_MOVES;
 		static const error INVALID_TRANS;
 		static const error INVALID_SOLVER;
@@ -50,9 +50,9 @@ namespace nissy {
 	public:
 		int value;
 
-		static const status run;
-		static const status stop;
-		static const status pause;
+		static const status RUN;
+		static const status STOP;
+		static const status PAUSE;
 	};
 
 	class cube {
@@ -96,7 +96,7 @@ namespace nissy {
 		solve_result solve(const cube&, nissflag, unsigned minmoves,
 		    unsigned maxmoves, unsigned maxsols, unsigned optimal,
 		    unsigned threads, int (*poll_status)(void *),
-		    void *poll_status_data);
+		    void *poll_status_data) const;
 
 		static std::variant<solver, error> get(const std::string&);
 	private:

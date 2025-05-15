@@ -233,6 +233,23 @@ with the comments in nissy.h for more details.
 
 NOTE: Support for the Python module is still rudimentary.
 
+### JavaScript (and WebAssembly)
+
+Bindings for JavaScript via a WebAssembly build (using
+[emscripten](https://emscripten.org)) are work in progress.
+The JavaScript module can be built with
+
+```
+./build web
+```
+
+Some examples can be found in the `web/examples` folder. They can be run
+using [nodejs](https://nodejs.org):
+
+```
+node web/examples/[filename]
+```
+
 ## Cube format
 
 This format is a "base 32" encoding of the cube. It is not meant to be

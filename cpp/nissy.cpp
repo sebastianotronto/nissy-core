@@ -36,9 +36,9 @@ namespace nissy {
 	const nissflag nissflag::ALL{7};
 
 	const error error::OK{0};
-	const error error::UNSOLVABLE{-1};
+	const error error::UNSOLVABLE_WARNING{-1};
+	const error error::UNSOLVABLE_ERROR{-11};
 	const error error::INVALID_CUBE{-10};
-	const error error::UNSOLVABLE_CUBE{-11};
 	const error error::INVALID_MOVES{-20};
 	const error error::INVALID_TRANS{-30};
 	const error error::INVALID_SOLVER{-50};
@@ -48,12 +48,12 @@ namespace nissy {
 	const error error::OPTIONS{-80};
 	const error error::UNKNOWN{-999};
 
-	const status status::run{0};
-	const status status::stop{1};
-	const status status::pause{2};
+	const status status::RUN{0};
+	const status status::STOP{1};
+	const status status::PAUSE{2};
 
 	namespace size {
-		constexpr size_t CUBE = 22;
+		constexpr size_t CUBE = 24;
 		constexpr size_t TRANSFORMATION = 12;
 		constexpr size_t DATAID = 255;
 	}
@@ -160,7 +160,7 @@ namespace nissy {
 	solver::solve(const cube& cube, nissflag niss, unsigned minmoves,
 	    unsigned maxmoves, unsigned maxsols, unsigned optimal,
 	    unsigned threads, int (*poll_status)(void *),
-	    void *poll_status_data)
+	    void *poll_status_data) const
 	{
 		solver::solve_result result;
 

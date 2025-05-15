@@ -118,19 +118,20 @@ parsesanitize() {
 }
 
 # Build flags
-CFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -lpthread"
+CFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread"
 [ "$ARCH" = "AVX2" ] && CFLAGS="$CFLAGS -mavx2"
 WFLAGS="-pedantic -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 OFLAGS="$OPTIMIZE"
 DFLAGS="-DDEBUG -g3 $(parsesanitize "$SANITIZE")"
 MFLAGS="-DTHREADS=$THREADS -D$ARCH"
-CPPFLAGS="-std=c++20"
+CPPFLAGS="-std=c++20 -pthread"
 
 # Build flags for emscripten (WASM target)
-WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L"
+WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread"
 WASMMFLAGS="-DTHREADS=$THREADS -DWASMSIMD"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE \
-	-sLINKABLE -sEXPORT_ALL -sEXPORTED_RUNTIME_METHODS=cwrap"
+	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS \
+	-sLINKABLE -sEXPORT_ALL"
 
 if (command -v "python3-config" >/dev/null 2>&1) ; then
 	PYTHON3_INCLUDES="$(python3-config --includes)"
@@ -250,9 +251,11 @@ build_web() {
 
 	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $(odflags) -c \
 		-o nissy.o src/nissy.c
-	run $EMCC -lembind $CPPFLAGS $(odflags) $WASMLINKFLAGS \
+	run $EMCC -lembind -lidbfs.js -lnodefs.js \
+		$CPPFLAGS $(odflags) $WASMLINKFLAGS \
+		--js-library web/callback.js \
 		-o web/nissy_web_module.mjs \
-		cpp/nissy.cpp web/wrapper.cpp nissy.o
+		cpp/nissy.cpp web/adapter.cpp nissy.o
 }
 
 dotest() {
