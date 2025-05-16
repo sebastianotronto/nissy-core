@@ -21,8 +21,8 @@ runtest
 runcpp
 runtest.js
 runtest.wasm
-wasm/*.wasm
-wasm/nissy_web_module.*
+web/*.wasm
+web/nissy_web_module.*
 runtool
 tools/.DS_Store
 run.DSYM

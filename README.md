@@ -13,40 +13,50 @@ of pruning tables that were developed independently.
 
 ## Building
 
-First run the configuration script to detect the system configuration.
-This is going to select a C compiler and architecture-specific optimizations.
+This project currently supports only POSIX systems (Linux, MacOS, BSD...).
+If you want to build on Windows you can do so via
+[WSL](https://learn.microsoft.com/en-us/windows/wsl/install). Note that
+the resulting executable will not be a native Windows executable.
+Windows as a build target will be available in the future.
+
+To build nissy simply run
 
 ```
-$ ./configure.sh
+$ ./build
 ```
 
-These settings can be overridden, for example:
+For a list of options and targets for the build system run `./build help`.
+Some compiler settings can be overridden using environment variables,
+as explained in the comments at the beginning of the build script. For
+example, the command:
 
 ```
-$ THREADS=3 CC=gcc ./configure.sh   # Use 3 threads and compile with gcc
+$ export NISSY_BUILD_THREADS=3
+$ CC=gcc ./build
 ```
 
-All the configuration-time options are described in the `configure.sh` script.
-
-Once the configuration is done, you can build with make
-
-```
-$ make
-```
+is going to configure `nissy` to use at most 3 threads, and build it with
+`gcc`. Se the comments in `./build` for more details.
 
 ## Running tests
 
-This project includes a suite of "unit" test. They can be run with:
+This project includes a suite of "unit" test. You can run them with:
 
 ```
-$ make test
+$ ./build test
 ```
 
-To run only a subset of the tests, set the `TEST` variable to a regular
+For running the tests for the WebAssembly build with nodejs you can use:
+
+```
+$ ./build webtest
+```
+
+To run only a subset of the tests, you can pass as argument a regular
 expression that matches only the name of the tests you want to run:
 
 ```
-$ TEST=coord make test
+$ ./buld test coord
 ```
 
 Each subfolder of the test folder contains a test. A test can consist
@@ -63,40 +73,36 @@ output, the results compared with the .out files) and test/last.err
 Tests are always run in debug mode: this means that optimizations are
 disabled and some extra logging is enabled.
 
-See the test folder and test/test.sh for details.
-
 ## Running "tools"
 
 In the tools folder there are some small programs that test various
 functionality of the H48 library. They work similarly to test, but they
 are not run in debug mode by default.
 
-To run a tool you must select it with the environment variable `TOOL`.
-For example the command:
+To run a tool you can use:
 
 ```
-TOOL=stats make tool
+$ ./build tool TOOLNAME PARAMETERS...
 ```
 
-Will run the stats_tables_h48 tool.
+Where `TOOLNAME` is the name of one of the tools, or a regular expression
+that matches one, and `PARAMETERS...` is a tool-specific list of
+parameters.
 
-To pass some arguments to a tool, use the `TOOLARGS` variable:
+For example:
 
 ```
-TOOL=gendata TOOLARGS="h48 0;2;20" make tool
+$ :./build tool gendata h48h2k2
 ```
 
-Like for tests, the value of the `TOOL` variable can be any regular
-expression matching the name of the tool. Unlike tests, one and
-only one tool will be selected for each run.  The content of the
-`TOOLARGS` variable is used directly as command line arguments for
-the chosen tool.
+Will run a tool that generates the data table for the H48 solver with
+parameters `h=2` and `k=2.
 
 Each tool run is automatically timed, so these tools can be used as
 benchmark.  The output as well as the time of the run are saved to a
 file in the tools/results folder.
 
-To build and run a tool in debug mode, use `make debugtool`.
+To build and run a tool in debug mode, use `./build -d tool`.
 
 ## Command-line interface
 
@@ -107,17 +113,11 @@ as the commands require quite verbose options.
 To build the shell run:
 
 ```
-$ make shell
+$ ./build shell
 ```
 
-This will create an executable called `run`.
-Optionally, you can run some tests:
-
-```
-$ make shelltest
-```
-
-Then you can for example get a cube from a sequence of moves:
+This will create an executable called `run`.  Then you can for example
+get a cube from a sequence of moves:
 
 ```
 $ ./run frommoves -moves "R' U' F"
@@ -174,7 +174,8 @@ implementation file `nissy.cpp`. This interface wraps the calls to the
 C functions in an object-oriented C++ interface for more convenient use.
 
 The `cpp/examples` folder contains some examples for how to use this
-interface. You can build them and run them with the build tool, for example:
+interface. You can build them and run them with the build tool, for
+example:
 
 ```
 ./build cpp cpp/examples/solve_h48h3k2.cpp
@@ -192,18 +193,18 @@ this module follows the C API quite closely, except its functions
 sometimes return strings instead of writing to `char *` buffers.
 
 To build the Python module you need the Python development headers
-installed. You can check this from the output of `./configure.sh`:
+installed. You can check this from the output of `./build config`:
 
 ```
-$ ./configure.sh
+$ ./build config
 ...
-Python3 development libraries: version 3.12
+Python bindings: version 3.13
 ```
 
 Then to build the module:
 
 ```
-$ make python
+$ ./build python
 ```
 
 And to import it
@@ -240,14 +241,14 @@ Bindings for JavaScript via a WebAssembly build (using
 The JavaScript module can be built with
 
 ```
-./build web
+$ ./build web
 ```
 
 Some examples can be found in the `web/examples` folder. They can be run
 using [nodejs](https://nodejs.org):
 
 ```
-node web/examples/[filename]
+$ node web/examples/[filename]
 ```
 
 ## Cube format

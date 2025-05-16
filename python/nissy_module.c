@@ -350,9 +350,9 @@ static PyMethodDef nissy_methods[] = {
 	{ "getcube", getcube, METH_VARARGS, getcube_doc },
 	{ "solverinfo", solverinfo, METH_VARARGS, solverinfo_doc },
 	{ "gendata", gendata, METH_VARARGS, gendata_doc },
-	{ "checkdata", _checkdata, METH_VARARGS, checkdata_doc },
+	{ "checkdata", checkdata, METH_VARARGS, checkdata_doc },
 	{ "solve", solve, METH_VARARGS, solve_doc },
-	{ "countmoves", _countmoves, METH_VARARGS, countmoves_doc },
+	{ "countmoves", countmoves, METH_VARARGS, countmoves_doc },
 	{ NULL, NULL, 0, NULL }
 };
 
