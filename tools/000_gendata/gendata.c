@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	}
 
 	solver = argv[1];
-	parse_h48_solver(solver, &h, &k);
+	parse_h48_hk(solver, &h, &k);
 	expected = expected_h48[h][k];
 
 	nissy_setlogger(log_stderr, NULL);

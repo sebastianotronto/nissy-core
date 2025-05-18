@@ -1,7 +1,5 @@
 STATIC size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
 STATIC uint32_t gendata_cocsep_dfs(cocsep_dfs_arg_t [static 1]);
-STATIC void getdistribution_cocsep(
-    const uint32_t [static COCSEP_TABLESIZE], uint64_t [static 21]);
 
 STATIC_INLINE bool gendata_cocsep_get_visited(
     const uint8_t [static COCSEP_VISITEDSIZE], int64_t);
@@ -134,20 +132,6 @@ gendata_cocsep_dfs(cocsep_dfs_arg_t arg[static 1])
 	}
 
 	return cc;
-}
-
-STATIC void
-getdistribution_cocsep(
-    const uint32_t table[static COCSEP_TABLESIZE],
-    uint64_t distr[static 21]
-)
-{
-	size_t i;
-
-	memset(distr, 0, 21 * sizeof(uint64_t));
-
-	for (i = 0; i < COCSEP_TABLESIZE; i++)
-		distr[CBOUND(table[i])]++;
 }
 
 STATIC_INLINE bool

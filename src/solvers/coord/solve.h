@@ -13,11 +13,13 @@ typedef struct {
 } dfsarg_solve_coord_t;
 
 STATIC int64_t solve_coord(oriented_cube_t, coord_t [static 1], uint8_t,
-    uint8_t, uint8_t, uint8_t, uint64_t, uint8_t, uint8_t, uint64_t,
-    const unsigned char *, size_t n, char [n], int (*)(void *), void *);
-STATIC int64_t solve_coord_dispatch(oriented_cube_t, const char *, uint8_t,
-    uint8_t, uint8_t, uint64_t, uint8_t, uint8_t, uint64_t,
-    const unsigned char *, size_t n, char [n], int (*)(void *), void *);
+    uint8_t, uint8_t, uint8_t, uint64_t, uint8_t, uint8_t, uint64_t n,
+    const unsigned char [n], size_t m, char [m], int (*)(void *), void *);
+STATIC long long solve_coord_dispatch(oriented_cube_t, const char *, unsigned,
+    unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long n,
+    const unsigned char [n], unsigned m, char [m],
+    long long [static NISSY_SIZE_SOLVE_STATS],
+    int (*)(void *), void *);
 STATIC bool coord_solution_admissible(const dfsarg_solve_coord_t [static 1]);
 STATIC bool solve_coord_dfs_stop(const dfsarg_solve_coord_t [static 1]);
 STATIC bool coord_continue_onnormal(const dfsarg_solve_coord_t [static 1]);
@@ -198,20 +200,21 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 	return ret;
 }
 
-STATIC int64_t
+STATIC long long
 solve_coord_dispatch(
 	oriented_cube_t oc,
 	const char *coord_and_axis,
-	uint8_t nissflag,
-	uint8_t minmoves,
-	uint8_t maxmoves,
-	uint64_t maxsolutions,
-	uint8_t optimal,
-	uint8_t threads,
-	uint64_t data_size,
-	const unsigned char *data,
-	size_t solutions_size,
+	unsigned nissflag,
+	unsigned minmoves,
+	unsigned maxmoves,
+	unsigned maxsolutions,
+	unsigned optimal,
+	unsigned threads,
+	unsigned long long data_size,
+	const unsigned char data[data_size],
+	unsigned solutions_size,
 	char sols[solutions_size],
+	long long stats[static NISSY_SIZE_SOLVE_STATS],
 	int (*poll_status)(void *),
 	void *poll_status_data
 )
@@ -250,7 +253,7 @@ solve_coord(
 	uint8_t optimal,
 	uint8_t threads,
 	uint64_t data_size,
-	const unsigned char *data,
+	const unsigned char data[data_size],
 	size_t solutions_size,
 	char sols[solutions_size],
 	int (*poll_status)(void *),

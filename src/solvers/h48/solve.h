@@ -50,6 +50,10 @@ typedef struct {
 	int8_t *shortest_sol;
 } dfsarg_solve_h48_maketasks_t;
 
+STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
+    unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long n,
+    const unsigned char [n], unsigned m, char [m],
+    long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
 STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
@@ -60,6 +64,36 @@ STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [static 1]);
 STATIC int64_t solve_h48(oriented_cube_t, uint8_t, uint8_t, uint8_t, uint8_t,
     uint8_t, uint64_t, const unsigned char *, size_t n, char [n],
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
+
+STATIC long long solve_h48_dispatch(
+	oriented_cube_t oc,
+        const char *solver,
+        unsigned nissflag,
+        unsigned minmoves,
+        unsigned maxmoves,
+        unsigned maxsols,
+        unsigned optimal,
+        unsigned threads,
+        unsigned long long data_size,
+        const unsigned char data[data_size],
+        unsigned sols_size,
+        char sols[sols_size],
+        long long stats[static NISSY_SIZE_SOLVE_STATS],
+        int (*poll_status)(void *),
+        void *poll_status_data
+)
+{
+	uint8_t h, k;
+	long long err;
+
+	err = parse_h48_hk(solver, &h, &k);
+	if (err != NISSY_OK)
+		return err;
+
+	return solve_h48(oc, minmoves, maxmoves, maxsols, optimal, threads,
+	    data_size, data, sols_size, sols, stats,
+	    poll_status, poll_status_data);
+}
 
 STATIC_INLINE bool
 solve_h48_stop(dfsarg_solve_h48_t arg[static 1])

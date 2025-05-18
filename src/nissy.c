@@ -12,13 +12,10 @@
 #include "core/core.h"
 #include "solvers/solvers.h"
 
-long long parse_h48_solver(
-    const char *, uint8_t [static 1], uint8_t [static 1]);
 STATIC bool checkdata(const unsigned char *, const tableinfo_t [static 1]);
 STATIC bool distribution_equal(const uint64_t [static INFO_DISTRIBUTION_LEN],
     const uint64_t [static INFO_DISTRIBUTION_LEN], uint8_t);
 STATIC long long write_result(oriented_cube_t, char [static NISSY_SIZE_CUBE]);
-STATIC size_t my_strnlen(const char *, size_t); 
 STATIC long long nissy_dataid(const char *, char [static NISSY_SIZE_DATAID]);
 STATIC long long nissy_gendata_unsafe(
     const char *, unsigned long long, unsigned char *);
@@ -33,67 +30,20 @@ struct {
 	GETCUBE_OPTIONS(NULL, NULL)
 };
 
-long long
-parse_h48_solver(const char *buf, uint8_t h[static 1], uint8_t k[static 1])
-{
-	const char *fullbuf = buf;
-
-	buf += 3;
-
-	if (*buf != 'h')
-		goto parse_h48_solver_error;
-	buf++;
-
-	*h = atoi(buf);
-
-	for ( ; *buf >= 0 + '0' && *buf <= 9 + '0'; buf++)
-		if (*buf == 0)
-			goto parse_h48_solver_error;
-
-	if (*buf != 'k')
-		goto parse_h48_solver_error;
-	buf++;
-
-	*k = atoi(buf);
-
-	return *h < 12 && (*k == 2 || (*k == 4 && *h == 0)) ? 0 : 1;
-
-parse_h48_solver_error:
-	*h = 0;
-	*k = 0;
-	LOG("Error parsing H48 solver: must be in \"h48h*k*\" format,"
-	    " but got %s\n", fullbuf);
-	return NISSY_ERROR_INVALID_SOLVER;
-}
-
 STATIC bool
 checkdata(const unsigned char *buf, const tableinfo_t info[static 1])
 {
 	uint64_t distr[INFO_DISTRIBUTION_LEN];
 
-	if (my_strnlen(info->solver, INFO_SOLVER_STRLEN)
-	    == INFO_SOLVER_STRLEN) {
-		LOG("[checkdata] Error reading table info\n");
-		return false;
-	} else if (!strncmp(info->solver, "cocsep", 6)) {
-		getdistribution_cocsep(
-		    (uint32_t *)((char *)buf + INFOSIZE), distr);
-	} else if (!strncmp(info->solver, "h48", 3)) {
-		getdistribution_h48(buf + INFOSIZE, distr,
-		    info->h48h, info->bits);
-	} else if (!strncmp(info->solver, "coordinate solver for ", 22)) {
-		getdistribution_coord(buf + INFOSIZE,
-		    info->solver + 22, distr);
-	} else if (!strncmp(info->solver, "eoesep data for h48", 19)) {
-		return true;
-	} else if (!strncmp(info->solver, "coord helper table for ", 23)) {
-		return true;
+	if (info->type == TABLETYPE_PRUNING) {
+		getdistribution(buf + INFOSIZE, distr, info);
+		LOG("\n[checkdata] Checking distribution for %s\n", info->solver);
+		return distribution_equal(info->distribution, distr, info->maxvalue);
 	} else {
-		LOG("[checkdata] unknown solver %s\n", info->solver);
-		return false;
+		LOG("\n[checkdata] Skipping distribution check for "
+		    "special table %s\n", info->solver);
+		return true;
 	}
-
-	return distribution_equal(info->distribution, distr, info->maxvalue);
 }
 
 STATIC bool
@@ -109,8 +59,12 @@ distribution_equal(
 	for (i = 0, wrong = 0; i <= MIN(maxvalue, 20); i++) {
 		if (expected[i] != actual[i]) {
 			wrong++;
-			LOG("Value %" PRIu8 ": expected %" PRIu64 ", found %"
-			    PRIu64 "\n", i, expected[i], actual[i]);
+			LOG("[checkdata] Value for depth %" PRIu8
+			    ": expected %" PRIu64 ", found %" PRIu64 "\n",
+			    i, expected[i], actual[i]);
+		} else {
+			LOG("[checkdata] Value for depth %" PRIu8
+			    " is correct (%" PRIu64 ")\n", i, actual[i]);
 		}
 	}
 
@@ -128,18 +82,6 @@ write_result(oriented_cube_t cube, char result[static NISSY_SIZE_CUBE])
 	}
 
 	return NISSY_OK;
-}
-
-STATIC size_t
-my_strnlen(const char *str, size_t maxlen)
-{
-	size_t i;
-
-	for (i = 0; i < maxlen; i++)
-		if (str[i] == '\0')
-			return i;
-
-	return maxlen;
 }
 
 long long
@@ -337,22 +279,15 @@ nissy_datainfo(
 STATIC long long
 nissy_dataid(const char *solver, char dataid[static NISSY_SIZE_DATAID])
 {
-	if (!strncmp(solver, "h48", 3)) {
-		uint8_t h, k;
-		long long err;
-		if ((err = parse_h48_solver(solver, &h, &k)) != NISSY_OK)
-			return err;
-		/* TODO: also check that h and k are admissible */
-		else strcpy(dataid, solver);
-		return err;
-		/* TODO: do this when moved parser */
-		/* return dataid_h48(solver, dataid); */
-	} else if (!strncmp(solver, "coord_", 6)) {
-		return dataid_coord(solver+6, dataid);
-	} else {
-		LOG("[gendata] Unknown solver %s\n", solver);
+	solver_dispatch_t *dispatch;
+
+	dispatch = match_solver(solver);
+	if (dispatch == NULL) {
+		LOG("[dataid] Unknown solver %s\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
+
+	return dispatch->dataid(solver, dataid);
 }
 
 long long
@@ -386,8 +321,7 @@ nissy_gendata_unsafe(
 	unsigned char *data
 )
 {
-	long long parse_ret;
-	gendata_h48_arg_t arg;
+	solver_dispatch_t *dispatch;
 
 	if (solver == NULL) {
 		LOG("[gendata] Error: 'solver' argument is NULL\n");
@@ -399,20 +333,13 @@ nissy_gendata_unsafe(
 		return NISSY_ERROR_DATA;
 	}
 
-	if (!strncmp(solver, "h48", 3)) {
-		arg.buf_size = data_size;
-		arg.buf = data;
-		parse_ret = parse_h48_solver(solver, &arg.h, &arg.k);
-		arg.maxdepth = 20;
-		if (parse_ret != NISSY_OK)
-			return parse_ret;
-		return gendata_h48(&arg);
-	} else if (!strncmp(solver, "coord_", 6)) {
-		return gendata_coord_dispatch(solver+6, data);
-	} else {
+	dispatch = match_solver(solver);
+	if (dispatch == NULL) {
 		LOG("[gendata] Unknown solver %s\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
+
+	return dispatch->gendata(solver, data_size, data);
 }
 
 long long
@@ -466,9 +393,8 @@ nissy_solve(
 )
 {
 	oriented_cube_t oc;
-	long long parse_ret;
-	uint8_t h, k;
 	int t;
+	solver_dispatch_t *dispatch;
 
 	if (solver == NULL) {
 		LOG("[solve] Error: 'solver' argument is NULL\n");
@@ -511,21 +437,14 @@ nissy_solve(
 		return NISSY_ERROR_DATA;
 	}
 
-	if (!strncmp(solver, "h48", 3)) {
-		parse_ret = parse_h48_solver(solver, &h, &k);
-		if (parse_ret != NISSY_OK)
-			return parse_ret;
-		return solve_h48(oc, minmoves, maxmoves, maxsols,
-		    optimal, t, data_size, data, sols_size, sols, stats,
-		    poll_status, poll_status_data);
-	} else if (!strncmp(solver, "coord_", 6)) {
-		return solve_coord_dispatch(oc, solver + 6, nissflag,
-		    minmoves, maxmoves, maxsols, optimal, t, data_size, data,
-		    sols_size, sols, poll_status, poll_status_data);
-	} else {
+	dispatch = match_solver(solver);
+	if (dispatch == NULL) {
 		LOG("[solve] Error: unknown solver '%s'\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
+	return dispatch->solve(oc, solver, nissflag, minmoves, maxmoves,
+	    maxsols, optimal, t, data_size, data, sols_size, sols, stats,
+	    poll_status, poll_status_data);
 }
 
 long long

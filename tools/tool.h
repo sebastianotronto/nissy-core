@@ -126,7 +126,7 @@ derivetable(
 		goto derivetable_error;
 	}
 
-	if (parse_h48_solver(solver_small, &h, &k) != 0) {
+	if (parse_h48_hk(solver_small, &h, &k) != NISSY_OK) {
 		gensize = -3;
 		goto derivetable_error;
 	}

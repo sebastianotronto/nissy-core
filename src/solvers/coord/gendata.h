@@ -1,5 +1,6 @@
 STATIC size_t gendata_coord(const coord_t [static 1], unsigned char *);
-STATIC int64_t gendata_coord_dispatch(const char *, unsigned char *);
+STATIC long long gendata_coord_dispatch(const char *, unsigned long long,
+    unsigned char *);
 STATIC tableinfo_t genptable_coord(
     const coord_t [static 1], const unsigned char *, unsigned char *);
 STATIC bool switch_to_fromnew(uint64_t, uint64_t, uint64_t);
@@ -7,15 +8,17 @@ STATIC uint64_t genptable_coord_fillneighbors(const coord_t [static 1],
     const unsigned char *, uint64_t, uint8_t, unsigned char *);
 STATIC uint64_t genptable_coord_fillfromnew(const coord_t [static 1],
     const unsigned char *, uint64_t, uint8_t, unsigned char *);
-STATIC void getdistribution_coord(const unsigned char *, const char *,
-    uint64_t [static INFO_DISTRIBUTION_LEN]);
 STATIC uint8_t get_coord_pval(
     const coord_t [static 1], const unsigned char *, uint64_t);
 STATIC void set_coord_pval(
     const coord_t [static 1], unsigned char *, uint64_t, uint8_t);
 
-STATIC int64_t
-gendata_coord_dispatch(const char *coordstr, unsigned char *buf)
+STATIC long long
+gendata_coord_dispatch(
+	const char *coordstr,
+	unsigned long long bufsize,
+	unsigned char *buf
+)
 {
 	coord_t *coord;
 
@@ -247,28 +250,6 @@ genptable_coord_fillfromnew(
 	}
 
 	return tot;
-}
-
-STATIC void
-getdistribution_coord(
-	const unsigned char *table,
-	const char *coord,
-	uint64_t distr[static INFO_DISTRIBUTION_LEN]
-)
-{
-	uint8_t v;
-	uint64_t i;
-	coord_t *c;
-
-	memset(distr, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
-
-	if((c = parse_coord(strlen(coord), coord)) == NULL)
-		return;
-
-	for (i = 0; i < c->max; i++) {
-		v = get_coord_pval(c, table, i);
-		distr[v]++;
-	}
 }
 
 STATIC uint8_t
