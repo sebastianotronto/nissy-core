@@ -25,8 +25,6 @@ STATIC_INLINE uint8_t get_h48_pval_atomic(
 STATIC_INLINE void set_h48_pval_atomic(
     _Atomic unsigned char *, int64_t, uint8_t, uint8_t);
 
-size_t gendata_h48_derive(uint8_t, const unsigned char *, unsigned char *);
-
 STATIC long long
 gendata_h48_dispatch(
 	const char *solver,
@@ -710,92 +708,4 @@ set_h48_pval_atomic(
 {
 	table[H48_INDEX(i, k)] = (table[H48_INDEX(i, k)] & (~H48_MASK(i, k)))
 	    | (val << H48_SHIFT(i, k));
-}
-
-size_t
-gendata_h48_derive(uint8_t h, const unsigned char *fulltable, unsigned char *buf)
-{
-	size_t cocsepsize, h48size;
-	uint8_t val_full, val_derive;
-	const unsigned char *h48full;
-	unsigned char *h48derive;
-	int64_t i, j, h48max;
-	uint64_t bufsize;
-	gendata_h48_arg_t arg;
-	tableinfo_t cocsepinfo, fulltableinfo;
-
-	/* Initializing values in case of error */
-	/* TODO cleanup this */
-	fulltableinfo.h48h = 11;
-	fulltableinfo.bits = 2;
-	fulltableinfo.base = 8;
-
-	int64_t TODOlarge = 999999999999; /* TODO: cleanup here */
-
-	readtableinfo_n(TODOlarge, fulltable, 2, &fulltableinfo);
-	arg.h = h;
-	arg.k = fulltableinfo.bits;
-	arg.maxdepth = 20;
-	arg.buf = buf;
-	arg.cocsepdata = (uint32_t *)(buf + INFOSIZE);
-	arg.base = fulltableinfo.base;
-	arg.info = makeinfo_h48k2(&arg);
-
-	/* Technically this step is redundant, except that we
-	   need selfsim and crep */
-	cocsepsize = gendata_cocsep(buf, arg.selfsim, arg.crep);
-	arg.h48buf = (_Atomic unsigned char *)buf + cocsepsize;
-	h48size = H48_TABLESIZE(h, arg.k) + INFOSIZE;
-
-	if (buf == NULL)
-		goto gendata_h48_derive_return_size;
-
-	bufsize = COCSEP_FULLSIZE + INFOSIZE;
-	if (readtableinfo(bufsize, buf, &cocsepinfo) != NISSY_OK) {
-		LOG("[H48 derive gendata] Error: could not read info for "
-		    "cocsep table\n");
-		goto gendata_h48_derive_error;
-	}
-
-	cocsepinfo.next = cocsepsize;
-	bufsize = COCSEP_FULLSIZE + INFOSIZE;
-	if (writetableinfo(&cocsepinfo, bufsize, buf) != NISSY_OK) {
-		LOG("[H48 derive gendata] Error: could not write info for "
-		    "cocsep table with updated 'next' value\n");
-		goto gendata_h48_derive_error;
-	}
-
-	h48full = fulltable + cocsepsize + INFOSIZE;
-	h48derive = (unsigned char *)arg.h48buf + INFOSIZE;
-	memset(h48derive, 0xFF, H48_TABLESIZE(h, arg.k));
-	memset(arg.info.distribution, 0,
-	    INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
-
-	h48max = H48_COORDMAX(fulltableinfo.h48h);
-	for (i = 0; i < h48max; i++) {
-		if (i % INT64_C(1000000000) == 0 && i > 0)
-			LOG("[H48 derive gendata] Processing %" PRId64
-			    "th coordinate\n", i);
-		j = i >> (int64_t)(fulltableinfo.h48h - h);
-		val_full = get_h48_pval(h48full, i, arg.k);
-		val_derive = get_h48_pval(h48derive, j, arg.k);
-		set_h48_pval(
-		    h48derive, j, arg.k, MIN(val_full, val_derive));
-	}
-
-	getdistribution(h48derive, arg.info.distribution, &arg.info);
-
-	bufsize = arg.buf_size - COCSEP_FULLSIZE - INFOSIZE;
-	if (writetableinfo(&arg.info, bufsize, (unsigned char *)arg.h48buf)
-	    != NISSY_OK) {
-		LOG("H48 derive gendata] Error: could not write info "
-		    "for table\n");
-		goto gendata_h48_derive_error;
-	}
-
-gendata_h48_derive_return_size:
-	return cocsepsize + h48size;
-
-gendata_h48_derive_error:
-	return 0;
 }

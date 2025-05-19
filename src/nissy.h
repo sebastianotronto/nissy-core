@@ -283,6 +283,7 @@ nissy_gendata(
 Check that the data is a valid data table for a solver.
 
 Parameters:
+   solver    - The name of the solver.
    data_size - The size of the data buffer.
    data      - The data for the solver. Can be computed with gendata.
                This buffer must have 8-byte alignment.
@@ -293,6 +294,7 @@ Return values:
 */
 long long
 nissy_checkdata(
+	const char *solver,
 	unsigned long long data_size,
 	const unsigned char data[data_size]
 );

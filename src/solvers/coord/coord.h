@@ -6,4 +6,5 @@
 #include "list.h"
 #include "utils.h"
 #include "gendata.h"
+#include "checkdata.h"
 #include "solve.h"

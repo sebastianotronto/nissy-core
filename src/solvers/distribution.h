@@ -13,6 +13,8 @@ typedef struct {
 STATIC void *getdistribution_runthread(void *);
 STATIC void getdistribution(const unsigned char *,
     uint64_t [static INFO_DISTRIBUTION_LEN], const tableinfo_t [static 1]);
+STATIC bool distribution_equal(const uint64_t [static INFO_DISTRIBUTION_LEN],
+    const uint64_t [static INFO_DISTRIBUTION_LEN], uint8_t);
 
 STATIC void *
 getdistribution_runthread(void *arg)
@@ -74,4 +76,29 @@ getdistribution(
 		pval = (table[i/epb] & TABLE_MASK(i, k)) >> TABLE_SHIFT(i, k);
 		distr[pval]++;
 	}
+}
+
+STATIC bool
+distribution_equal(
+	const uint64_t expected[static INFO_DISTRIBUTION_LEN],
+	const uint64_t actual[static INFO_DISTRIBUTION_LEN],
+	uint8_t maxvalue
+)
+{
+	int wrong;
+	uint8_t i;
+
+	for (i = 0, wrong = 0; i <= MIN(maxvalue, 20); i++) {
+		if (expected[i] != actual[i]) {
+			wrong++;
+			LOG("[checkdata] Value for depth %" PRIu8
+			    ": expected %" PRIu64 ", found %" PRIu64 "\n",
+			    i, expected[i], actual[i]);
+		} else {
+			LOG("[checkdata] Value for depth %" PRIu8
+			    " is correct (%" PRIu64 ")\n", i, actual[i]);
+		}
+	}
+
+	return wrong == 0;
 }

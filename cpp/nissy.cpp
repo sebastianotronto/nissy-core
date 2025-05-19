@@ -17,7 +17,8 @@ extern "C" {
 	long long nissy_solverinfo(const char *, char *);
 	long long nissy_gendata(const char *, unsigned long long,
 	    unsigned char *);
-	long long nissy_checkdata(unsigned long long, const unsigned char *);
+	long long nissy_checkdata(const char *, unsigned long long,
+	    const unsigned char *);
 	long long nissy_solve(const char *, const char *, unsigned, unsigned,
 	    unsigned, unsigned, unsigned, unsigned, unsigned long long,
 	    const unsigned char *, unsigned, char *, long long *,
@@ -144,7 +145,7 @@ namespace nissy {
 
 	error solver::check_data()
 	{
-		auto err_value = nissy_checkdata(data.size(),
+		auto err_value = nissy_checkdata(name.c_str(), data.size(),
 		    reinterpret_cast<const unsigned char *>(data.data()));
 		error err{err_value};
 		data_checked = err.ok();

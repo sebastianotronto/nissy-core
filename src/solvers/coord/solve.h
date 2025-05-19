@@ -222,8 +222,7 @@ solve_coord_dispatch(
 	coord_t *coord;
 	uint8_t axis;
 
-	parse_coord_and_axis(
-	    strlen(coord_and_axis), coord_and_axis, &coord, &axis);
+	parse_coord_and_axis(coord_and_axis, &coord, &axis);
 
 	if (coord == NULL) {
 		LOG("Error: could not parse coordinate from '%s'\n",

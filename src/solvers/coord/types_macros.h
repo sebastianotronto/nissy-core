@@ -26,6 +26,8 @@ typedef struct {
 	uint8_t axistrans[3];
 	bool (*is_admissible)(const solution_moves_t[static 1]);
 	bool (*is_solvable)(cube_t);
+	uint64_t pruning_distribution[INFO_DISTRIBUTION_LEN];
+	uint8_t pruning_max;
 	struct {
 		size_t classes;
 		uint64_t max;

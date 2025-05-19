@@ -239,21 +239,23 @@ PyDoc_STRVAR(checkdata_doc,
 "Checks if the data (pruning table) given is valid or not\n"
 "\n"
 "Parameters:\n"
-"  - data: a bytearray containing the data for a solver"
+"  - solver: the name of the solver\n"
+"  - data: a bytearray containing the data for a solver\n"
 "\n"
 "Returns: true if the data is valid, false otherwise\n"
 );
 PyObject *
 checkdata(PyObject *self, PyObject *args)
 {
+	const char *solver;
 	long long result;
 	PyByteArrayObject *data;
 
-	if (!PyArg_ParseTuple(args, "Y", &data))
+	if (!PyArg_ParseTuple(args, "sY", &solver, &data))
 		return NULL;
 
 	result = nissy_checkdata(
-	    data->ob_alloc, (unsigned char *)data->ob_bytes);
+	    solver, data->ob_alloc, (unsigned char *)data->ob_bytes);
 
 	if (check_error(result))
 		return Py_True;

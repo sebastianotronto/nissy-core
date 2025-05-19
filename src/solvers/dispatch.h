@@ -2,7 +2,9 @@ typedef struct {
 	const char *prefix;
 	long long (*dataid)(const char *, char [static NISSY_SIZE_DATAID]);
 	long long (*gendata)(
-	    const char *, unsigned long long, unsigned char *);
+	    const char *, unsigned long long n, unsigned char [n]);
+	long long (*checkdata)(
+	    const char *, unsigned long long, const unsigned char *);
 	long long (*solve)(oriented_cube_t, const char *, unsigned, unsigned,
 	    unsigned, unsigned, unsigned, unsigned, unsigned long long,
 	    const unsigned char *, unsigned, char *,
@@ -17,12 +19,14 @@ solver_dispatch_t solver_dispatchers[] = {
 	.prefix = "h48",
 	.dataid = dataid_h48,
 	.gendata = gendata_h48_dispatch,
+	.checkdata = checkdata_h48,
 	.solve = solve_h48_dispatch,
 },
 {
 	.prefix = "coord_",
 	.dataid = dataid_coord,
 	.gendata = gendata_coord_dispatch,
+	.checkdata = checkdata_coord,
 	.solve = solve_coord_dispatch,
 },
 {

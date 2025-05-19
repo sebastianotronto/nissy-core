@@ -1,11 +1,11 @@
 #include "../tool.h"
-#include "../expected_distributions.h"
 
 char *solver, *filename;
 
 static void
 run(void) {
-	long long int size, sizeread, result;
+	bool result;
+	long long int size, sizeread;
 	char dataid[NISSY_SIZE_DATAID];
 	unsigned char *buf;
 	FILE *f;
@@ -25,10 +25,12 @@ run(void) {
 	buf = malloc(size);
 	sizeread = fread(buf, size, 1, f);
 	fclose(f);
-	result = sizeread == 1 && nissy_checkdata(size, buf);
+	if (sizeread != 1)
+		printf("File has unexpected size\n");
+	result = sizeread == 1 && nissy_checkdata(solver, size, buf) == NISSY_OK;
 	free(buf);
 
-	printf("checkdata %s\n", result == 0 ? "succeeded" : "failed");
+	printf("checkdata %s\n", result ? "succeeded" : "failed");
 
 	/* TODO: cross-check with expected distributions? */
 }

@@ -12,9 +12,6 @@
 #include "core/core.h"
 #include "solvers/solvers.h"
 
-STATIC bool checkdata(const unsigned char *, const tableinfo_t [static 1]);
-STATIC bool distribution_equal(const uint64_t [static INFO_DISTRIBUTION_LEN],
-    const uint64_t [static INFO_DISTRIBUTION_LEN], uint8_t);
 STATIC long long write_result(oriented_cube_t, char [static NISSY_SIZE_CUBE]);
 STATIC long long nissy_dataid(const char *, char [static NISSY_SIZE_DATAID]);
 STATIC long long nissy_gendata_unsafe(
@@ -29,47 +26,6 @@ struct {
 	GETCUBE_OPTIONS("fix", getcube_fix),
 	GETCUBE_OPTIONS(NULL, NULL)
 };
-
-STATIC bool
-checkdata(const unsigned char *buf, const tableinfo_t info[static 1])
-{
-	uint64_t distr[INFO_DISTRIBUTION_LEN];
-
-	if (info->type == TABLETYPE_PRUNING) {
-		getdistribution(buf + INFOSIZE, distr, info);
-		LOG("\n[checkdata] Checking distribution for %s\n", info->solver);
-		return distribution_equal(info->distribution, distr, info->maxvalue);
-	} else {
-		LOG("\n[checkdata] Skipping distribution check for "
-		    "special table %s\n", info->solver);
-		return true;
-	}
-}
-
-STATIC bool
-distribution_equal(
-	const uint64_t expected[static INFO_DISTRIBUTION_LEN],
-	const uint64_t actual[static INFO_DISTRIBUTION_LEN],
-	uint8_t maxvalue
-)
-{
-	int wrong;
-	uint8_t i;
-
-	for (i = 0, wrong = 0; i <= MIN(maxvalue, 20); i++) {
-		if (expected[i] != actual[i]) {
-			wrong++;
-			LOG("[checkdata] Value for depth %" PRIu8
-			    ": expected %" PRIu64 ", found %" PRIu64 "\n",
-			    i, expected[i], actual[i]);
-		} else {
-			LOG("[checkdata] Value for depth %" PRIu8
-			    " is correct (%" PRIu64 ")\n", i, actual[i]);
-		}
-	}
-
-	return wrong == 0;
-}
 
 STATIC long long
 write_result(oriented_cube_t cube, char result[static NISSY_SIZE_CUBE])
@@ -227,55 +183,6 @@ nissy_getcube(
 	return write_result(oc, result);
 }
 
-long long
-nissy_datainfo(
-        uint64_t data_size,
-	const unsigned char data[data_size]
-)
-{
-	uint8_t i;
-	tableinfo_t info;
-	long long ret;
-
-	if ((size_t)data % 8 != 0) {
-		LOG("[datainfo] Error: buffer is not 8-byte aligned\n");
-		return NISSY_ERROR_DATA;
-	}
-
-	ret = readtableinfo(data_size, data, &info);
-	if (ret != 0)
-		return ret;
-
-	LOG("\n---------\n\n"
-	    "Table information for '%s'\n\n"
-	    "Size:      %" PRIu64 " bytes\n"
-	    "Entries:   %" PRIu64 " (%" PRIu8 " bits per entry)\n",
-	    info.solver, info.fullsize, info.entries, info.bits);
-
-	switch (info.type) {
-	case TABLETYPE_PRUNING:
-		LOG("\nTable distribution:\nValue\tPositions\n");
-		for (i = 0; i <= info.maxvalue; i++) {
-			LOG("%" PRIu8 "\t%" PRIu64 "\n",
-			    i + info.base, info.distribution[i]);
-		}
-		break;
-	case TABLETYPE_SPECIAL:
-		LOG("This is an ad-hoc table\n");
-		break;
-	default:
-		LOG("datainfo: unknown table type\n");
-		return NISSY_ERROR_DATA;
-	}
-
-	if (info.next != 0)
-		return nissy_datainfo(data_size - info.next, data + info.next);
-
-	LOG("\n---------\n");
-
-	return NISSY_OK;
-}
-
 STATIC long long
 nissy_dataid(const char *solver, char dataid[static NISSY_SIZE_DATAID])
 {
@@ -344,33 +251,20 @@ nissy_gendata_unsafe(
 
 long long
 nissy_checkdata(
+	const char *solver,
 	unsigned long long data_size,
 	const unsigned char data[data_size]
 )
 {
-	tableinfo_t info;
-	int64_t err;
+	solver_dispatch_t *dispatch;
 
-	if ((size_t)data % 8 != 0) {
-		LOG("[checkdata] Error: buffer is not 8-byte aligned\n");
-		return NISSY_ERROR_DATA;
+	dispatch = match_solver(solver);
+	if (dispatch == NULL) {
+		LOG("[checkdata] Unknown solver %s\n", solver);
+		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	for (const unsigned char *buf = data;
-	     (err = readtableinfo(data_size, buf, &info)) == NISSY_OK;
-	     buf += info.next, data_size -= info.next)
-	{
-		if (!checkdata(buf, &info)) {
-			LOG("[checkdata] Error: data for solver '%s' is "
-			    "corrupted!\n", info.solver);
-			return NISSY_ERROR_DATA;
-		}
-
-		if (info.next == 0)
-			break;
-	}
-
-	return err;
+	return dispatch->checkdata(solver, data_size, data);
 }
 
 long long

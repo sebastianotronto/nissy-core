@@ -79,7 +79,7 @@ gendata_eoesep(unsigned char *buf, uint8_t maxdepth)
 	if (buf == NULL)
 		goto gendata_eoesep_return_size;
 
-	LOG("Computing eoesep data\n");
+	LOG("[H48 gendata] Computing eoesep data\n");
 	memset(buf, 0xFF, EOESEP_FULLSIZE);
 	esep_classes = (uint32_t *)(buf + INFOSIZE);
 	buf8 = buf + INFOSIZE + 4*ESEP_MAX;
@@ -111,7 +111,7 @@ gendata_eoesep(unsigned char *buf, uint8_t maxdepth)
 
 	writetableinfo(&info, EOESEP_FULLSIZE, buf);
 
-	LOG("eoesep data computed\n");
+	LOG("[H48 gendata] eoesep data computed\n");
 
 gendata_eoesep_return_size:
 	return EOESEP_FULLSIZE;

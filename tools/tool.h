@@ -7,19 +7,14 @@
 #include <string.h>
 
 #include "../src/nissy.h"
-#include "nissy_extra.h"
 
 static void log_stderr(const char *, void *);
 static double timerun(void (*)(void));
 static void writetable(const unsigned char *, int64_t, const char *);
 static long long int generatetable(const char *, unsigned char **,
     char [static NISSY_SIZE_DATAID]);
-static long long int derivetable(
-    const char *, const char *, const char *, unsigned char **);
 static int getdata(const char *, unsigned char **, const char *);
 static void gendata_run(const char *, uint64_t[static 21]);
-static void derivedata_run(
-    const char *, const char *, const char *, const char *);
 
 static void
 log_stderr(const char *str, void *unused)
@@ -100,53 +95,6 @@ generatetable(
 	return gensize;
 }
 
-static long long int
-derivetable(
-	const char *solver_large,
-	const char *solver_small,
-	const char *filename_large,
-	unsigned char **buf
-)
-{
-	uint8_t h, k;
-	long long int size, gensize;
-	char dataid[NISSY_SIZE_DATAID];
-	unsigned char *fulltable;
-
-	if (getdata(solver_large, &fulltable, filename_large) != 0) {
-		printf("Error reading full table.\n");
-		gensize = -1;
-		goto derivetable_error_nofree;
-	}
-
-	size = nissy_solverinfo(solver_small, dataid);
-	if (size == -1) {
-		printf("Error getting table size.\n");
-		gensize = -2;
-		goto derivetable_error;
-	}
-
-	if (parse_h48_hk(solver_small, &h, &k) != NISSY_OK) {
-		gensize = -3;
-		goto derivetable_error;
-	}
-
-	*buf = malloc(size);
-	gensize = gendata_h48_derive(h, fulltable, *buf);
-
-	if (gensize != size) {
-		printf("Error deriving table\n");
-		gensize = -4;
-		goto derivetable_error;
-	}
-
-derivetable_error:
-	free(fulltable);
-
-derivetable_error_nofree:
-	return gensize;
-}
-
 static int
 getdata(
 	const char *solver,
@@ -206,8 +154,6 @@ gendata_run(
 	case -2:
 		goto gendata_run_finish;
 	default:
-		nissy_datainfo(size, buf);
-		printf("\n");
 		printf("Succesfully generated %lld bytes. "
 		       "See above for details on the tables.\n", size);
 
@@ -217,37 +163,5 @@ gendata_run(
 	}
 
 gendata_run_finish:
-	free(buf);
-}
-
-static void
-derivedata_run(
-	const char *solver_large,
-	const char *solver_small,
-	const char *filename_large,
-	const char *filename_small
-)
-{
-	long long int size;
-	unsigned char *buf;
-
-	buf = NULL;
-	size = derivetable(solver_large, solver_small, filename_large, &buf);
-	switch (size) {
-	case -1:
-		return;
-	case -2:
-		goto derivedata_run_finish;
-	default:
-		nissy_datainfo(size, buf);
-		printf("\n");
-		printf("Succesfully generated %lld bytes. "
-		       "See above for details on the tables.\n", size);
-
-		writetable(buf, size, filename_small);
-		break;
-	}
-
-derivedata_run_finish:
 	free(buf);
 }

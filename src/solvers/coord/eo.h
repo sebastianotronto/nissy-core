@@ -20,6 +20,17 @@ STATIC coord_t coordinate_eo = {
 	},
 	.is_admissible = &solution_lastqt_cw,
 	.is_solvable = &is_eo_even,
+	.pruning_distribution = {
+		[0] = 1,
+		[1] = 2,
+		[2] = 25,
+		[3] = 202,
+		[4] = 620,
+		[5] = 900,
+		[6] = 285,
+		[7] = 13,
+	},
+	.pruning_max = 7,
 	.sym = {0},
 };
 
