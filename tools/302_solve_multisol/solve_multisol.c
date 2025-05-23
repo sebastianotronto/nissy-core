@@ -25,7 +25,7 @@ void run(void) {
 		printf("%d. %s\n", i+1, scrambles[i]);
 		printf("Solving scramble %s\n", scrambles[i]);
 		if (nissy_applymoves(NISSY_SOLVED_CUBE, scrambles[i], cube)
-		     == -1) {
+		     != NISSY_OK) {
 			printf("Invalid scramble\n");
 			continue;
 		}

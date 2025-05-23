@@ -1,3 +1,5 @@
+#define BASE_SLEEP_TIME 500
+
 STATIC void msleep(int);
 
 #if defined(WIN32)

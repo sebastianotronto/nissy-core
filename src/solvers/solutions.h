@@ -12,8 +12,7 @@ STATIC bool appendnormal(
 STATIC bool appendinverse(
     const solution_moves_t [static 1], solution_list_t [static 1]);
 STATIC int64_t appendsolution(const solution_moves_t [static 1],
-    const solution_settings_t [static 1], solution_list_t [static 1], bool,
-    const char *);
+    const solution_settings_t [static 1], solution_list_t [static 1]);
 STATIC bool solutions_done(const solution_list_t [static 1],
     const solution_settings_t [static 1], int8_t depth);
 
@@ -53,10 +52,8 @@ solution_moves_reorient(solution_moves_t moves[static 1], uint8_t or)
 STATIC bool
 solution_list_init(solution_list_t sols[static 1], size_t n, char buf[n])
 {
-	if (n == 0) {
-		LOG("Error: cannot use solution buffer with size 0\n");
+	if (n == 0)
 		return false;
-	}
 
 	sols->nsols = 0;
 	sols->shortest_sol = MAXLEN + 1;
@@ -158,16 +155,13 @@ STATIC int64_t
 appendsolution(
 	const solution_moves_t moves[static 1],
 	const solution_settings_t settings[static 1],
-	solution_list_t list[static 1],
-	bool log,
-	const char *solver_name
+	solution_list_t list[static 1]
 )
 {
 	int64_t r;
 	int i;
 	uint8_t t;
 	solution_moves_t tsol[NTRANS];
-	char *last_start;
 
 	if (moves->nmoves + moves->npremoves > MAXLEN)
 		goto appendsolution_error_solution_length;
@@ -210,8 +204,6 @@ appendsolution(
 		if (solution_moves_is_duplicate(r, tsol))
 			continue;
 
-		last_start = list->buf + list->used;
-
 		/* Append first the moves on the side that has more */
 		/* E.g. write (U L F) B instead of B (U L F) */
 		if (tsol[r].nmoves >= tsol[r].npremoves) {
@@ -244,26 +236,16 @@ appendsolution(
 		    list->shortest_sol, tsol[r].nmoves + tsol[r].npremoves);
 		r++;
 
-		if (log) {
-			list->buf[list->used-1] = '\0';
-			LOG("[%s solve] Found solution #%" PRIu64 ": %s\n",
-			    solver_name, list->nsols, last_start);
-			list->buf[list->used-1] = '\n';
-		}
 	}
 
 	list->buf[list->used] = '\0';
 	return r;
 
 appendsolution_error_buffer:
-	LOG("[%s solve] Error: buffer too small\n", solver_name);
 	list->buf[0] = '\0';
 	return NISSY_ERROR_BUFFER_SIZE;
 
 appendsolution_error_solution_length:
-	LOG("[%s solve] Error: solution is too long (%" PRIu8 ").\n"
-	    "This is a bug, please report it.\n",
-	    solver_name, moves->nmoves + moves->npremoves);
 	list->buf[0] = '\0';
 	return NISSY_ERROR_UNKNOWN;
 }

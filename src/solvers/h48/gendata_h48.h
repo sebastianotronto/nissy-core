@@ -105,7 +105,7 @@ gendata_h48(gendata_h48_arg_t arg[static 1])
 		return size; /* Dry-run */
 
 	if (arg->buf_size < size) {
-		LOG("[H48 gendata] Error data: buffer is too small "
+		LOG("[H48 gendata] Error: buffer is too small "
 		    "(needed %" PRId64 " bytes but received %" PRId64 ")\n",
 		    size, arg->buf_size);
 		return NISSY_ERROR_BUFFER_SIZE;
@@ -392,9 +392,11 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 	};
 
 	uint8_t t;
+	int sleeptime;
 	unsigned char *table;
 	int64_t j;
-	uint64_t i, ii, inext, count, bufsize;
+	_Atomic uint64_t count;
+	uint64_t i, ii, inext, bufsize, done, nshort, velocity;
 	h48map_t shortcubes;
 	gendata_h48short_arg_t shortarg;
 	h48k2_dfs_arg_t dfsarg[THREADS];
@@ -414,7 +416,8 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 		.map = &shortcubes
 	};
 	gendata_h48short(&shortarg);
-	LOG("[H48 gendata] Computed %" PRIu64 " positions\n", shortarg.map->n);
+	nshort = shortarg.map->n;
+	LOG("[H48 gendata] Computed %" PRIu64 " positions\n", nshort);
 
 	if (arg->base >= 20)
 		arg->base = base[arg->h];
@@ -446,6 +449,31 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 		    &thread[i], NULL, gendata_h48k2_runthread, &dfsarg[i]);
 	}
 
+	if (NISSY_CANSLEEP) {
+		/* Log the progress periodically */
+		LOG("Processing 'short cubes'. This will take a while.\n");
+
+		/* Estimate velocity by checking how much is done after 1s */
+		msleep(1000);
+		velocity = count;
+
+		/* We plan to log 10 times */
+		sleeptime = (100*(nshort-velocity)) / velocity;
+
+		done = count;
+		while (nshort - done > (velocity * sleeptime) / 1000) {
+			msleep(sleeptime);
+			pthread_mutex_lock(&shortcubes_mutex);
+			done = count;
+			pthread_mutex_unlock(&shortcubes_mutex);
+			LOG("Processed %" PRIu64 " / %" PRIu64 " cubes\n",
+			    (done / 1000) * 1000, nshort);
+		}
+	} else {
+		LOG("Status updates won't be available because the sleep() "
+		    "functionality is not available on this platform.\n");
+	}
+
 	for (i = 0; i < THREADS; i++)
 		pthread_join(thread[i], NULL);
 
@@ -463,7 +491,7 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 STATIC void *
 gendata_h48k2_runthread(void *arg)
 {
-	uint64_t count, coord, mutex;
+	uint64_t coord, mutex;
 	kvpair_t kv;
 	h48k2_dfs_arg_t *dfsarg;
 
@@ -477,12 +505,8 @@ gendata_h48k2_runthread(void *arg)
 			pthread_mutex_unlock(dfsarg->shortcubes_mutex);
 			break;
 		}
-		count = ++(*dfsarg->count);
+		(*dfsarg->count)++;
 		pthread_mutex_unlock(dfsarg->shortcubes_mutex);
-
-		if (count % UINT64_C(1000000) == 0)
-			LOG("[H48 gendata] Processing %" PRIu64
-			    "th short cube\n", count);
 
 		if (kv.val < dfsarg->shortdepth) {
 			coord = kv.key >> (int64_t)(11 - dfsarg->h);

@@ -107,7 +107,7 @@ typedef struct {
 	pthread_mutex_t *shortcubes_mutex;
 	pthread_mutex_t *table_mutex[CHUNKS];
 	uint64_t *next;
-	uint64_t *count;
+	_Atomic uint64_t *count;
 } h48k2_dfs_arg_t;
 
 typedef struct {

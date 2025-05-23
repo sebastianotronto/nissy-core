@@ -35,10 +35,8 @@ typedef struct {
 	solve_h48_task_t *tasks;
 	int thread_id;
 	pthread_mutex_t *solutions_mutex;
-	int (*poll_status)(void *);
-	void *poll_status_data;
-	_Atomic bool cancelled;
-	_Atomic bool cantsleep;
+	_Atomic int *status;
+	_Atomic bool thread_done;
 } dfsarg_solve_h48_t;
 
 typedef struct {
@@ -58,9 +56,9 @@ STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
     solve_h48_task_t [static STARTING_CUBES], int [static 1]);
-STATIC bool solve_h48_runthread_continue(dfsarg_solve_h48_t *);
 STATIC void *solve_h48_runthread(void *);
 STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [static 1]);
+STATIC void solve_h48_log_solutions(solution_list_t [static 1], size_t);
 STATIC int64_t solve_h48(oriented_cube_t, uint8_t, uint8_t, uint8_t, uint8_t,
     uint8_t, uint64_t, const unsigned char *, size_t n, char [n],
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
@@ -201,7 +199,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 			return 0;
 		pthread_mutex_lock(arg->solutions_mutex);
 		ret = appendsolution(arg->solution_moves,
-		    arg->solution_settings, arg->solution_list, true, "H48");
+		    arg->solution_settings, arg->solution_list);
 		pthread_mutex_unlock(arg->solutions_mutex);
 		return ret;
 	}
@@ -271,41 +269,20 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	return ret;
 }
 
-STATIC bool
-solve_h48_runthread_continue(dfsarg_solve_h48_t *arg)
-{
-	int status;
-
-	for (status = NISSY_STATUS_PAUSE; status == NISSY_STATUS_PAUSE; ) {
-		status = arg->poll_status == NULL ? NISSY_STATUS_RUN :
-		    arg->poll_status(arg->poll_status_data);
-		msleep(500);
-	}
-
-	return status == NISSY_STATUS_RUN;
-}
-
 STATIC void *
 solve_h48_runthread(void *arg)
 {
-	int i, j, status;
+	int i, j;
 	solve_h48_task_t task;
 	dfsarg_solve_h48_t *dfsarg;
 
 	dfsarg = (dfsarg_solve_h48_t *)arg;
 
 	for (i = dfsarg->thread_id; i < dfsarg->ntasks; i += dfsarg->threads) {
-		status = dfsarg->poll_status == NULL ? NISSY_STATUS_RUN :
-		    dfsarg->poll_status(dfsarg->poll_status_data);
-		switch (status) {
-		case NISSY_STATUS_STOP:
-			goto solve_h48_runthread_cancel;
-		case NISSY_STATUS_PAUSE:
-			if (!NISSY_CANSLEEP)
-				goto solve_h48_runthread_cantsleep;
-			if (!solve_h48_runthread_continue(dfsarg))
-				goto solve_h48_runthread_cancel;
-		}
+		if (*dfsarg->status == NISSY_STATUS_STOP)
+			goto solve_h48_runthread_end;
+		while (*dfsarg->status == NISSY_STATUS_PAUSE)
+			msleep(BASE_SLEEP_TIME);
 
 		task = dfsarg->tasks[i];
 
@@ -329,12 +306,8 @@ solve_h48_runthread(void *arg)
 		solve_h48_dfs(dfsarg);
 	}
 
-	return NULL;
-
-solve_h48_runthread_cantsleep:
-	dfsarg->cantsleep = true;
-solve_h48_runthread_cancel:
-	dfsarg->cancelled = true;
+solve_h48_runthread_end:
+	dfsarg->thread_done = true;
 	return NULL;
 }
 
@@ -366,7 +339,7 @@ solve_h48_maketasks(
 		    maketasks_arg->moves, maketasks_arg->nmoves);
 
 		appret = appendsolution(&moves, solve_arg->solution_settings,
-		    solve_arg->solution_list, true, "H48");
+		    solve_arg->solution_list);
 		return appret < 0 ? appret : NISSY_OK;
 	}
 
@@ -410,6 +383,22 @@ solve_h48_maketasks(
 	return NISSY_OK;
 }
 
+STATIC void
+solve_h48_log_solutions(solution_list_t s[static 1], size_t e)
+{
+	size_t i;
+	char b;
+	while (e != s->used) {
+		LOG("[h48 solve] Found solution: ");
+		for (i = e; s->buf[i] != '\n' && s->buf[i] != '\0'; i++) ;
+		b = s->buf[i];
+		s->buf[i] = '\0';
+		LOG("%s\n", s->buf + e);
+		s->buf[i] = b;
+		e = i + 1;
+	}
+}
+
 STATIC int64_t
 solve_h48(
 	oriented_cube_t oc,
@@ -427,8 +416,10 @@ solve_h48(
 	void *poll_status_data
 )
 {
-	bool anycancelled, anycantsleep;
 	int i, ntasks, eoesep_table_index;
+	bool td, fp;
+	_Atomic int status;
+	size_t lastused;
 	int8_t d;
 	dfsarg_solve_h48_t arg[THREADS];
 	solve_h48_task_t tasks[STARTING_CUBES];
@@ -508,10 +499,7 @@ solve_h48(
 			.threads = threads,
 			.thread_id = i,
 			.solutions_mutex = &solutions_mutex,
-			.poll_status = poll_status,
-			.poll_status_data = poll_status_data,
-			.cancelled = false,
-			.cantsleep = false,
+			.status = &status,
 		};
 
 	}
@@ -538,35 +526,69 @@ solve_h48(
 
 	LOG("[H48 solve] Prepared %d tasks\n", ntasks);
 
-	anycancelled = anycantsleep = false;
+	solve_h48_log_solutions(&sollist, 0);
+	lastused = sollist.used;
+	status = poll_status == NULL ? NISSY_STATUS_RUN :
+	    poll_status(poll_status_data);
+	if (!NISSY_CANSLEEP) {
+		LOG("[solve h48] Pause / Stop / Resume functionality won't "
+		    "be available on this system (can't sleep()).\n");
+	}
 	for (
 	    d = MAX(minmoves, STARTING_MOVES + 1);
-	    !(solutions_done(&sollist, &settings, d) || anycancelled);
+	    !(solutions_done(&sollist, &settings, d)) &&
+	        status != NISSY_STATUS_STOP;
 	    d++
 	) {
-		if (d >= 15)
+		if (d >= 15) {
 			LOG("[H48 solve] Found %" PRId64 " solutions, "
 			    "searching at depth %" PRId8 "\n",
 			    sollist.nsols, d);
+		}
+
 		for (i = 0; i < threads; i++) {
 			arg[i].target_depth = d;
+			arg[i].thread_done = false;
 			pthread_create(
 			    &thread[i], NULL, solve_h48_runthread, &arg[i]);
 		}
-		for (i = 0; i < threads; i++) {
-			pthread_join(thread[i], NULL);
-			anycancelled = anycancelled || arg[i].cancelled;
-			anycantsleep = anycantsleep || arg[i].cantsleep;
+
+		/* Log solutions and handle pause / stop / resume */
+		if (d >= 15 && NISSY_CANSLEEP) {
+			td = false;
+			fp = true;
+			while (!td && status != NISSY_STATUS_STOP) {
+				msleep(BASE_SLEEP_TIME);
+
+				pthread_mutex_lock(&solutions_mutex);
+				solve_h48_log_solutions(&sollist, lastused);
+				lastused = sollist.used;
+				pthread_mutex_unlock(&solutions_mutex);
+
+				if (poll_status == NULL)
+					continue;
+
+				status = poll_status(poll_status_data);
+				if (status == NISSY_STATUS_PAUSE && fp) {
+					LOG("[H48 solve] Paused\n");
+					fp = false;
+				}
+				if (status == NISSY_STATUS_RUN)
+					fp = true;
+
+				for (td = true, i = 0; i < threads; i++)
+					td = td && arg[i].thread_done;
+			}
 		}
+
+		for (i = 0; i < threads; i++)
+			pthread_join(thread[i], NULL);
+
+		solve_h48_log_solutions(&sollist, lastused);
+		lastused = sollist.used;
 	}
 
-	if (anycantsleep) {
-		LOG("[H48 solve] Received pause request, but this feature is "
-		    "not available on this system. "
-		    "Taking it as a stop request.\n");
-	}
-
-	if (anycancelled) {
+	if (status == NISSY_STATUS_STOP) {
 		LOG("[H48 solve] Received stop request, ending solution "
 		    "search early.\n");
 	}
