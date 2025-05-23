@@ -251,6 +251,19 @@ using [nodejs](https://nodejs.org):
 $ node web/examples/[filename]
 ```
 
+An example web app running nissy can be found in the `web/http` folder.
+You can run a web server in that folder to check it out, but you need
+to set some extra headers to make it work. For example, if you are using
+[darkhttpd](https://github.com/emikulic/darkhttpd) you can start the server
+with the following command:
+
+```
+$ darkhttpd web/http/ \
+  --header 'Cross-Origin-Opener-Policy: same-origin' \
+  --header 'Cross-Origin-Embedder-Policy: require-corp' \
+  --mimetypes web/http/mime
+```
+
 ## Cube format
 
 This format is a "base 32" encoding of the cube. It is not meant to be

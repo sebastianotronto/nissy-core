@@ -129,9 +129,12 @@ CPPFLAGS="-std=c++20 -pthread"
 # Build flags for emscripten (WASM target)
 WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread"
 WASMMFLAGS="-DTHREADS=$THREADS -DWASMSIMD"
+#WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE \
+#	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS \
+#	-sNODERAWFS -sASYNCIFY -sLINKABLE -sEXPORT_ALL"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE \
 	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS \
-	-sLINKABLE -sEXPORT_ALL"
+	-sASYNCIFY -sLINKABLE -sEXPORT_ALL"
 
 if (command -v "python3-config" >/dev/null 2>&1) ; then
 	PYTHON3_INCLUDES="$(python3-config --includes)"
@@ -207,7 +210,7 @@ odflags() {
 
 build_clean() {
 	run rm -rf -- *.o *.so *.a run runtest runtool runcpp \
-		web/nissy_web_module.*
+	    web/nissy_web_module.* web/*.wasm web/http/*.mjs web/http/*.wasm
 }
 
 build_nissy() {
@@ -233,7 +236,7 @@ build_sharedlib() {
 }
 
 build_shell() {
-	build_nissy
+	build_nissy || exit 1
 	run $CC $CFLAGS $WFLAGS $(odflags) -o run nissy.o shell/shell.c
 }
 
@@ -243,7 +246,7 @@ build_python() {
 		echo "Cannot build python module"
 		exit 1
 	fi
-	build_nissy
+	build_nissy || exit 1
 	run $CC $CFLAGS $WFLAGS $PYTHON3_INCLUDES $(odflags) -shared \
 		-o nissy_python_module.so nissy.o python/nissy_module.c
 }
@@ -255,7 +258,7 @@ build_cpp() {
 		echo "usage: ./build cpp FILES"
 	fi
 
-	build_nissy
+	build_nissy || exit 1
 	run $CXX -std=c++20 -o runcpp cpp/nissy.cpp nissy.o $@
 	run ./runcpp
 }
@@ -265,13 +268,20 @@ build_web() {
 	validate_threads "$THREADS"
 	validate_arch "$ARCH"
 
+	obj="nissy_web_module"
+
 	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $(odflags) -c \
-		-o nissy.o src/nissy.c
-	run $EMCC -lembind -lidbfs.js -lnodefs.js \
+		-o nissy.o src/nissy.c || exit 1
+	#run $EMCC -lembind -lidbfs.js -lnodefs.js -lnoderawfs.js \
+	#	$CPPFLAGS $(odflags) $WASMLINKFLAGS \
+	#	--js-library web/callback.js -o web/"$obj".mjs \
+	#	cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o
+	run $EMCC -lembind -lidbfs.js \
 		$CPPFLAGS $(odflags) $WASMLINKFLAGS \
-		--js-library web/callback.js \
-		-o web/nissy_web_module.mjs \
-		cpp/nissy.cpp web/adapter.cpp nissy.o
+		--js-library web/callback.js -o web/"$obj".mjs \
+		cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o || exit 1
+	cp web/"$obj".mjs web/http
+	cp web/"$obj".wasm web/http
 }
 
 dotest() {
@@ -310,7 +320,7 @@ build_test_generic() {
 		shift
 	fi
 	debug="yes"
-	build_$obj
+	build_$obj || exit 1
 	for t in test/*; do
 		dotest || exit 1
 	done
@@ -323,7 +333,7 @@ build_test() {
 	testbuild="$CC $CFLAGS $WFLAGS $DFLAGS $MFLAGS -o $testobj"
 	testrun="./$testobj"
 	build_test_generic $@
-	rm runtest
+	rm -f runtest
 }
 
 build_webtest() {

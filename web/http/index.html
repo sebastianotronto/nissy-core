@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>Nissy - H48 solver POC</title>
+    <script type="module" src="./solve.mjs"></script>
+  </head>
+  <body>
+    <input id="scrambleText" placeholder="Type the scramble here...">
+    <select id="solverSelector">
+      <option value="h48h0k4" selected="selected">h48 h=0 k=4 (59Mb)</option>
+      <option value="h48h3k2">h48 h=3 k=2 (283Mb)</option>
+      <option value="h48h7k2">h48 h=7 k=2 (3.6Gb)</option>
+    </select>
+    <button id="solveButton">Solve!</button>
+    <p>Solution:</p>
+    <p id="solution"></p>
+  </body>
+</html>
