@@ -565,16 +565,15 @@ solve_h48(
 				lastused = sollist.used;
 				pthread_mutex_unlock(&solutions_mutex);
 
-				if (poll_status == NULL)
-					continue;
-
-				status = poll_status(poll_status_data);
-				if (status == NISSY_STATUS_PAUSE && fp) {
-					LOG("[H48 solve] Paused\n");
-					fp = false;
+				if (poll_status != NULL) {
+					status = poll_status(poll_status_data);
+					if (status == NISSY_STATUS_PAUSE && fp) {
+						LOG("[H48 solve] Paused\n");
+						fp = false;
+					}
+					if (status == NISSY_STATUS_RUN)
+						fp = true;
 				}
-				if (status == NISSY_STATUS_RUN)
-					fp = true;
 
 				for (td = true, i = 0; i < threads; i++)
 					td = td && arg[i].thread_done;
