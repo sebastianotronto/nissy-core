@@ -13,29 +13,29 @@ std::string getprefix() {
 }
 
 EM_ASYNC_JS(int, loadfs, (), {
-  const dir = '/tables';
-  const inBrowser = typeof window !== 'undefined';
-  const inWorker = typeof WorkerGlobalScope !== 'undefined' &&
-    self instanceof WorkerGlobalScope;
+	const dir = '/tables';
+	const inBrowser = typeof window !== 'undefined';
+	const inWorker = typeof WorkerGlobalScope !== 'undefined' &&
+	    self instanceof WorkerGlobalScope;
 
-  if (!(inBrowser || inWorker)) return;
+	if (!(inBrowser || inWorker))
+		return;
 
-  if (!FS.analyzePath(dir).exists)
-    FS.mkdir(dir);
+	if (!FS.analyzePath(dir).exists)
+		FS.mkdir(dir);
 
-  if (FS.analyzePath(dir).object.mount.mountpoint != dir) {
-    FS.mount(IDBFS, { autoPersist: true }, dir);
+	if (FS.analyzePath(dir).object.mount.mountpoint != dir) {
+		FS.mount(IDBFS, { autoPersist: true }, dir);
 
-    await new Promise((resolve, reject) => {
-      FS.syncfs(true, function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(true);
-        }
-      });
-    });
-  }
+		await new Promise((resolve, reject) => {
+			FS.syncfs(true, function (err) {
+				if (err)
+					reject(err);
+				else
+					resolve(true);
+			});
+		});
+	}
 });
 
 bool storage::read(std::string key, size_t data_size, char *data)

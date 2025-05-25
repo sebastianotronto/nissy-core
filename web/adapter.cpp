@@ -108,17 +108,13 @@ bool solver_valid(const std::string& name)
 
 int poll_status(void *arg)
 {
-	return nissy::status::RUN.value;
-/*
-TODO: reintroduce poll status
-	int id = *(int *)arg;
-	if (id == -1)
+	if (arg == NULL || *(int *)arg == -1)
 		return nissy::status::RUN.value;
-	return callFunctionInt(id);
-*/
+
+	return callFunctionInt(*(int *)arg);
 }
 
-#if 0
+#if 1
 
 nissy::solver::solve_result solve(std::string name,
     nissy::cube cube, nissy::nissflag nissflag, unsigned minmoves,
@@ -212,17 +208,17 @@ EMSCRIPTEN_BINDINGS(Nissy)
 		.function("toString", &nissy::cube::to_string)
 		;
 
+/*
 	emscripten::register_vector<std::string>("StringVector");
 	emscripten::value_array<nissy::solver::solve_result>("SolveResult")
 		.element(&nissy::solver::solve_result::err)
 		.element(&nissy::solver::solve_result::solutions)
 		;
-/*
+*/
 	emscripten::class_<nissy::solver::solve_result>("SolveResult")
 		.property("err", &nissy::solver::solve_result::err)
 		.property("solutions", &nissy::solver::solve_result::solutions)
 		;
-*/
 
 	emscripten::function("countMoves", &nissy::count_moves);
 	emscripten::function("solve", &solve,

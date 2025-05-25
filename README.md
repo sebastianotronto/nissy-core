@@ -244,13 +244,6 @@ The JavaScript module can be built with
 $ ./build web
 ```
 
-Some examples can be found in the `web/examples` folder. They can be run
-using [nodejs](https://nodejs.org):
-
-```
-$ node web/examples/[filename]
-```
-
 An example web app running nissy can be found in the `web/http` folder.
 You can run a web server in that folder to check it out, but you need
 to set some extra headers to make it work. For example, if you are using

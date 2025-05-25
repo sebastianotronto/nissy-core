@@ -56,6 +56,7 @@ namespace nissy {
 	namespace size {
 		constexpr size_t CUBE = 24;
 		constexpr size_t TRANSFORMATION = 12;
+		constexpr size_t SOLVE_STATS = 10;
 		constexpr size_t DATAID = 255;
 	}
 
@@ -163,34 +164,28 @@ namespace nissy {
 	    unsigned threads, int (*poll_status)(void *),
 	    void *poll_status_data) const
 	{
+		long long stats[size::SOLVE_STATS];
 		solver::solve_result result;
 
 		if (maxsols == 0) {
-			result.solutions = {};
+			result.solutions = "";
 			result.err = error::OK;
 			return result;
 		}
 
 		const size_t len = 3 * (maxmoves+1) * maxsols;
-		std::vector<char> csols(len);
+		result.solutions.resize(len);
 
 		auto err = nissy_solve(cube.to_string().c_str(),
 		    name.c_str(), niss.value, minmoves, maxmoves, maxsols,
 		    optimal, threads, data.size(),
 		    reinterpret_cast<const unsigned char *>(data.data()), len,
-		    csols.data(), result.stats.data(), poll_status,
-		    poll_status_data);
+		    result.solutions.data(), stats,
+		    poll_status, poll_status_data);
+
+		int size = result.solutions.find_first_of('\0') + 1;
+		result.solutions.resize(size);
 		result.err = error{err};
-
-		if (err < 0)
-			return result;
-
-		std::string_view strsols(csols.data());
-		for (auto r : strsols | std::views::split('\n'))
-			if (r.begin() != r.end() ||
-			    r.begin() == strsols.begin())
-				result.solutions.push_back(
-				    std::string{r.begin(), r.end()});
 
 		return result;
 	}

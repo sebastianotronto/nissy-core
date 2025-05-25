@@ -79,8 +79,7 @@ namespace nissy {
 	public:
 		struct solve_result {
 			error err;
-			std::vector<std::string> solutions;
-			std::array<long long, 10> stats;
+			std::string solutions;
 		};
 
 		const std::string name;
