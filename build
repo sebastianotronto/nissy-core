@@ -129,9 +129,6 @@ CPPFLAGS="-std=c++20 -pthread"
 # Build flags for emscripten (WASM target)
 WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread"
 WASMMFLAGS="-DTHREADS=$THREADS -DWASMSIMD"
-#WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE \
-#	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS \
-#	-sNODERAWFS -sASYNCIFY -sLINKABLE -sEXPORT_ALL"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE \
 	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS \
 	-sASYNCIFY -sLINKABLE -sEXPORT_ALL"
@@ -272,10 +269,6 @@ build_web() {
 
 	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $(odflags) -c \
 		-o nissy.o src/nissy.c || exit 1
-	#run $EMCC -lembind -lidbfs.js -lnodefs.js -lnoderawfs.js \
-	#	$CPPFLAGS $(odflags) $WASMLINKFLAGS \
-	#	--js-library web/callback.js -o web/"$obj".mjs \
-	#	cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o
 	run $EMCC -lembind -lidbfs.js \
 		$CPPFLAGS $(odflags) $WASMLINKFLAGS \
 		--js-library web/callback.js -o web/"$obj".mjs \
