@@ -7,5 +7,11 @@ onmessage = (e) => {
   var cube = new nissy.Cube();
   cube.move(e.data.scramble);
   nissy.solve(e.data.solver, cube, nissy.NissFlag.normal, 0, 17, 1, 99, 4, -1)
-    .then((sol) => postMessage(sol))
+    .then((solve_result) => {
+      if (!solve_result.err.ok())
+        posMessage("Error while solving (solve returned " +
+          solve_result.err.value + ")");
+      else
+        postMessage(solve_result.solutions)
+    });
 };

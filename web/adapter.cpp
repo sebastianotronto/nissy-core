@@ -114,8 +114,6 @@ int poll_status(void *arg)
 	return callFunctionInt(*(int *)arg);
 }
 
-#if 1
-
 nissy::solver::solve_result solve(std::string name,
     nissy::cube cube, nissy::nissflag nissflag, unsigned minmoves,
     unsigned maxmoves, unsigned maxsols, unsigned optimal, unsigned threads,
@@ -136,35 +134,6 @@ nissy::solver::solve_result solve(std::string name,
 	return loaded_solvers.at(name).solve(cube, nissflag, minmoves,
 	    maxmoves, maxsols, optimal, threads, NULL, &poll_status_id);
 }
-
-#else
-
-std::string solve(std::string name,
-    nissy::cube cube, nissy::nissflag nissflag, unsigned minmoves,
-    unsigned maxmoves, unsigned maxsols, unsigned optimal, unsigned threads,
-    int poll_status_id)
-{
-	// Here we use a dirty trick to make this function always return the
-	// same kind of JavaScript object. If we did not do this, the returned
-	// object would be a Promise on the first run of the solver for each
-	// session (because when loading the table some async JS code is
-	// called), and a regular object otherwise.
-	// TODO figure out if there is a better way to do this.
-	fake_async();
-
-	if (!solver_valid(name))
-		return "";
-/*
-		return nissy::solver::solve_result
-		    {.err = nissy::error::INVALID_SOLVER};
-*/
-
-	return loaded_solvers.at(name).solve(cube, nissflag, minmoves,
-	    maxmoves, maxsols, optimal, threads, NULL, &poll_status_id)
-	    .solutions[0];
-}
-
-#endif
 
 EMSCRIPTEN_BINDINGS(Nissy)
 {
@@ -208,13 +177,6 @@ EMSCRIPTEN_BINDINGS(Nissy)
 		.function("toString", &nissy::cube::to_string)
 		;
 
-/*
-	emscripten::register_vector<std::string>("StringVector");
-	emscripten::value_array<nissy::solver::solve_result>("SolveResult")
-		.element(&nissy::solver::solve_result::err)
-		.element(&nissy::solver::solve_result::solutions)
-		;
-*/
 	emscripten::class_<nissy::solver::solve_result>("SolveResult")
 		.property("err", &nissy::solver::solve_result::err)
 		.property("solutions", &nissy::solver::solve_result::solutions)
