@@ -13,13 +13,12 @@ std::string getprefix() {
 }
 
 EM_ASYNC_JS(int, loadfs, (), {
-	const dir = '/tables';
 	const inBrowser = typeof window !== 'undefined';
 	const inWorker = typeof WorkerGlobalScope !== 'undefined' &&
 	    self instanceof WorkerGlobalScope;
+	console.assert(inBrowser || inWorker, "Non-browsers not supported");
 
-	if (!(inBrowser || inWorker))
-		return;
+	const dir = '/tables';
 
 	if (!FS.analyzePath(dir).exists)
 		FS.mkdir(dir);
@@ -36,6 +35,30 @@ EM_ASYNC_JS(int, loadfs, (), {
 			});
 		});
 	}
+});
+
+EM_ASYNC_JS(int, download_and_store, (const char *key, const char *url), {
+	const inBrowser = typeof window !== 'undefined';
+	const inWorker = typeof WorkerGlobalScope !== 'undefined' &&
+	    self instanceof WorkerGlobalScope;
+	console.assert(inBrowser || inWorker, "Non-browsers not supported");
+
+	url = UTF8ToString(url);
+	key = UTF8ToString(key);
+	let response = await fetch(url);
+	if (!response.ok) {
+		console.log("Error downloading data for " + key);
+		console.log("" + response.status + ": " + response.statusText);
+		return 0;
+	}
+
+	console.log("Data for " + key + " downloaded, writing to storage...");
+	let data = await response.bytes();
+	var stream = FS.open("/tables/" + key, "w+");
+	FS.write(stream, data, 0, data.length, 0);
+	FS.close(stream);
+	console.log("Data for " + key + " stored (" + data.length + " bytes)");
+	return 1;
 });
 
 bool storage::read(std::string key, size_t data_size, char *data)
@@ -64,4 +87,10 @@ bool storage::write(std::string key, size_t data_size, const char *data)
 	ofs.close();
 
 	return !ofs.fail();
+}
+
+int storage::download(std::string key, std::string url)
+{
+	loadfs();
+	return download_and_store(key.c_str(), url.c_str());
 }

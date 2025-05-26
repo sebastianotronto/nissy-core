@@ -1,5 +1,12 @@
+extern "C" {
+	extern int addCallbackFunction(/* args intentionally unspecified */);
+	extern void callFunction(int, const char *);
+	extern int callFunctionInt(int);
+}
+
 #include "../cpp/nissy.h"
 #include "storage.h"
+#include "logging.h"
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
@@ -10,35 +17,6 @@
 
 EM_ASYNC_JS(void, fake_async, (), {});
 
-extern "C" {
-	extern int addCallbackFunction(/* args intentionally unspecified */);
-	extern void callFunction(int, const char *);
-	extern int callFunctionInt(int);
-}
-
-static int logger_id = -1;
-
-void log(std::string s)
-{
-	if (logger_id == -1)
-		return;
-
-	callFunction(logger_id, s.c_str());
-}
-
-void log_wrapper(const char *cstr, void *data)
-{
-	log(cstr);
-}
-
-void set_logger(int id)
-{
-	logger_id = id;
-	nissy::set_logger(log_wrapper, NULL);
-}
-
-// Some of the solvers are not available to the JS interface because of
-// memory limitations.
 const std::set<std::string> available_solvers
 {
 	"h48h0k4",
@@ -50,38 +28,119 @@ const std::set<std::string> available_solvers
 
 std::map<std::string, nissy::solver> loaded_solvers;
 
-// TODO: this should ask the user if they want to download or generate.
-bool init_solver(const std::string& name)
+bool is_solver_available(const std::string& name)
 {
-	auto se = nissy::solver::get(name);
-	nissy::solver solver = std::get<nissy::solver>(se);
+	return available_solvers.contains(name);
+}
 
-	solver.data.resize(solver.size);
-	if (storage::read(solver.id, solver.size,
-	    reinterpret_cast<char *>(solver.data.data()))) {
-		log("Data for solver " + solver.name + " read from storage\n");
-	} else {
-		log("Could not read data for solver " + solver.name +
-		    " from storage, generating it\n");
-		auto err = solver.generate_data();
+bool is_solver_loaded(const std::string& name)
+{
+	return loaded_solvers.contains(name);
+}
 
-		if (!err.ok()) {
-			log("Error generating the data!\n");
-			return false;
-		}
-	}
-
+bool check_data(nissy::solver& solver)
+{
 	log("Checking data integrity "
 	    "(this is done only once per session per solver)...\n");
+
 	if (!solver.check_data().ok()) {
 		log("Error! Data is corrupted!\n");
 		return false;
 	}
-	loaded_solvers.insert({name, solver});
+
+	return true;
+}
+
+bool read_solver_data(nissy::solver& solver)
+{
+	solver.data.resize(solver.size);
+
+	bool success = storage::read(solver.id, solver.size,
+	    reinterpret_cast<char *>(solver.data.data()));
+
+	if (!success) {
+		log("Could not read data for solver " +
+		    solver.name + " from storage\n");
+		return false;
+	}
+
+	if (!check_data(solver)) {
+		log("Data for solver " + solver.name + " is corrupt!\n");
+		return false;
+	}
+
+	log("Data for solver " + solver.name + " read from storage\n");
+	loaded_solvers.insert({solver.name, solver});
+
+	return true;
+}
+
+bool is_solver_valid(const std::string& name,
+    std::variant<nissy::solver, nissy::error>& se)
+{
+	if (std::holds_alternative<nissy::error>(se)) {
+		log("Invalid solver " + name + "\n");
+		return false;
+	}
+
+	if (!is_solver_available(name)) {
+		log("Solver " + name + " is not available in this version\n");
+		return false;
+	}
+
+	return true;
+}
+
+bool init_solver_from_storage(const std::string& name)
+{
+	if (is_solver_loaded(name))
+		return true;
+	auto se = nissy::solver::get(name);
+	if (!is_solver_valid(name, se))
+		return false;
+	nissy::solver solver = std::get<nissy::solver>(se);
+
+	return read_solver_data(solver);
+}
+
+bool init_solver_download(const std::string& name, const std::string& urlbase)
+{
+	if (is_solver_loaded(name))
+		return true;
+	auto se = nissy::solver::get(name);
+	if (!is_solver_valid(name, se))
+		return false;
+	nissy::solver solver = std::get<nissy::solver>(se);
+
+	if (storage::download(solver.id, urlbase + "/" + solver.id)) {
+		return read_solver_data(solver);
+	} else {
+		return false;
+	}
+}
+
+bool init_solver_generate(const std::string& name)
+{
+	if (is_solver_loaded(name))
+		return true;
+	auto se = nissy::solver::get(name);
+	if (!is_solver_valid(name, se))
+		return false;
+	nissy::solver solver = std::get<nissy::solver>(se);
+
+	if (!solver.generate_data().ok()) {
+		log("Error generating data for solver " + name + "!\n");
+		return false;
+	}
+
+	if (!check_data(solver)) {
+		log("Data for solver " + name + " generated incorrectly!\n");
+		return false;
+	}
 
 	if (storage::write(solver.id, solver.size,
 	    reinterpret_cast<const char *>(solver.data.data()))) {
-		log("Data for solver " + solver.name + " stored\n");
+		log("Data for solver " + name + " stored\n");
 	} else {
 		log("Error storing the data (the solver is usable, "
 		    "but the data will have to be re-generated next "
@@ -89,21 +148,6 @@ bool init_solver(const std::string& name)
 	}
 
 	return true;
-}
-
-bool solver_valid(const std::string& name)
-{
-	if (loaded_solvers.contains(name) ||
-	    (available_solvers.contains(name) && init_solver(name)))
-		return true;
-
-	auto se = nissy::solver::get(name);
-	if (std::holds_alternative<nissy::solver>(se))
-		log("The solver " + name + " is not available in "
-		   "the web version of Nissy. Use a native version.\n");
-	else
-		log("Invalid solver " + name + "\n");
-	return false;
 }
 
 int poll_status(void *arg)
@@ -127,9 +171,11 @@ nissy::solver::solve_result solve(std::string name,
 	// TODO figure out if there is a better way to do this.
 	fake_async();
 
-	if (!solver_valid(name))
+	if (!is_solver_loaded(name)) {
+		log("Solver " + name + " is invalid or has not been loaded\n");
 		return nissy::solver::solve_result
 		    {.err = nissy::error::INVALID_SOLVER};
+	}
 
 	return loaded_solvers.at(name).solve(cube, nissflag, minmoves,
 	    maxmoves, maxsols, optimal, threads, NULL, &poll_status_id);
@@ -147,8 +193,10 @@ EMSCRIPTEN_BINDINGS(Nissy)
 
 	emscripten::class_<nissy::error>("Error")
 		.function("ok", &nissy::error::ok)
-		.class_property("unsolvableWarning", &nissy::error::UNSOLVABLE_WARNING)
-		.class_property("unsolvableError", &nissy::error::UNSOLVABLE_ERROR)
+		.class_property("unsolvableWarning",
+		    &nissy::error::UNSOLVABLE_WARNING)
+		.class_property("unsolvableError",
+		    &nissy::error::UNSOLVABLE_ERROR)
 		.class_property("invalidCube", &nissy::error::INVALID_CUBE)
 		.class_property("invalidMoves", &nissy::error::INVALID_MOVES)
 		.class_property("invalidTrans", &nissy::error::INVALID_TRANS)
@@ -181,6 +229,13 @@ EMSCRIPTEN_BINDINGS(Nissy)
 		.property("err", &nissy::solver::solve_result::err)
 		.property("solutions", &nissy::solver::solve_result::solutions)
 		;
+
+	emscripten::function("isSolverAvailable", &is_solver_available);
+	emscripten::function("isSolverLoaded", &is_solver_loaded);
+	emscripten::function("initSolverFromStorage",
+	    &init_solver_from_storage);
+	emscripten::function("initSolverDownload", &init_solver_download);
+	emscripten::function("initSolverGenerate", &init_solver_generate);
 
 	emscripten::function("countMoves", &nissy::count_moves);
 	emscripten::function("solve", &solve,
