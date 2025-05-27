@@ -207,7 +207,8 @@ odflags() {
 
 build_clean() {
 	run rm -rf -- *.o *.so *.a run runtest runtool runcpp \
-	    web/nissy_web_module.* web/*.wasm web/http/*.mjs web/http/*.wasm
+	    web/nissy_web_module.* web/http/nissy_web_module.* \
+	    web/http/worker.mjs
 }
 
 build_nissy() {
@@ -273,8 +274,9 @@ build_web() {
 		$CPPFLAGS $(odflags) $WASMLINKFLAGS \
 		--js-library web/callback.js -o web/"$obj".mjs \
 		cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o || exit 1
-	cp web/"$obj".mjs web/http
-	cp web/"$obj".wasm web/http
+	cp web/"$obj".mjs web/http/
+	cp web/"$obj".wasm web/http/
+	cp web/worker.mjs web/http/
 }
 
 dotest() {

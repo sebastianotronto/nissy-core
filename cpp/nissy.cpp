@@ -183,7 +183,7 @@ namespace nissy {
 		    result.solutions.data(), stats,
 		    poll_status, poll_status_data);
 
-		int size = result.solutions.find_first_of('\0') + 1;
+		int size = result.solutions.find_first_of('\0');
 		result.solutions.resize(size);
 		result.err = error{err};
 
