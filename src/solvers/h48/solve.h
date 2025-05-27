@@ -49,8 +49,8 @@ typedef struct {
 } dfsarg_solve_h48_maketasks_t;
 
 STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
-    unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long n,
-    const unsigned char [n], unsigned m, char [m],
+    unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
+    const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
 STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
 STATIC int64_t solve_h48_maketasks(
@@ -60,7 +60,7 @@ STATIC void *solve_h48_runthread(void *);
 STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [static 1]);
 STATIC void solve_h48_log_solutions(solution_list_t [static 1], size_t);
 STATIC int64_t solve_h48(oriented_cube_t, uint8_t, uint8_t, uint8_t, uint8_t,
-    uint8_t, uint64_t, const unsigned char *, size_t n, char [n],
+    uint8_t, uint64_t, const unsigned char *, size_t, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
 
 STATIC long long solve_h48_dispatch(
@@ -73,9 +73,9 @@ STATIC long long solve_h48_dispatch(
         unsigned optimal,
         unsigned threads,
         unsigned long long data_size,
-        const unsigned char data[data_size],
+        const unsigned char *data,
         unsigned sols_size,
-        char sols[sols_size],
+        char *sols,
         long long stats[static NISSY_SIZE_SOLVE_STATS],
         int (*poll_status)(void *),
         void *poll_status_data
@@ -410,7 +410,7 @@ solve_h48(
 	uint64_t data_size,
 	const unsigned char *data,
 	size_t solutions_size,
-	char solutions[solutions_size],
+	char *solutions,
 	long long stats[static NISSY_SIZE_SOLVE_STATS],
 	int (*poll_status)(void *),
 	void *poll_status_data

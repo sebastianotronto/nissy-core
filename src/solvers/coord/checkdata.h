@@ -1,11 +1,11 @@
 STATIC long long checkdata_coord(
-    const char *, unsigned long long n, const unsigned char [n]);
+    const char *, unsigned long long, const unsigned char *);
 
 STATIC long long
 checkdata_coord(
 	const char *solver,
 	unsigned long long data_size,
-	const unsigned char data[data_size]
+	const unsigned char *data
 )
 {
 	coord_t *coord;

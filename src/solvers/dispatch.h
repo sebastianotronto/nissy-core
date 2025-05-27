@@ -2,7 +2,7 @@ typedef struct {
 	const char *prefix;
 	long long (*dataid)(const char *, char [static NISSY_SIZE_DATAID]);
 	long long (*gendata)(
-	    const char *, unsigned long long n, unsigned char [n]);
+	    const char *, unsigned long long, unsigned char *);
 	long long (*checkdata)(
 	    const char *, unsigned long long, const unsigned char *);
 	long long (*solve)(oriented_cube_t, const char *, unsigned, unsigned,

@@ -215,7 +215,7 @@ long long
 nissy_gendata(
 	const char *solver,
 	unsigned long long data_size,
-	unsigned char data[data_size]
+	unsigned char *data
 )
 {
 	return nissy_gendata_unsafe(solver, data_size, data);
@@ -253,7 +253,7 @@ long long
 nissy_checkdata(
 	const char *solver,
 	unsigned long long data_size,
-	const unsigned char data[data_size]
+	const unsigned char *data
 )
 {
 	solver_dispatch_t *dispatch;
@@ -278,9 +278,9 @@ nissy_solve(
 	unsigned optimal,
 	unsigned threads,
 	unsigned long long data_size,
-	const unsigned char data[data_size],
+	const unsigned char *data,
 	unsigned sols_size,
-	char sols[sols_size],
+	char *sols,
 	long long stats[static NISSY_SIZE_SOLVE_STATS],
 	int (*poll_status)(void *),
 	void *poll_status_data

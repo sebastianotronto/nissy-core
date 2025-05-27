@@ -3,13 +3,13 @@
 
 STATIC uint8_t readmove(char);
 STATIC int64_t readmoves(const char *,
-    size_t n, size_t m, uint64_t *, uint64_t *, uint8_t [n], uint8_t [m]);
+    size_t, size_t, uint64_t *, uint64_t *, uint8_t *, uint8_t *);
 STATIC int64_t countmoves(const char *);
 STATIC uint8_t readmodifier(char);
-STATIC int64_t writemoves(size_t n, const uint8_t [n], size_t m, char [m]);
+STATIC int64_t writemoves(size_t, const uint8_t *, size_t, char *);
 
 STATIC_INLINE bool allowednextmove(uint8_t, uint8_t);
-STATIC bool allowedmoves(size_t n, const uint8_t [n]);
+STATIC bool allowedmoves(size_t, const uint8_t *);
 
 STATIC_INLINE uint8_t movebase(uint8_t);
 STATIC_INLINE uint8_t moveaxis(uint8_t);
@@ -24,8 +24,8 @@ STATIC uint8_t transform_move(uint8_t, uint8_t);
 STATIC cube_t move(cube_t, uint8_t);
 STATIC cube_t premove(cube_t, uint8_t);
 STATIC uint8_t inverse_move(uint8_t);
-STATIC void sortparallel_moves(size_t n, uint8_t [n]);
-STATIC bool are_lastmoves_singlecw(size_t n, const uint8_t [n]);
+STATIC void sortparallel_moves(size_t, uint8_t*);
+STATIC bool are_lastmoves_singlecw(size_t, const uint8_t*);
 
 #define FOREACH_READMOVE(ARG_BUF, ARG_MOVE, ARG_C, ARG_MAX, \
 	RET_ERROR, ARG_ACTION) \
@@ -126,8 +126,8 @@ readmoves(
 	size_t invsize,
 	uint64_t *n,
 	uint64_t *i,
-	uint8_t normal[nsize],
-	uint8_t inverse[invsize]
+	uint8_t *normal,
+	uint8_t *inverse
 )
 {
 	uint8_t m;
@@ -171,9 +171,9 @@ countmoves(const char *buf)
 STATIC int64_t
 writemoves(
 	size_t nmoves,
-	const uint8_t m[nmoves],
+	const uint8_t *m,
 	size_t buf_size,
-	char buf[buf_size]
+	char *buf
 )
 {
 	size_t i, len, w;
@@ -214,7 +214,7 @@ allowednextmove(uint8_t m1, uint8_t m2)
 }
 
 STATIC bool
-allowedmoves(size_t n, const uint8_t m[n])
+allowedmoves(size_t n, const uint8_t *m)
 {
 	uint8_t j;
 
@@ -422,7 +422,7 @@ inverse_move(uint8_t m)
 }
 
 STATIC void
-sortparallel_moves(size_t n, uint8_t moves[n])
+sortparallel_moves(size_t n, uint8_t *moves)
 {
 	uint8_t i;
 
@@ -435,7 +435,7 @@ sortparallel_moves(size_t n, uint8_t moves[n])
 }
 
 STATIC bool
-are_lastmoves_singlecw(size_t n, const uint8_t moves[n])
+are_lastmoves_singlecw(size_t n, const uint8_t *moves)
 {
 	bool two;
 

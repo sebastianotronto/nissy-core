@@ -1,11 +1,10 @@
 STATIC void solution_moves_reset(solution_moves_t [static 1]);
 STATIC void solution_moves_transform(solution_moves_t [static 1], uint8_t);
 STATIC void solution_moves_reorient(solution_moves_t [static 1], uint8_t);
-STATIC bool solution_list_init(
-    solution_list_t [static 1], size_t n, char [n]);
+STATIC bool solution_list_init(solution_list_t [static 1], size_t, char *);
 STATIC bool solution_moves_equal(
     const solution_moves_t [static 1], const solution_moves_t [static 1]);
-STATIC bool solution_moves_is_duplicate(size_t n, const solution_moves_t[n+1]);
+STATIC bool solution_moves_is_duplicate(size_t, const solution_moves_t *);
 STATIC bool appendchar(solution_list_t [static 1], char);
 STATIC bool appendnormal(
     const solution_moves_t [static 1], solution_list_t [static 1]);
@@ -50,7 +49,7 @@ solution_moves_reorient(solution_moves_t moves[static 1], uint8_t or)
 }
 
 STATIC bool
-solution_list_init(solution_list_t sols[static 1], size_t n, char buf[n])
+solution_list_init(solution_list_t sols[static 1], size_t n, char *buf)
 {
 	if (n == 0)
 		return false;
@@ -88,7 +87,7 @@ solution_moves_equal(
 }
 
 STATIC bool
-solution_moves_is_duplicate(size_t n, const solution_moves_t s[n+1])
+solution_moves_is_duplicate(size_t n, const solution_moves_t *s)
 {
 	size_t i;
 

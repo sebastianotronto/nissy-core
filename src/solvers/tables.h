@@ -1,11 +1,13 @@
-STATIC uint64_t read_unaligned_u64(const unsigned char [static sizeof(uint64_t)]);
-STATIC void write_unaligned_u64(unsigned char [static sizeof(uint64_t)], uint64_t);
+STATIC uint64_t read_unaligned_u64(
+    const unsigned char [static sizeof(uint64_t)]);
+STATIC void write_unaligned_u64(
+    unsigned char [static sizeof(uint64_t)], uint64_t);
 STATIC int64_t readtableinfo(
-    size_t n, const unsigned char [n], tableinfo_t [static 1]);
+    size_t, const unsigned char *, tableinfo_t [static 1]);
 STATIC int64_t readtableinfo_n(
-    size_t n, const unsigned char [n], uint8_t, tableinfo_t [static 1]);
+    size_t, const unsigned char *, uint8_t, tableinfo_t [static 1]);
 STATIC int64_t writetableinfo(
-    const tableinfo_t [static 1], size_t n, unsigned char [n]);
+    const tableinfo_t [static 1], size_t, unsigned char *);
 
 STATIC uint64_t
 read_unaligned_u64(const unsigned char buf[static sizeof(uint64_t)])
@@ -26,7 +28,7 @@ write_unaligned_u64(unsigned char buf[static sizeof(uint64_t)], uint64_t x)
 STATIC int64_t
 readtableinfo(
 	size_t buf_size,
-	const unsigned char buf[buf_size],
+	const unsigned char *buf,
 	tableinfo_t info[static 1]
 )
 {
@@ -70,7 +72,7 @@ readtableinfo(
 STATIC int64_t
 readtableinfo_n(
 	size_t buf_size,
-	const unsigned char buf[buf_size],
+	const unsigned char *buf,
 	uint8_t n,
 	tableinfo_t info[static 1]
 )
@@ -88,7 +90,7 @@ STATIC int64_t
 writetableinfo(
 	const tableinfo_t info[static 1],
 	size_t data_size,
-	unsigned char buf[data_size]
+	unsigned char *buf
 )
 {
 	size_t i;

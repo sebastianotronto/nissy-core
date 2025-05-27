@@ -1,10 +1,10 @@
-STATIC coord_t *parse_coord(size_t n, const char [n]);
+STATIC coord_t *parse_coord(size_t, const char *);
 STATIC uint8_t parse_axis(const char [static 2]);
 STATIC void parse_coord_and_axis(const char *, coord_t **, uint8_t *);
 STATIC long long dataid_coord(const char *, char [static NISSY_SIZE_DATAID]);
 
 STATIC coord_t *
-parse_coord(size_t n, const char coord[n])
+parse_coord(size_t n, const char *coord)
 {
 	int i;
 

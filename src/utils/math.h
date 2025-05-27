@@ -4,12 +4,12 @@
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 
 STATIC int64_t factorial(int64_t);
-STATIC bool isperm(size_t n, const uint8_t [n]);
-STATIC int64_t permtoindex(size_t n, const uint8_t [n]);
-STATIC void indextoperm(int64_t, size_t n, uint8_t [n]);
-STATIC int permsign(size_t n, const uint8_t [n]);
-STATIC int64_t digitstosumzero(size_t n, const uint8_t [n], uint8_t);
-STATIC void sumzerotodigits(int64_t, size_t n, uint8_t, uint8_t [n]);
+STATIC bool isperm(size_t, const uint8_t *);
+STATIC int64_t permtoindex(size_t, const uint8_t *);
+STATIC void indextoperm(int64_t, size_t, uint8_t *);
+STATIC int permsign(size_t, const uint8_t *);
+STATIC int64_t digitstosumzero(size_t, const uint8_t *, uint8_t);
+STATIC void sumzerotodigits(int64_t, size_t, uint8_t, uint8_t *);
 STATIC double intpow(double, uint64_t);
 
 STATIC int64_t
@@ -33,7 +33,7 @@ factorial(int64_t n)
 }
 
 STATIC bool
-isperm(size_t n, const uint8_t a[n])
+isperm(size_t n, const uint8_t *a)
 {
 	size_t i;
 	bool aux[FACTORIAL_MAX+1];
@@ -61,7 +61,7 @@ isperm(size_t n, const uint8_t a[n])
 }
 
 STATIC int64_t
-permtoindex(size_t n, const uint8_t a[n])
+permtoindex(size_t n, const uint8_t *a)
 {
 	size_t i, j;
 	int64_t c, ret;
@@ -85,7 +85,7 @@ permtoindex(size_t n, const uint8_t a[n])
 }
 
 STATIC void
-indextoperm(int64_t p, size_t n, uint8_t r[n])
+indextoperm(int64_t p, size_t n, uint8_t *r)
 {
 	int64_t c;
 	size_t i, j;
@@ -120,7 +120,7 @@ indextoperm_error:
 }
 
 STATIC int
-permsign(size_t n, const uint8_t a[n])
+permsign(size_t n, const uint8_t *a)
 {
 	size_t i, j, ret;
 
@@ -132,7 +132,7 @@ permsign(size_t n, const uint8_t a[n])
 }
 
 STATIC int64_t
-digitstosumzero(size_t n, const uint8_t a[n], uint8_t b)
+digitstosumzero(size_t n, const uint8_t *a, uint8_t b)
 {
 	int64_t ret, p;
 	size_t i, sum;
@@ -162,7 +162,7 @@ digitstosumzero(size_t n, const uint8_t a[n], uint8_t b)
 }
 
 STATIC void
-sumzerotodigits(int64_t d, size_t n, uint8_t b, uint8_t a[n])
+sumzerotodigits(int64_t d, size_t n, uint8_t b, uint8_t *a)
 {
 	uint8_t sum;
 	size_t i;

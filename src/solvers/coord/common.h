@@ -9,7 +9,7 @@ STATIC size_t coord_gendata_generic(const coord_t [static 1], unsigned char *);
 STATIC void append_coord_name(const coord_t [static 1], char *);
 STATIC bool solution_lastqt_cw(const solution_moves_t [static 1]);
 STATIC bool coord_can_switch(const coord_t [static 1], const unsigned char *,
-    size_t n, const uint8_t [n]);
+    size_t, const uint8_t *);
 
 STATIC uint64_t
 coord_coord_generic(
@@ -164,7 +164,7 @@ coord_can_switch(
 	const coord_t coord[static 1],
 	const unsigned char *data,
 	size_t n,
-	const uint8_t moves[n]
+	const uint8_t *moves
 )
 {
 	/*

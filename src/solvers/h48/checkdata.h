@@ -1,5 +1,5 @@
 STATIC long long checkdata_h48(
-    const char *, unsigned long long n, const unsigned char [n]);
+    const char *, unsigned long long, const unsigned char *);
 
 /*
 Currently unused.
@@ -178,7 +178,7 @@ STATIC long long
 checkdata_h48(
 	const char *solver,
 	unsigned long long data_size,
-	const unsigned char data[data_size]
+	const unsigned char *data
 )
 {
 	const unsigned char *table;
