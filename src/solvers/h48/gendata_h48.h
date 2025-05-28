@@ -423,7 +423,8 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 		arg->base = base[arg->h];
 	arg->info = makeinfo_h48k2(arg);
 
-	inext = count = 0;
+	inext = 0;
+	count = 0;
 	pthread_mutex_init(&shortcubes_mutex, NULL);
 	for (i = 0; i < CHUNKS; i++)
 		pthread_mutex_init(&table_mutex[i], NULL);
