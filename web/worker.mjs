@@ -1,10 +1,7 @@
 import Nissy from "./nissy_web_module.mjs"
 
 const nissy = await Nissy();
-function log(message) {
-  postMessage({ command: "log", id: -1, object: message });
-  console.log(message);
-}
+const log = (msg) => postMessage({ command: "log", id: -1, object: msg });
 nissy.setLogger(nissy._addCallbackFunction(log));
 
 const commands = [
@@ -32,7 +29,7 @@ onmessage = (event) => {
     }
   }
  
-  log("[nissy worker] unknown command " + event.data.command);
+  console.log("[nissy worker] unknown command " + event.data.command);
 };
 
 // Load solver data from storage.

@@ -50,20 +50,6 @@ solveButton.addEventListener("click", () => {
   const solver = solverSelector.options[solverSelector.selectedIndex].value;
   const scramble = scrField.value;
   loadDataThenSolve(solver, scramble);
-
-  const solveCallbackId = ++lastCallbackId;
-  callbacks.set(solveCallbackId, {
-    f: (callbackArg, loadResult) => {
-      if (loadResult.success) {
-        startSolve(callbackArg.solver, callbackArg.scramble);
-      } else {
-        updateResults("", "", true);
-      }
-    },
-    arg: { solver: solver, scramble: scramble }
-  });
-
-  const downloadCallbackId = ++lastCallbackId;
 });
 
 function loadDataThenSolve(solver, scramble) {

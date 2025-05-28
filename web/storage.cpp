@@ -43,8 +43,11 @@ EM_ASYNC_JS(int, download_and_store, (const char *key, const char *url), {
 	    self instanceof WorkerGlobalScope;
 	console.assert(inBrowser || inWorker, "Non-browsers not supported");
 
-	url = UTF8ToString(url);
-	key = UTF8ToString(key);
+	// See comment in callback.js about this workaround
+	const non64_url = Number(url);
+	const non64_key = Number(key);
+	url = UTF8ToString(non64_url);
+	key = UTF8ToString(non64_key);
 	let response = await fetch(url);
 	if (!response.ok) {
 		console.log("Error downloading data for " + key);
