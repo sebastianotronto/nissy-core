@@ -30,8 +30,8 @@ worker.onmessage = (event) => {
 function updateResults(label, results, enable) {
   resultsLabel.innerText = label;
   resultsText.innerText = results;
-  solveButton.disable = !enable;
-  solverSelector.disable = !enable;
+  solveButton.disabled = !enable;
+  solverSelector.disabled = !enable;
 }
 
 var logVisible = false;
@@ -49,7 +49,27 @@ toggleLog.addEventListener("click", () => {
 solveButton.addEventListener("click", () => {
   const solver = solverSelector.options[solverSelector.selectedIndex].value;
   const scramble = scrField.value;
-  loadDataThenSolve(solver, scramble);
+
+  const callbackId = ++lastCallbackId;
+  callbacks.set(callbackId, {
+    f: (callbackArg, validateResult) => {
+      if (validateResult) {
+        loadDataThenSolve(callbackArg.solver, callbackArg.scramble);
+      } else {
+        updateResults("Scramble is invalid", "", true);
+      }
+    },
+    arg: {
+      solver: solver,
+      scramble: scramble
+    }
+  });
+
+  worker.postMessage({
+    command: "validate scramble",
+    id: lastCallbackId,
+    arg: scramble
+  });
 });
 
 function loadDataThenSolve(solver, scramble) {

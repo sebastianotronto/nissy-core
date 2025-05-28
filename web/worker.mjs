@@ -8,6 +8,7 @@ const commands = [
   { name: "load solver data", exec: loadSolverDataFromStorage },
   { name: "download solver data", exec: downloadSolverData },
   { name: "generate solver data", exec: generateSolverData },
+  { name: "validate scramble", exec: validateScramble },
   { name: "solve", exec: solve },
 ];
 
@@ -45,7 +46,7 @@ async function loadSolverDataFromStorage(id, solver) {
   });
 
   if (!(await nissy.isSolverAvailable(solver))) {
-    async_return(false, "Error: solver " + arg.solver +
+    async_return(false, "Error: solver " + solver +
       " is not available in this version of nissy.");
     return;
   }
@@ -111,6 +112,19 @@ async function generateSolverData(id, solver) {
   } else {
     async_return(false, "Error generating solver data");
   }
+}
+
+// Check if the scramble is valid.
+// Argument: string (the scramble).
+async function validateScramble(id, arg) {
+  const async_return = (success) => postMessage({
+    command: "validate scramble",
+    id: id,
+    arg: success
+  });
+
+  var cube = new nissy.Cube();
+  async_return(cube.move(arg).ok());
 }
 
 // Solve the cube with the given options.

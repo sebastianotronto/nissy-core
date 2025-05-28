@@ -23,7 +23,8 @@ const std::set<std::string> available_solvers
 	"h48h1k2",
 	"h48h2k2",
 	"h48h3k2",
-	"h48h7k2",
+	"h48h4k2",
+	"h48h5k2",
 };
 
 std::map<std::string, nissy::solver> loaded_solvers;
