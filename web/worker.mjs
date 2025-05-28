@@ -8,8 +8,10 @@ function log(message) {
 nissy.setLogger(nissy._addCallbackFunction(log));
 
 const commands = [
-    { name: "solve", exec: solve },
-    { name: "download solver data", exec: downloadSolverData },
+  { name: "load solver data", exec: loadSolverDataFromStorage },
+  { name: "download solver data", exec: downloadSolverData },
+  { name: "generate solver data", exec: generateSolverData },
+  { name: "solve", exec: solve },
 ];
 
 // Message structure:
@@ -25,6 +27,7 @@ onmessage = (event) => {
   for (var i = 0; i < commands.length; i++) {
     if (commands[i].name == event.data.command) {
       commands[i].exec(event.data.id, event.data.arg);
+      console.log("[worker] Received '" + commands[i].name + "'");
       return;
     }
   }
@@ -32,10 +35,41 @@ onmessage = (event) => {
   log("[nissy worker] unknown command " + event.data.command);
 };
 
+// Load solver data from storage.
+// Argument: string (the name of the solver)
+async function loadSolverDataFromStorage(id, solver) {
+  const async_return = (success, message = "") => postMessage({
+    command: "load solver data",
+    id: id,
+    arg: {
+      success: success,
+      message: message
+    }
+  });
+
+  if (!(await nissy.isSolverAvailable(solver))) {
+    async_return(false, "Error: solver " + arg.solver +
+      " is not available in this version of nissy.");
+    return;
+  }
+
+  if (await nissy.isSolverLoaded(solver)) {
+    async_return(true);
+    return;
+  }
+
+  if (await nissy.initSolverFromStorage(solver)) {
+    async_return(true);
+  } else {
+    async_return(false, "Could not read data for " + solver +
+      " from local storage");
+  }
+}
+
 // Download solver data.
-// Argument: string
+// Argument: string (the name of the solver)
 async function downloadSolverData(id, solver) {
-  const downloadSolverDataReturn = (success, message = "") => postMessage({
+  const async_return = (success, message = "") => postMessage({
     command: "download solver data",
     id: id,
     arg: {
@@ -44,10 +78,41 @@ async function downloadSolverData(id, solver) {
     }
   });
 
-  if (await nissy.initSolverDownload(arg.solver, "/tables")) {
-    downloadSolverDataReturn(true);
+  if (!(await nissy.isSolverAvailable(solver))) {
+    async_return(false, "Error: solver " + arg.solver +
+      " is not available in this version of nissy.");
+    return;
+  }
+
+  if (await nissy.initSolverDownload(solver, "/tables")) {
+    async_return(true);
   } else {
-    downloadSolverDataReturn(false, "Error retrieving the solver data");
+    async_return(false, "Error retrieving solver data");
+  }
+}
+
+// Generate solver data locally.
+// Argument: string (the name of the solver)
+async function generateSolverData(id, solver) {
+  const async_return = (success, message = "") => postMessage({
+    command: "generate solver data",
+    id: id,
+    arg: {
+      success: success,
+      message: message
+    }
+  });
+
+  if (!(await nissy.isSolverAvailable(solver))) {
+    async_return(false, "Error: solver " + arg.solver +
+      " is not available in this version of nissy.");
+    return;
+  }
+
+  if (await nissy.initSolverGenerate(solver)) {
+    async_return(true);
+  } else {
+    async_return(false, "Error generating solver data");
   }
 }
 
@@ -62,7 +127,7 @@ async function downloadSolverData(id, solver) {
 //   threads: number
 // }
 async function solve(id, arg) {
-  const solveReturn = (success, solutions = [], message = "") => postMessage({
+  const async_return = (success, solutions = [], message = "") => postMessage({
     command: "solve",
     id: id,
     arg: {
@@ -73,14 +138,14 @@ async function solve(id, arg) {
   });
 
   if (!(await nissy.isSolverAvailable(arg.solver))) {
-    solveReturn(false, [], "Error: solver " + arg.solver +
+    async_return(false, [], "Error: solver " + arg.solver +
       " is not available in this version of nissy.");
     return;
   }
 
   if (!(await nissy.isSolverLoaded(arg.solver)) &&
       !(await nissy.initSolverFromStorage(arg.solver))) {
-    solveReturn(false, [], "Error: solver " + arg.solver + " has not been " +
+    async_return(false, [], "Error: solver " + arg.solver + " has not been " +
       "loaded. Its data must be donwloaded or generated before using it.");
     return;
   }
@@ -106,9 +171,9 @@ async function solve(id, arg) {
     //TODO: add solution lenght?
     var solutions = result.solutions == "" ? [] : result.solutions.split("\n");
     solutions.pop(); // Solver always returns string ending in newline
-    solveReturn(true, solutions);
+    async_return(true, solutions);
   } else {
-    solveReturn(false, [],
+    async_return(false, [],
       "Error while solving (error " + result.err.value + ")");
   }
 };
