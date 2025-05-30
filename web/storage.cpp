@@ -55,7 +55,6 @@ EM_ASYNC_JS(int, download_and_store, (const char *key, const char *url), {
 		return 0;
 	}
 
-	console.log("Data for " + key + " downloaded, writing to storage...");
 	let data = await response.bytes();
 	var stream = FS.open("/tables/" + key, "w+");
 	FS.write(stream, data, 0, data.length, 0);
