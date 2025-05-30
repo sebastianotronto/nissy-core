@@ -16,6 +16,7 @@ var maxSlider = document.getElementById("maxMovesSlider");
 var minLabel = document.getElementById("minLabel");
 var maxLabel = document.getElementById("maxLabel");
 var maxSolsInput = document.getElementById("maxSolutions");
+var optimalInput = document.getElementById("optimalInput");
 
 var solveStatus = "run"; // For now this is global
 var lastCallbackId = 0;
@@ -50,6 +51,7 @@ function updateResults(label, results, enable) {
   minSlider.disabled = !enable;
   maxSlider.disabled = !enable;
   maxSolsInput.disabled = !enable;
+  optimalInput.disabled = !enable;
 }
 
 scrField.addEventListener("input", (e) => {
@@ -80,14 +82,17 @@ minSlider.addEventListener("input", () =>
 maxSlider.addEventListener("input", () =>
   maxLabel.innerText = "Maximum moves: " + maxSlider.value);
 
-maxSolsInput.addEventListener("keyup", () => {
-  if (maxSolsInput.value != "") {
-    if (parseInt(maxSolsInput.value) < parseInt(maxSolsInput.min))
-      maxSolsInput.value = maxSolsInput.min;
-    if (parseInt(maxSolsInput.value) > parseInt(maxSolsInput.max))
-      maxSolsInput.value = maxSolsInput.max;
+function enforceMinMax() {
+  if (this.value != "") {
+    if (parseInt(this.value) < parseInt(this.min))
+      this.value = this.min;
+    if (parseInt(this.value) > parseInt(this.max))
+      this.value = this.max;
   }
-});
+}
+
+maxSolsInput.addEventListener("keyup", enforceMinMax);
+optimalInput.addEventListener("keyup", enforceMinMax);
 
 var logVisible = false;
 toggleLog.addEventListener("click", () => {
@@ -265,7 +270,7 @@ function startSolve(solver, scramble) {
       minmoves: minSlider.value,
       maxmoves: maxSlider.value,
       maxsolutions: maxSolsInput.value,
-      optimal: 20,
+      optimal: optimalInput.value,
       threads: window.navigator.hardwareConcurrency,
     }
   });
