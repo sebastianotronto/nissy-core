@@ -217,8 +217,7 @@ odflags() {
 
 build_clean() {
 	run rm -rf -- *.o *.so *.a run runtest runtool runcpp \
-	    web/nissy_web_module.* web/http/nissy_web_module.* \
-	    web/http/worker.mjs
+	    web/nissy_web_module.* web/http/nissy_web_module.*
 }
 
 build_nissy() {
@@ -286,7 +285,6 @@ build_web() {
 		cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o || exit 1
 	cp web/"$obj".mjs web/http/
 	cp web/"$obj".wasm web/http/
-	cp web/worker.mjs web/http/
 }
 
 dotest() {

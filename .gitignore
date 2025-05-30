@@ -22,7 +22,6 @@ runcpp
 runtest.js
 runtest.wasm
 web/http/nissy_web_module.*
-web/http/worker.mjs
 web/nissy_web_module.*
 runtool
 tools/.DS_Store
