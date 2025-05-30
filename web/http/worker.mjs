@@ -4,12 +4,19 @@ const nissy = await Nissy();
 const log = (msg) => postMessage({ command: "log", id: -1, object: msg });
 nissy.setLogger(nissy._addCallbackFunction(log));
 
+var solveStatus = nissy.statusRUN; // For now this is a global variable
+const pollStatusCallback = nissy._addCallbackFunction(() => {
+console.log("Calling pollstatus, returning " + solveStatus);
+return solveStatus;
+});
+
 const commands = [
   { name: "load solver data", exec: loadSolverDataFromStorage },
   { name: "download solver data", exec: downloadSolverData },
   { name: "generate solver data", exec: generateSolverData },
   { name: "validate scramble", exec: validateScramble },
   { name: "solve", exec: solve },
+  { name: "update status", exec: updateStatus },
 ];
 
 // Message structure:
@@ -161,10 +168,11 @@ async function solve(id, arg) {
     return;
   }
 
+  solveStatus = nissy.statusRUN;
+
   var cube = new nissy.Cube();
   cube.move(arg.scramble);
 
-  // TODO: error handling here?
   const nissFlag = ((str) => {
     switch (str) {
       case "inverse": return nissy.NissFlag.inverse;
@@ -176,15 +184,29 @@ async function solve(id, arg) {
   })(arg.nissFlag);
 
   const result = await nissy.solve(arg.solver, cube, nissFlag, arg.minmoves,
-    arg.maxmoves, arg.maxsolutions, arg.optimal, arg.threads, id);
+    arg.maxmoves, arg.maxsolutions, arg.optimal, arg.threads,
+    pollStatusCallback);
 
   if (result.err.ok()) {
-    //TODO: add solution lenght?
     var solutions = result.solutions == "" ? [] : result.solutions.split("\n");
     solutions.pop(); // Solver always returns string ending in newline
+    for (var i = 0; i < solutions.length; i++) {
+      const movecount = await nissy.countMoves(solutions[i]);
+      solutions[i] += " (" + movecount.value + ")";
+    }
     async_return(true, solutions);
   } else {
     async_return(false, [],
       "Error while solving (error " + result.err.value + ")");
+  }
+};
+
+function updateStatus(id, arg) {
+  if (arg == "stop") {
+    solveStatus = nissy.statusSTOP;
+  } else if (arg == "pause") {
+    solveStatus = nissy.statusPAUSE;
+  } else {
+    solveStatus = nissy.statusRUN;
   }
 };

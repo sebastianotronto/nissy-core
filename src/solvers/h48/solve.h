@@ -417,8 +417,8 @@ solve_h48(
 )
 {
 	int i, ntasks, eoesep_table_index;
-	bool td, fp;
-	_Atomic int status;
+	bool td;
+	_Atomic int status, prev_status;
 	size_t lastused;
 	int8_t d;
 	dfsarg_solve_h48_t arg[THREADS];
@@ -556,7 +556,6 @@ solve_h48(
 		/* Log solutions and handle pause / stop / resume */
 		if (poll_status != NULL && d >= 15 && NISSY_CANSLEEP) {
 			td = false;
-			fp = true;
 			while (!td && status != NISSY_STATUS_STOP) {
 				msleep(BASE_SLEEP_TIME);
 
@@ -565,13 +564,14 @@ solve_h48(
 				lastused = sollist.used;
 				pthread_mutex_unlock(&solutions_mutex);
 
+				prev_status = status;
 				status = poll_status(poll_status_data);
-				if (status == NISSY_STATUS_PAUSE && fp) {
-					LOG("[H48 solve] Paused\n");
-					fp = false;
+				if (status != prev_status) {
+					if (status == NISSY_STATUS_PAUSE)
+						LOG("[H48 solve] Paused\n");
+					if (status == NISSY_STATUS_RUN)
+						LOG("[H48 solve] Resumed\n");
 				}
-				if (status == NISSY_STATUS_RUN)
-					fp = true;
 
 				for (td = true, i = 0; i < threads; i++)
 					td = td && arg[i].thread_done;

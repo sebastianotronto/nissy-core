@@ -145,7 +145,7 @@ bool init_solver_generate(const std::string& name)
 	} else {
 		log("Error storing the data (the solver is usable, "
 		    "but the data will have to be re-generated next "
-		    "time you want to use it)");
+		    "time you want to use it)\n");
 	}
 
 	return true;
@@ -179,7 +179,7 @@ nissy::solver::solve_result solve(std::string name,
 	}
 
 	return loaded_solvers.at(name).solve(cube, nissflag, minmoves,
-	    maxmoves, maxsols, optimal, threads, NULL, &poll_status_id);
+	    maxmoves, maxsols, optimal, threads, poll_status, &poll_status_id);
 }
 
 EMSCRIPTEN_BINDINGS(Nissy)
@@ -194,6 +194,7 @@ EMSCRIPTEN_BINDINGS(Nissy)
 
 	emscripten::class_<nissy::error>("Error")
 		.function("ok", &nissy::error::ok)
+		.property("value", &nissy::error::value)
 		.class_property("unsolvableWarning",
 		    &nissy::error::UNSOLVABLE_WARNING)
 		.class_property("unsolvableError",

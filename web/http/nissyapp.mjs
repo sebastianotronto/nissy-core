@@ -3,16 +3,31 @@
 // to this folder when running ./build web.
 
 var solveButton = document.getElementById("solveButton");
+var pauseResumeButton = document.getElementById("pauseResumeButton");
+var cancelSolveButton = document.getElementById("cancelSolveButton");
 var scrField = document.getElementById("scrambleText");
 var resultsLabel = document.getElementById("resultsLabel");
 var resultsText = document.getElementById("results");
 var solverSelector = document.getElementById("solverSelector");
 var toggleLog = document.getElementById("toggleShowLog");
 var logPane = document.getElementById("logPane");
+var minSlider = document.getElementById("minMovesSlider");
+var maxSlider = document.getElementById("maxMovesSlider");
+var minLabel = document.getElementById("minLabel");
+var maxLabel = document.getElementById("maxLabel");
+var maxSolsInput = document.getElementById("maxSolutions");
 
+var solveStatus = "run"; // For now this is global
 var lastCallbackId = 0;
 var callbacks = new Map(); // Values: { f: function, arg: object }
 var worker = new Worker("./worker.mjs", { type: "module" });
+
+// Periodically send status updates to the worker
+
+const sendStatusUpdateToWorker = () =>
+  worker.postMessage({command: "update status", id: -1, arg: solveStatus });
+setInterval(() => sendStatusUpdateToWorker(), 500);
+
 worker.onmessage = (event) => {
   if (event.data.command == "log") {
     logPane.innerText += event.data.object;
@@ -32,7 +47,47 @@ function updateResults(label, results, enable) {
   resultsText.innerText = results;
   solveButton.disabled = !enable;
   solverSelector.disabled = !enable;
+  minSlider.disabled = !enable;
+  maxSlider.disabled = !enable;
+  maxSolsInput.disabled = !enable;
 }
+
+scrField.addEventListener("input", (e) => {
+  const scramble = scrField.value;
+
+  const callbackId = ++lastCallbackId;
+  callbacks.set(callbackId, {
+    f: (callbackArg, validateResult) => {
+      if (validateResult) {
+        scrField.style.border = "";
+      } else {
+        scrField.style.border = "2px solid red";
+      }
+    },
+    arg: scramble
+  });
+
+  worker.postMessage({
+    command: "validate scramble",
+    id: callbackId,
+    arg: scramble
+  });
+});
+
+minSlider.addEventListener("input", () =>
+  minLabel.innerText = "Minimum moves: " + minSlider.value);
+
+maxSlider.addEventListener("input", () =>
+  maxLabel.innerText = "Maximum moves: " + maxSlider.value);
+
+maxSolsInput.addEventListener("keyup", () => {
+  if (maxSolsInput.value != "") {
+    if (parseInt(maxSolsInput.value) < parseInt(maxSolsInput.min))
+      maxSolsInput.value = maxSolsInput.min;
+    if (parseInt(maxSolsInput.value) > parseInt(maxSolsInput.max))
+      maxSolsInput.value = maxSolsInput.max;
+  }
+});
 
 var logVisible = false;
 toggleLog.addEventListener("click", () => {
@@ -67,7 +122,7 @@ solveButton.addEventListener("click", () => {
 
   worker.postMessage({
     command: "validate scramble",
-    id: lastCallbackId,
+    id: callbackId,
     arg: scramble
   });
 });
@@ -110,7 +165,10 @@ function askDownloadThenSolve(solver, scramble) {
   updateResults("", "", false);
   confirmDiv.style.display = "block";
 
-  cancel.addEventListener("click", cleanup);
+  cancel.addEventListener("click", () => {
+    cleanup();
+    updateResults("", "", true);
+  });
 
   download.addEventListener("click", () => {
     cleanup();
@@ -153,12 +211,38 @@ function downloadOrGenerateThenSolve(solver, scramble, download) {
   });
 }
 
+pauseResumeButton.addEventListener("click", (e) => {
+  if (pauseResumeButton.innerText == "Pause") {
+    solveStatus = "pause";
+    pauseResumeButton.innerText = "Resume";
+    updateResults("Solver paused - click Resume to continue", "", false);
+  } else {
+    solveStatus = "run";
+    pauseResumeButton.innerText = "Pause";
+    updateResults("Solving...", "", false);
+  }
+});
+
+cancelSolveButton.addEventListener("click", (e) => {
+  solveStatus = "stop";
+  pauseResumeButton.innerText = "Pause";
+});
+
 function startSolve(solver, scramble) {
   updateResults("Solving...", "", false);
 
   const callbackId = ++lastCallbackId;
+  pauseResumeButton.disabled = false;
+  cancelSolveButton.disabled = false;
+  solveStatus = "run";
+
   callbacks.set(callbackId, {
     f: (callbackArg, solveResult) => {
+      pauseResumeButton.disabled = true;
+      cancelSolveButton.disabled = true;
+      pauseResumeButton.innerText = "Pause";
+      solveStatus = "stop";
+
       if (solveResult.success) {
         const n = solveResult.solutions.length;
         const label = n == 0 ? "No solution found" :
@@ -178,9 +262,9 @@ function startSolve(solver, scramble) {
     arg: {
       solver: solver,
       scramble: scramble,
-      minmoves: 0,
-      maxmoves: 20,
-      maxsolutions: 1,
+      minmoves: minSlider.value,
+      maxmoves: maxSlider.value,
+      maxsolutions: maxSolsInput.value,
       optimal: 20,
       threads: window.navigator.hardwareConcurrency,
     }
