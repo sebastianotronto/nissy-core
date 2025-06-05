@@ -151,13 +151,14 @@ int poll_status(void *arg)
 	if (arg == nullptr)
 		return nissy::status::RUN.value;
 
-	std::function<int(void)> poll((int (*)(void))arg);
+	std::function<int(void)> poll((int (*)(void))*(int *)arg);
 	return poll();
 }
 
 // The parameter js_poll_status is of type int here, but actually it is a
 // pointer to a JS function. The type will have to be changed to a 64-bit
 // integer when we move to WASM64.
+int js_poll_status_global = 0;
 nissy::solver::solve_result solve(std::string name,
     nissy::cube cube, nissy::nissflag nissflag, unsigned minmoves,
     unsigned maxmoves, unsigned maxsols, unsigned optimal, unsigned threads,
@@ -179,9 +180,10 @@ nissy::solver::solve_result solve(std::string name,
 
 	// TODO: when running multiple solvers at the same time, we could use
 	// poll_status_id as intended (i.e. an id of some sort)
+	js_poll_status_global = js_poll_status;
 	return loaded_solvers.at(name).solve(cube, nissflag, minmoves,
 	    maxmoves, maxsols, optimal, threads,
-	    poll_status, &js_poll_status);
+	    poll_status, &js_poll_status_global);
 }
 
 EMSCRIPTEN_BINDINGS(Nissy)

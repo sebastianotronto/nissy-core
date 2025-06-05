@@ -3,7 +3,8 @@ import Nissy from "./nissy_web_module.mjs"
 const nissy = await Nissy();
 
 const log = (cstr) => postMessage({
-	command: "log", id: -1,
+	command: "log",
+	id: -1,
 	object: nissy.UTF8ToString(cstr)
 });
 nissy.setLogger(nissy.addFunction(log, "vp"));

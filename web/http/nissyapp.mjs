@@ -267,10 +267,10 @@ function startSolve(solver, scramble) {
     arg: {
       solver: solver,
       scramble: scramble,
-      minmoves: minSlider.value,
-      maxmoves: maxSlider.value,
-      maxsolutions: maxSolsInput.value,
-      optimal: optimalInput.value,
+      minmoves: Number(minSlider.value),
+      maxmoves: Number(maxSlider.value),
+      maxsolutions: Number(maxSolsInput.value),
+      optimal: Number(optimalInput.value),
       threads: window.navigator.hardwareConcurrency,
     }
   });

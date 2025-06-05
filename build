@@ -142,6 +142,7 @@ CPPFLAGS="-std=c++20 -pthread"
 WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread
             -mfpu=neon -mrelaxed-simd"
 WASMCPPFLAGS="-std=c++20 -pthread"
+WASMDBGFLAGS="-sASSERTIONS"
 WASMMFLAGS="-DTHREADS=$THREADS -DNEON"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE 
 	-sEXPORTED_RUNTIME_METHODS=addFunction,UTF8ToString
@@ -216,7 +217,7 @@ run() {
 odflags() {
 	if [ "$debug" = "yes" ]; then
 		echo "$DFLAGS"
-	else 
+	else
 		echo "$OFLAGS"
 	fi
 }
@@ -283,10 +284,16 @@ build_web() {
 
 	obj="nissy_web_module"
 
-	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $(odflags) -c \
+	if [ "$debug" = "yes" ]; then
+		ODFLAGS="$DFLAGS -sASSERTIONS"
+	else
+		ODFLAGS="$OFLAGS"
+	fi
+
+	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $ODFLAGS -c \
 		-o nissy.o src/nissy.c || exit 1
 	run $EMCC -lembind -lidbfs.js \
-		$WASMCPPFLAGS $(odflags) $WASMLINKFLAGS -o web/"$obj".mjs \
+		$WASMCPPFLAGS $ODFLAGS $WASMLINKFLAGS -o web/"$obj".mjs \
 		cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o || exit 1
 	cp web/"$obj".mjs web/http/
 	cp web/"$obj".wasm web/http/
