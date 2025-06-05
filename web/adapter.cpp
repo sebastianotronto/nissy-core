@@ -1,21 +1,18 @@
-extern "C" {
-	extern int addCallbackFunction(/* args intentionally unspecified */);
-	extern void callFunction(int, const char *);
-	extern int callFunctionInt(int);
-}
-
 #include "../cpp/nissy.h"
 #include "storage.h"
 #include "logging.h"
 
 #include <emscripten.h>
 #include <emscripten/bind.h>
+#include <functional>
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
 
 EM_ASYNC_JS(void, fake_async, (), {});
+
+std::map<std::string, nissy::solver> loaded_solvers;
 
 const std::set<std::string> available_solvers
 {
@@ -26,8 +23,6 @@ const std::set<std::string> available_solvers
 	"h48h4k2",
 	"h48h5k2",
 };
-
-std::map<std::string, nissy::solver> loaded_solvers;
 
 bool is_solver_available(const std::string& name)
 {
@@ -153,16 +148,20 @@ bool init_solver_generate(const std::string& name)
 
 int poll_status(void *arg)
 {
-	if (arg == NULL || *(int *)arg == -1)
+	if (arg == nullptr)
 		return nissy::status::RUN.value;
 
-	return callFunctionInt(*(int *)arg);
+	std::function<int(void)> poll((int (*)(void))arg);
+	return poll();
 }
 
+// The parameter js_poll_status is of type int here, but actually it is a
+// pointer to a JS function. The type will have to be changed to a 64-bit
+// integer when we move to WASM64.
 nissy::solver::solve_result solve(std::string name,
     nissy::cube cube, nissy::nissflag nissflag, unsigned minmoves,
     unsigned maxmoves, unsigned maxsols, unsigned optimal, unsigned threads,
-    int poll_status_id)
+    int js_poll_status)
 {
 	// Here we use a dirty trick to make this function always return the
 	// same kind of JavaScript object. If we did not do this, the returned
@@ -178,8 +177,11 @@ nissy::solver::solve_result solve(std::string name,
 		    {.err = nissy::error::INVALID_SOLVER};
 	}
 
+	// TODO: when running multiple solvers at the same time, we could use
+	// poll_status_id as intended (i.e. an id of some sort)
 	return loaded_solvers.at(name).solve(cube, nissflag, minmoves,
-	    maxmoves, maxsols, optimal, threads, poll_status, &poll_status_id);
+	    maxmoves, maxsols, optimal, threads,
+	    poll_status, &js_poll_status);
 }
 
 EMSCRIPTEN_BINDINGS(Nissy)
@@ -244,5 +246,4 @@ EMSCRIPTEN_BINDINGS(Nissy)
 	    emscripten::return_value_policy::take_ownership());
 	emscripten::function("setLogger", &set_logger,
 	    emscripten::allow_raw_pointers());
-	emscripten::function("addCallbackFunction", &addCallbackFunction);
 }

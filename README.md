@@ -257,6 +257,8 @@ $ darkhttpd web/http/ \
   --mimetypes web/http/mime
 ```
 
+The command above can also be run with the `web/http/start-server.sh` script.
+
 ## Cube format
 
 This format is a "base 32" encoding of the cube. It is not meant to be

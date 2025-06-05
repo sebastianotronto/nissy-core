@@ -1,14 +1,16 @@
 import Nissy from "./nissy_web_module.mjs"
 
 const nissy = await Nissy();
-const log = (msg) => postMessage({ command: "log", id: -1, object: msg });
-nissy.setLogger(nissy._addCallbackFunction(log));
+
+const log = (cstr) => postMessage({
+	command: "log", id: -1,
+	object: nissy.UTF8ToString(cstr)
+});
+nissy.setLogger(nissy.addFunction(log, "vp"));
 
 var solveStatus = nissy.statusRUN; // For now this is a global variable
-const pollStatusCallback = nissy._addCallbackFunction(() => {
-console.log("Calling pollstatus, returning " + solveStatus);
-return solveStatus;
-});
+const pollStatus = () => solveStatus;
+const pollStatusCallback = nissy.addFunction(pollStatus, "i");
 
 const commands = [
   { name: "load solver data", exec: loadSolverDataFromStorage },

@@ -139,12 +139,14 @@ CPPFLAGS="-std=c++20 -pthread"
 # The options below have to be adjusted when native WASM_SIMD is implemented.
 
 # Build flags for emscripten (WASM target)
-WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread \
+WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread
             -mfpu=neon -mrelaxed-simd"
 WASMCPPFLAGS="-std=c++20 -pthread"
 WASMMFLAGS="-DTHREADS=$THREADS -DNEON"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE 
-	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS \
+	-sEXPORTED_RUNTIME_METHODS=addFunction,UTF8ToString
+	-sALLOW_TABLE_GROWTH
+	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS
 	-sFETCH -sASYNCIFY -sLINKABLE -sEXPORT_ALL"
 
 if (command -v "python3-config" >/dev/null 2>&1) ; then
@@ -284,8 +286,7 @@ build_web() {
 	run $EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $(odflags) -c \
 		-o nissy.o src/nissy.c || exit 1
 	run $EMCC -lembind -lidbfs.js \
-		$WASMCPPFLAGS $(odflags) $WASMLINKFLAGS \
-		--js-library web/callback.js -o web/"$obj".mjs \
+		$WASMCPPFLAGS $(odflags) $WASMLINKFLAGS -o web/"$obj".mjs \
 		cpp/nissy.cpp web/storage.cpp web/adapter.cpp nissy.o || exit 1
 	cp web/"$obj".mjs web/http/
 	cp web/"$obj".wasm web/http/
