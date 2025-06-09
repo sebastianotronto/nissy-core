@@ -1,8 +1,8 @@
 <!doctype html>
 <html lang="en-US">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width" />
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
   <title>Nissy - H48 solver POC</title>
   <script type="module" src="./nissyapp.mjs"></script>
 </head>
@@ -10,7 +10,7 @@
 <body>
 
   <div id="scrambleRaw">
-    <input id="scrambleText" placeholder="Type the scramble here..." />
+    <input id="scrambleText" placeholder="Type the scramble here...">
     <select id="solverSelector">
       <option value="h48h3k2" selected="selected">
         h48 h=4 k=2 (300 Mb) - light
@@ -25,21 +25,21 @@
   </div>
 
   <div id="solverConfiguration">
-    <label id="minLabel" for="minSlider">Minimum moves: 0</label><br />
+    <label id="minLabel" for="minSlider">Minimum moves: 0</label><br>
     <input id="minMovesSlider" name="minSlider"
-      type="range" min="0" max="20" value="0" />
-    <br />
-    <label id="maxLabel" for="maxSlider">Maximum moves: 20</label><br />
+      type="range" min="0" max="20" value="0">
+    <br>
+    <label id="maxLabel" for="maxSlider">Maximum moves: 20</label><br>
     <input id="maxMovesSlider" name="maxSlider"
-      type="range" min="0" max="20" value="20" />
-    <br />
+      type="range" min="0" max="20" value="20">
+    <br>
     <label for="maxSolutions">Limit number of solutions to</label>
     <input id="maxSolutions" name="maxSolutions"
-      type="number" min="1" max="999" value="1" />
-    <br />
+      type="number" min="1" max="999" value="1">
+    <br>
     <label for="optimalInput">Above optimal by at most</label>
     <input id="optimalInput" name="optimal"
-      type="number" min="0" max="20" value="20" />
+      type="number" min="0" max="20" value="20">
   </div>
 
   <div id="confirmDownload" style="display:none">
