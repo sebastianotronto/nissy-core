@@ -67,7 +67,7 @@ STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
-STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE bool solve_h48_stop(const dfsarg_solve_h48_t [static 1]);
 STATIC_INLINE void solve_h48_estimate(dfsarg_solve_h48_t [static 1]);
 STATIC_INLINE estimate_h48_data_t solve_h48_get_backup_estimate(
     const dfsarg_solve_h48_t [static 1], uint8_t);
@@ -114,7 +114,7 @@ STATIC long long solve_h48_dispatch(
 }
 
 STATIC_INLINE bool
-solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
+solve_h48_stop(const dfsarg_solve_h48_t arg[static 1])
 {
 	int8_t target, n;
 	bool toodeep, toomanysols, toomanymoves;
@@ -281,19 +281,10 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	uint8_t snext[MAX_H48_ESTIMATE];
 	estimate_h48_data_t next[MAX_H48_ESTIMATE][NMOVES];
 
-	nm = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
-	if (equal(arg->cube, SOLVED_CUBE)) {
-		if (arg->target_depth != nm)
-			return 0;
-		pthread_mutex_lock(arg->solutions_mutex);
-		ret = appendsolution(arg->solution_moves,
-		    arg->solution_settings, arg->solution_list);
-		pthread_mutex_unlock(arg->solutions_mutex);
-		return ret;
-	}
-
 	if (solve_h48_stop(arg))
 		return 0;
+
+	nm = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 
 	backup_cube = arg->cube;
 	backup_inverse = arg->inverse;
@@ -325,6 +316,23 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 				continue;
 
 			arg->cube = move(backup_cube, m);
+
+			if (equal(arg->cube, SOLVED_CUBE)) {
+				if (arg->target_depth != nm+1)
+					continue;
+
+				arg->solution_moves->moves[
+				    arg->solution_moves->nmoves-1] = m;
+				pthread_mutex_lock(arg->solutions_mutex);
+				ret += appendsolution(arg->solution_moves,
+				    arg->solution_settings, arg->solution_list);
+				pthread_mutex_unlock(arg->solutions_mutex);
+
+				if (solve_h48_stop(arg))
+					return ret;
+				continue;
+			}
+
 			arg->inverse = premove(backup_inverse, m);
 			arg->lb_inverse = lbi;
 			arg->use_lb_normal = false;
@@ -345,6 +353,23 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 				continue;
 
 			arg->cube = premove(backup_cube, m);
+
+			if (equal(arg->cube, SOLVED_CUBE)) {
+				if (arg->target_depth != nm+1)
+					continue;
+
+				arg->solution_moves->premoves[
+				    arg->solution_moves->npremoves-1] = m;
+				pthread_mutex_lock(arg->solutions_mutex);
+				ret += appendsolution(arg->solution_moves,
+				    arg->solution_settings, arg->solution_list);
+				pthread_mutex_unlock(arg->solutions_mutex);
+
+				if (solve_h48_stop(arg))
+					return ret;
+				continue;
+			}
+
 			arg->inverse = move(backup_inverse, m);
 			arg->lb_normal = lbn;
 			arg->use_lb_normal = ulbn && m % 3 == 1;
@@ -364,6 +389,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 		for (j = 0; j < snext[i]; j++) {
 			solve_h48_restore_backup_estimate(
 			    &next[i][j], invbranch, arg);
+
 			n = solve_h48_dfs(arg);
 
 			if (n < 0)
