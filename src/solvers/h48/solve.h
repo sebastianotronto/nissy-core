@@ -1,5 +1,6 @@
-#define STARTING_MOVES 3
-#define STARTING_CUBES 3240 /* Number of 3-move sequences */
+#define MAX_H48_ESTIMATE 20
+#define STARTING_MOVES   3
+#define STARTING_CUBES   3240 /* Number of 3-move sequences */
 
 typedef struct {
 	cube_t cube;
@@ -14,6 +15,7 @@ typedef struct {
 	solution_moves_t *solution_moves;
 	solution_settings_t *solution_settings;
 	solution_list_t *solution_list;
+	int8_t estimate;
 	int8_t lb_normal;
 	int8_t lb_inverse;
 	bool use_lb_normal;
@@ -48,11 +50,29 @@ typedef struct {
 	int8_t *shortest_sol;
 } dfsarg_solve_h48_maketasks_t;
 
+typedef struct {
+	uint8_t estimate;
+	uint8_t m;
+	cube_t cube;
+	cube_t inverse;
+	int8_t lb_normal;
+	int8_t lb_inverse;
+	bool use_lb_normal;
+	bool use_lb_inverse;
+	uint64_t movemask_normal;
+	uint64_t movemask_inverse;
+} estimate_h48_data_t;
+
 STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
 STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE void solve_h48_estimate(dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE estimate_h48_data_t solve_h48_get_backup_estimate(
+    const dfsarg_solve_h48_t [static 1], uint8_t);
+STATIC_INLINE void solve_h48_restore_backup_estimate(
+    const estimate_h48_data_t [static 1], bool, dfsarg_solve_h48_t [static 1]);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
     solve_h48_task_t [static STARTING_CUBES], int [static 1]);
@@ -96,33 +116,53 @@ STATIC long long solve_h48_dispatch(
 STATIC_INLINE bool
 solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 {
-	uint32_t data, data_inv;
-	int64_t coord;
-	int8_t target, nh, n;
-	uint8_t pval_cocsep, pval_eoesep;
+	int8_t target, n;
+	bool toodeep, toomanysols, toomanymoves;
 
 	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	target = arg->target_depth - n;
-	if (target <= 0 ||
-	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions ||
-	    n > arg->solution_list->shortest_sol +
-	        arg->solution_settings->optimal)
-		return true;
 
+	toodeep = target <= 0;
+	toomanysols = arg->solution_list->nsols >=
+	    arg->solution_settings->maxsolutions;
+	toomanymoves = n > arg->solution_list->shortest_sol +
+	    arg->solution_settings->optimal;
+
+	return toodeep || toomanysols || toomanymoves;
+}
+
+STATIC_INLINE void
+solve_h48_estimate(dfsarg_solve_h48_t arg[static 1])
+{
+	uint32_t data, data_inv;
+	int64_t coord;
+	int8_t target, nh, nc, nc_inv;
+	uint8_t pval_cocsep, pval_eoesep;
+
+	target = arg->target_depth
+	    - (arg->solution_moves->nmoves + arg->solution_moves->npremoves);
 	arg->movemask_normal = arg->movemask_inverse = MM18_ALLMOVES;
 	arg->nodes_visited++;
 
+	if (arg->estimate > 0)
+		arg->estimate--;
+
 	/* Preliminary probing using last computed bound, if possible */
 
-	if ((arg->use_lb_normal && arg->lb_normal > target) ||
-	    (arg->use_lb_inverse && arg->lb_inverse > target))
-		return true;
+	if (arg->use_lb_normal)
+		arg->estimate = MAX(arg->estimate, arg->lb_normal);
+	if (arg->use_lb_inverse)
+		arg->estimate = MAX(arg->estimate, arg->lb_inverse);
+	if (arg->estimate > target)
+		return;
 
 	/* Preliminary corner probing */
 
-	if (get_h48_cdata(arg->cube, arg->cocsepdata, &data) > target ||
-	    get_h48_cdata(arg->inverse, arg->cocsepdata, &data_inv) > target)
-		return true;
+	nc = get_h48_cdata(arg->cube, arg->cocsepdata, &data);
+	nc_inv = get_h48_cdata(arg->inverse, arg->cocsepdata, &data_inv);
+	arg->estimate = MAX(arg->estimate, MAX(nc, nc_inv));
+	if (arg->estimate > target)
+		return;
 
 	/* Inverse probing */
 
@@ -147,8 +187,10 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		arg->use_lb_inverse = true;
 	}
 
-	if (arg->lb_inverse > target)
-		return true;
+	arg->estimate = MAX(arg->estimate, arg->lb_inverse);
+	if (arg->estimate > target)
+		return;
+
 	nh = arg->lb_inverse == target;
 	arg->movemask_normal = nh * MM18_NOHALFTURNS + (1-nh) * MM18_ALLMOVES;
 
@@ -175,26 +217,72 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		arg->use_lb_normal = true;
 	}
 
-	if (arg->lb_normal > target)
-		return true;
+	arg->estimate = MAX(arg->estimate, arg->lb_normal);
+	if (arg->estimate > target)
+		return;
+
 	nh = arg->lb_normal == target;
 	arg->movemask_inverse = nh * MM18_NOHALFTURNS + (1-nh) * MM18_ALLMOVES;
 
-	return false;
+	return;
+}
+
+STATIC_INLINE estimate_h48_data_t
+solve_h48_get_backup_estimate(const dfsarg_solve_h48_t arg[static 1], uint8_t m)
+{
+	return (estimate_h48_data_t) {
+		.m = m,
+		.estimate = arg->estimate,
+		.cube = arg->cube,
+		.inverse = arg->inverse,
+		.lb_normal = arg->lb_normal,
+		.lb_inverse = arg->lb_inverse,
+		.use_lb_normal = arg->use_lb_normal,
+		.use_lb_inverse = arg->use_lb_inverse,
+		.movemask_normal = arg->movemask_normal,
+		.movemask_inverse = arg->movemask_inverse,
+	};
+}
+
+STATIC_INLINE void
+solve_h48_restore_backup_estimate(
+	const estimate_h48_data_t e[static 1],
+	bool invbranch,
+	dfsarg_solve_h48_t arg[static 1]
+)
+{
+	if (!invbranch)  {
+		arg->solution_moves->moves[
+		    arg->solution_moves->nmoves-1] = e->m;
+	} else {
+		arg->solution_moves->premoves[
+		    arg->solution_moves->npremoves-1] = e->m;
+	}
+	arg->estimate = e->estimate;
+	arg->cube = e->cube;
+	arg->inverse = e->inverse;
+	arg->lb_inverse = e->lb_inverse;
+	arg->lb_normal = e->lb_normal;
+	arg->use_lb_normal = e->use_lb_normal;
+	arg->use_lb_inverse = e->use_lb_inverse;
+	arg->movemask_normal = e->movemask_normal;
+	arg->movemask_inverse = e->movemask_inverse;
 }
 
 STATIC int64_t
 solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 {
 	int64_t ret, n;
-	uint8_t m, nm, lbn, lbi;
+	int8_t backup_estimate;
+	uint8_t i, j, m, nm, lbn, lbi, e;
 	uint64_t mm_normal, mm_inverse;
-	bool ulbi, ulbn;
+	bool ulbi, ulbn, invbranch;
 	cube_t backup_cube, backup_inverse;
+	uint8_t snext[MAX_H48_ESTIMATE];
+	estimate_h48_data_t next[MAX_H48_ESTIMATE][NMOVES];
 
+	nm = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	if (equal(arg->cube, SOLVED_CUBE)) {
-		nm = arg->solution_moves->nmoves
-		    + arg->solution_moves->npremoves;
 		if (arg->target_depth != nm)
 			return 0;
 		pthread_mutex_lock(arg->solutions_mutex);
@@ -209,6 +297,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 
 	backup_cube = arg->cube;
 	backup_inverse = arg->inverse;
+	backup_estimate = arg->estimate;
 	lbn = arg->lb_normal;
 	lbi = arg->lb_inverse;
 	ulbn = arg->use_lb_normal;
@@ -225,46 +314,68 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 		m = arg->solution_moves->premoves[arg->solution_moves->npremoves-1];
 		mm_inverse &= allowedmask[movebase(m)];
 	}
-	if (popcount_u32(mm_normal) <= popcount_u32(mm_inverse)) {
+
+	memset(snext, 0, MAX_H48_ESTIMATE);
+	invbranch = popcount_u32(mm_normal) > popcount_u32(mm_inverse);
+
+	if (!invbranch) {
 		arg->solution_moves->nmoves++;
-		for (m = 0; m < 18; m++) {
+		for (m = 0; m < NMOVES; m++) {
 			if (!(mm_normal & MM_SINGLE(m)))
 				continue;
-			arg->solution_moves->moves[
-			    arg->solution_moves->nmoves-1] = m;
+
 			arg->cube = move(backup_cube, m);
 			arg->inverse = premove(backup_inverse, m);
 			arg->lb_inverse = lbi;
 			arg->use_lb_normal = false;
 			arg->use_lb_inverse = ulbi && m % 3 == 1;
-			n = solve_h48_dfs(arg);
-			if (n < 0)
-				return n;
-			ret += n;
+			arg->estimate = backup_estimate;
+
+			solve_h48_estimate(arg);
+			e = arg->estimate;
+
+			if (e + nm + 1 <= arg->target_depth)
+				next[e][snext[e]++] =
+				    solve_h48_get_backup_estimate(arg, m);
 		}
-		arg->solution_moves->nmoves--;
 	} else {
 		arg->solution_moves->npremoves++;
-		for (m = 0; m < 18; m++) {
+		for (m = 0; m < NMOVES; m++) {
 			if(!(mm_inverse & MM_SINGLE(m)))
 				continue;
-			arg->solution_moves->premoves[
-			    arg->solution_moves->npremoves-1] = m;
-			arg->inverse = move(backup_inverse, m);
+
 			arg->cube = premove(backup_cube, m);
+			arg->inverse = move(backup_inverse, m);
 			arg->lb_normal = lbn;
-			arg->use_lb_inverse = false;
 			arg->use_lb_normal = ulbn && m % 3 == 1;
+			arg->use_lb_inverse = false;
+			arg->estimate = backup_estimate;
+
+			solve_h48_estimate(arg);
+			e = arg->estimate;
+
+			if (e + nm + 1 <= arg->target_depth)
+				next[e][snext[e]++] =
+				    solve_h48_get_backup_estimate(arg, m);
+		}
+	}
+
+	for (i = 0; i < MAX_H48_ESTIMATE; i++) {
+		for (j = 0; j < snext[i]; j++) {
+			solve_h48_restore_backup_estimate(
+			    &next[i][j], invbranch, arg);
 			n = solve_h48_dfs(arg);
+
 			if (n < 0)
 				return n;
 			ret += n;
 		}
-		arg->solution_moves->npremoves--;
 	}
 
-	arg->cube = backup_cube;
-	arg->inverse = backup_inverse;
+	if (!invbranch)
+		arg->solution_moves->nmoves--;
+	else
+		arg->solution_moves->npremoves--;
 
 	return ret;
 }
@@ -302,8 +413,11 @@ solve_h48_runthread(void *arg)
 		dfsarg->use_lb_inverse = false;
 		dfsarg->movemask_normal = MM18_ALLMOVES;
 		dfsarg->movemask_inverse = MM18_ALLMOVES;
+		dfsarg->estimate = 0;
+		solve_h48_estimate(dfsarg);
 
-		solve_h48_dfs(dfsarg);
+		if (dfsarg->estimate + STARTING_MOVES <= dfsarg->target_depth)
+			solve_h48_dfs(dfsarg);
 	}
 
 solve_h48_runthread_end:
@@ -360,7 +474,7 @@ solve_h48_maketasks(
 
 	maketasks_arg->nmoves++;
 	backup_cube = maketasks_arg->cube;
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (!(mm & MM_SINGLE(m)))
 			continue;
 		maketasks_arg->moves[maketasks_arg->nmoves-1] = m;
