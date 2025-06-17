@@ -8,9 +8,11 @@ char *solver;
 int64_t size = 0, N = 0;
 unsigned char *buf;
 char scrambles[MAX_SCR][MAX_SCR_LEN];
+unsigned nsols = 1;
+unsigned optimal = 0;
 
 void run(void) {
-	int64_t i, nsols;
+	int64_t i, solsfound;
 	long long stats[NISSY_SIZE_SOLVE_STATS];
 	char sol[SOL_BUFFER_LEN], cube[NISSY_SIZE_CUBE];
 
@@ -19,14 +21,14 @@ void run(void) {
 		printf("%" PRId64 ". %s\n", i+1, scrambles[i]);
 		printf("Solving scramble %s\n", scrambles[i]);
 		if (nissy_applymoves(NISSY_SOLVED_CUBE, scrambles[i], cube)
-		     == -1) {
+		     != NISSY_OK) {
 			printf("Invalid scramble\n");
 			continue;
 		}
-		nsols = nissy_solve(cube, solver, NISSY_NISSFLAG_NORMAL,
-		    0, 20, 1, -1, 0, size, buf, SOL_BUFFER_LEN, sol, stats,
-		    NULL, NULL);
-		if (nsols == 0)
+		solsfound = nissy_solve(cube, solver, NISSY_NISSFLAG_NORMAL,
+		    0, 20, nsols, optimal, 0, size, buf, SOL_BUFFER_LEN,
+		    sol, stats, NULL, NULL);
+		if (solsfound == 0)
 			printf("No solution found\n");
 		else
 			printf("Solutions:\n%s\n", sol);
@@ -39,12 +41,19 @@ int main(int argc, char **argv) {
 
 	if (argc < 3) {
 		printf("Error: not enough arguments. "
-		    "A solver and a scramble file must be given.\n");
+		    "A solver and a scramble file must be given.\n"
+		    "Optionally, a maximum number of solutions per scramble "
+		    "and a bound for the number of moves above the shortest "
+		    "solution can be provided.\n");
 		return 1;
 	}
 
 	solver = argv[1];
 	scrfilename = argv[2];
+	if (argc >= 5) {
+		nsols = atoi(argv[3]);
+		optimal = atoi(argv[4]);
+	}
 
 	srand(time(NULL));
 	nissy_setlogger(log_stderr, NULL);
