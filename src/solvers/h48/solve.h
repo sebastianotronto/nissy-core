@@ -12,7 +12,7 @@
 typedef struct {
 	cube_t cube;
 	uint8_t moves[H48_STARTING_MOVES];
-	int64_t nodes_visited;
+	int64_t rank;
 } solve_h48_task_t;
 
 typedef struct {
@@ -283,6 +283,7 @@ STATIC void *
 solve_h48_runthread(void *arg)
 {
 	int i, j;
+	uint8_t lastmove;
 	int64_t nprev;
 	dfsarg_solve_h48_t *dfsarg;
 
@@ -294,8 +295,6 @@ solve_h48_runthread(void *arg)
 			goto solve_h48_runthread_end;
 		while (*dfsarg->status == NISSY_STATUS_PAUSE)
 			msleep(BASE_SLEEP_TIME);
-
-		dfsarg->tasks[i].nodes_visited = 0;
 
 		solution_moves_reset(dfsarg->solution_moves);
 		memcpy(dfsarg->solution_moves->moves,
@@ -317,7 +316,20 @@ solve_h48_runthread(void *arg)
 
 		solve_h48_dfs(dfsarg);
 
-		dfsarg->tasks[i].nodes_visited = dfsarg->nodes_visited - nprev;
+		/*
+		We compute the "rank" of each taks, which is used in the next
+		step of the IDFS to sort them. This heuristically leads us
+		faster to a solution.  The rank is computed by taking the
+		number of nodes visited, adjusted by a factor of about
+		sqrt(2)/sqrt(3) because there are more sequences starting with
+		U, R and F than with D, L and B, as we don't allow e.g. both
+		U D and D U, but only U D.
+		This trick was suggested by Chen Shuang, the implementation is
+		inspired by Andrew Skalski's vcube.
+		*/
+		lastmove = dfsarg->tasks[i].moves[H48_STARTING_MOVES-1];
+		dfsarg->tasks[i].rank = (dfsarg->nodes_visited - nprev) *
+		    (movebase(lastmove) % 2 == 0 ? 47525 : 58206);
 		nprev = dfsarg->nodes_visited;
 	}
 
@@ -417,8 +429,11 @@ solve_h48_log_solutions(solution_list_t s[static 1], size_t e)
 STATIC int
 solve_h48_compare_tasks(const void *x, const void *y)
 {
-	return ((solve_h48_task_t *)y)->nodes_visited
-	    - ((solve_h48_task_t *)x)->nodes_visited;
+	int64_t nodes_x = ((solve_h48_task_t *)x)->rank;
+	int64_t nodes_y = ((solve_h48_task_t *)y)->rank;
+
+	/* Same as returning nodes_y - nodes_x, but avoids overflow */
+	return (nodes_x < nodes_y) - (nodes_x > nodes_y);
 }
 
 STATIC int64_t
