@@ -6,7 +6,7 @@
 #define H48_STARTING_CUBES 43254 /* Number of 4-move sequences */
 #endif
 
-#define H48_SORT_TASKS_MIN_DEPTH 17
+#define H48_SORT_TASKS_MIN_DEPTH 16
 #define H48_LOG_PROGRESS_MIN_DEPTH 15
 
 typedef struct {
