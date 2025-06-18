@@ -382,7 +382,7 @@ build_tool() {
 		exit 1
 	fi
 
-	build_nissy
+	build_nissy || exit 1
 
 	results="tools/results"
 	last="$results/last.out"
