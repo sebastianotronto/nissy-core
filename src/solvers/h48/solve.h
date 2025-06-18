@@ -1,9 +1,18 @@
-#define STARTING_MOVES 3
-#define STARTING_CUBES 3240 /* Number of 3-move sequences */
+#define H48_STARTING_MOVES 4
+
+#if H48_STARTING_MOVES == 3
+#define H48_STARTING_CUBES 3240 /* Number of 3-move sequences */
+#elif H48_STARTING_MOVES == 4
+#define H48_STARTING_CUBES 43254 /* Number of 4-move sequences */
+#endif
+
+#define H48_SORT_TASKS_MIN_DEPTH 17
+#define H48_LOG_PROGRESS_MIN_DEPTH 15
 
 typedef struct {
 	cube_t cube;
-	uint8_t moves[STARTING_MOVES];
+	uint8_t moves[H48_STARTING_MOVES];
+	int64_t nodes_visited;
 } solve_h48_task_t;
 
 typedef struct {
@@ -42,7 +51,7 @@ typedef struct {
 typedef struct {
 	cube_t cube;
 	int8_t nmoves;
-	uint8_t moves[STARTING_MOVES];
+	uint8_t moves[H48_STARTING_MOVES];
 	int8_t minmoves;
 	int8_t maxmoves;
 	int8_t *shortest_sol;
@@ -55,10 +64,11 @@ STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
 STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
-    solve_h48_task_t [static STARTING_CUBES], int [static 1]);
+    solve_h48_task_t [static H48_STARTING_CUBES], int [static 1]);
 STATIC void *solve_h48_runthread(void *);
 STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [static 1]);
 STATIC void solve_h48_log_solutions(solution_list_t [static 1], size_t);
+STATIC int solve_h48_compare_tasks(const void *, const void *);
 STATIC int64_t solve_h48(oriented_cube_t, uint8_t, uint8_t, uint8_t, uint8_t,
     uint8_t, uint64_t, const unsigned char *, size_t, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
@@ -273,27 +283,29 @@ STATIC void *
 solve_h48_runthread(void *arg)
 {
 	int i, j;
-	solve_h48_task_t task;
+	int64_t nprev;
 	dfsarg_solve_h48_t *dfsarg;
 
 	dfsarg = (dfsarg_solve_h48_t *)arg;
 
+	nprev = 0;
 	for (i = dfsarg->thread_id; i < dfsarg->ntasks; i += dfsarg->threads) {
 		if (*dfsarg->status == NISSY_STATUS_STOP)
 			goto solve_h48_runthread_end;
 		while (*dfsarg->status == NISSY_STATUS_PAUSE)
 			msleep(BASE_SLEEP_TIME);
 
-		task = dfsarg->tasks[i];
+		dfsarg->tasks[i].nodes_visited = 0;
 
 		solution_moves_reset(dfsarg->solution_moves);
-		memcpy(
-		    dfsarg->solution_moves->moves, task.moves, STARTING_MOVES);
-		dfsarg->solution_moves->nmoves = STARTING_MOVES;
+		memcpy(dfsarg->solution_moves->moves,
+		    dfsarg->tasks[i].moves, H48_STARTING_MOVES);
+		dfsarg->solution_moves->nmoves = H48_STARTING_MOVES;
 
 		dfsarg->cube = dfsarg->start_cube;
-		for (j = 0; j < STARTING_MOVES; j++)
-			dfsarg->cube = move(dfsarg->cube, task.moves[j]);
+		for (j = 0; j < H48_STARTING_MOVES; j++)
+			dfsarg->cube =
+			   move(dfsarg->cube, dfsarg->tasks[i].moves[j]);
 		dfsarg->inverse = inverse(dfsarg->cube);
 
 		dfsarg->lb_normal = 0;
@@ -304,6 +316,9 @@ solve_h48_runthread(void *arg)
 		dfsarg->movemask_inverse = MM18_ALLMOVES;
 
 		solve_h48_dfs(dfsarg);
+
+		dfsarg->tasks[i].nodes_visited = dfsarg->nodes_visited - nprev;
+		nprev = dfsarg->nodes_visited;
 	}
 
 solve_h48_runthread_end:
@@ -315,7 +330,7 @@ STATIC int64_t
 solve_h48_maketasks(
 	dfsarg_solve_h48_t solve_arg[static 1],
 	dfsarg_solve_h48_maketasks_t maketasks_arg[static 1],
-	solve_h48_task_t tasks[static STARTING_CUBES],
+	solve_h48_task_t tasks[static H48_STARTING_CUBES],
 	int ntasks[static 1]
 )
 {
@@ -343,10 +358,10 @@ solve_h48_maketasks(
 		return appret < 0 ? appret : NISSY_OK;
 	}
 
-	if (maketasks_arg->nmoves == STARTING_MOVES) {
+	if (maketasks_arg->nmoves == H48_STARTING_MOVES) {
 		tasks[*ntasks].cube = maketasks_arg->cube;
 		memcpy(tasks[*ntasks].moves,
-		    maketasks_arg->moves, STARTING_MOVES);
+		    maketasks_arg->moves, H48_STARTING_MOVES);
 		(*ntasks)++;
 		return NISSY_OK;
 	}
@@ -399,6 +414,13 @@ solve_h48_log_solutions(solution_list_t s[static 1], size_t e)
 	}
 }
 
+STATIC int
+solve_h48_compare_tasks(const void *x, const void *y)
+{
+	return ((solve_h48_task_t *)y)->nodes_visited
+	    - ((solve_h48_task_t *)x)->nodes_visited;
+}
+
 STATIC int64_t
 solve_h48(
 	oriented_cube_t oc,
@@ -422,7 +444,7 @@ solve_h48(
 	size_t lastused;
 	int8_t d;
 	dfsarg_solve_h48_t arg[THREADS];
-	solve_h48_task_t tasks[STARTING_CUBES];
+	solve_h48_task_t tasks[H48_STARTING_CUBES];
 	dfsarg_solve_h48_maketasks_t maketasks_arg;
 	long double fallback_rate, lookups_per_node;
 	uint64_t offset;
@@ -516,7 +538,8 @@ solve_h48(
 	solve_h48_maketasks(&arg[0], &maketasks_arg, tasks, &ntasks);
 	if (ntasks < 0)
 		goto solve_h48_error_solutions_buffer;
-	if (solutions_done(&sollist, &settings, MAX(minmoves, STARTING_MOVES)))
+	if (solutions_done(&sollist, &settings,
+	    MAX(minmoves, H48_STARTING_MOVES)))
 		goto solve_h48_done;
 
 	for (i = 0; i < threads; i++) {
@@ -535,16 +558,20 @@ solve_h48(
 		    "be available on this system (can't sleep()).\n");
 	}
 	for (
-	    d = MAX(minmoves, STARTING_MOVES + 1);
+	    d = MAX(minmoves, H48_STARTING_MOVES + 1);
 	    !(solutions_done(&sollist, &settings, d)) &&
 	        status != NISSY_STATUS_STOP;
 	    d++
 	) {
-		if (d >= 15) {
+		if (d >= H48_LOG_PROGRESS_MIN_DEPTH) {
 			LOG("[H48 solve] Found %" PRId64 " solutions, "
 			    "searching at depth %" PRId8 "\n",
 			    sollist.nsols, d);
 		}
+
+		if (d >= H48_SORT_TASKS_MIN_DEPTH)
+			qsort(tasks, ntasks, sizeof(solve_h48_task_t),
+			    solve_h48_compare_tasks);
 
 		for (i = 0; i < threads; i++) {
 			arg[i].target_depth = d;
