@@ -38,12 +38,12 @@ may be particularly inaccurate, because writing the solution (together
 with some log messages) to standard output may take a significant portion
 of the time, depending on the terminal emulator used and other factors.
 
-We ran two different tests: finding a single optimal solution and finding
-*all* optimal solution. Both problems involve an exhaustive search at
-depth `n-1`, but the second also involves and exhaustive search at depth
-`n`. Comparisons with vcube are only done in the first case, because
-vcube's current configuration does not allow for finding multiple
-solutions, as far as I am aware.
+The main test we performed was finding a single optimal solution, and we
+compared the results with vcube. This test was run in a single-thread
+configuration and in two multithread configurations (with 4 and 16
+threads).  We also ran a test on finding *all* optimal solutions which,
+as far as I know, is a use case not supported by vcube; this latter test
+was only run on 16 threads.
 
 Since the size of the pruning table used by the solver is of utmost
 importance, we include two statistics: time per cube and time per cube
@@ -167,57 +167,9 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 (a) vcube cannot parallelize on a single scramble, the results for the
 Superflip are going to be the same as in the single thread case.
 
-## All optimal solutions (TODO)
+## All optimal solutions
 
 Average time for finding all optimal solutions.
-
-### Single thread
-
-Time per cube (in seconds, lower is better).
-
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|
-|:---------|:-------|-------:|-------:|-------:|-------:|
-|H48 h11 k2|56.1GiB |        |        |        |        |
-|H48 h10 k2|28.1GiB |        |        |        |        |
-|H48 h9 k2 |14.1GiB |        |        |        |        |
-|H48 h8 k2 | 7.1GiB |        |        |        |        |
-|H48 h7 k2 | 3.6GiB |        |        |        |        |
-|H48 h6 k2 | 1.8GiB |        |        |        |        |
-
-Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
-
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|
-|:---------|:-------|-------:|-------:|-------:|-------:|
-|H48 h11 k2|56.1GiB |        |        |        |        |
-|H48 h10 k2|28.1GiB |        |        |        |        |
-|H48 h9 k2 |14.1GiB |        |        |        |        |
-|H48 h8 k2 | 7.1GiB |        |        |        |        |
-|H48 h7 k2 | 3.6GiB |        |        |        |        |
-|H48 h6 k2 | 1.8GiB |        |        |        |        |
-
-### Multithread (4 threads)
-
-Time per cube (in seconds, lower is better).
-
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|
-|:---------|:-------|-------:|-------:|-------:|-------:|
-|H48 h11 k2|56.1GiB |        |        |        |        |
-|H48 h10 k2|28.1GiB |        |        |        |        |
-|H48 h9 k2 |14.1GiB |        |        |        |        |
-|H48 h8 k2 | 7.1GiB |        |        |        |        |
-|H48 h7 k2 | 3.6GiB |        |        |        |        |
-|H48 h6 k2 | 1.8GiB |        |        |        |        |
-
-Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
-
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|
-|:---------|:-------|-------:|-------:|-------:|-------:|
-|H48 h11 k2|56.1GiB |        |        |        |        |
-|H48 h10 k2|28.1GiB |        |        |        |        |
-|H48 h9 k2 |14.1GiB |        |        |        |        |
-|H48 h8 k2 | 7.1GiB |        |        |        |        |
-|H48 h7 k2 | 3.6GiB |        |        |        |        |
-|H48 h6 k2 | 1.8GiB |        |        |        |        |
 
 ### Multithread (16 threads)
 
@@ -225,23 +177,23 @@ Time per cube (in seconds, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|
 |:---------|:-------|-------:|-------:|-------:|-------:|
-|H48 h11 k2|56.1GiB |        |        |        |        |
-|H48 h10 k2|28.1GiB |        |        |        |        |
-|H48 h9 k2 |14.1GiB |        |        |        |        |
-|H48 h8 k2 | 7.1GiB |        |        |        |        |
-|H48 h7 k2 | 3.6GiB |        |        |        |        |
-|H48 h6 k2 | 1.8GiB |        |        |        |        |
+|H48 h11 k2|56.1GiB |  0.05  |  0.50  |  4.24  | 19.75  |
+|H48 h10 k2|28.1GiB |  0.08  |  0.88  |  6.94  |        |
+|H48 h9 k2 |14.1GiB |  0.13  |  1.39  | 13.50  |        |
+|H48 h8 k2 | 7.1GiB |  0.25  |  2.85  |        |        |
+|H48 h7 k2 | 3.6GiB |  0.36  |  4.24  |        |        |
+|H48 h6 k2 | 1.8GiB |  0.69  |  8.20  |        |        |
 
 Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|
 |:---------|:-------|-------:|-------:|-------:|-------:|
-|H48 h11 k2|56.1GiB |        |        |        |        |
-|H48 h10 k2|28.1GiB |        |        |        |        |
-|H48 h9 k2 |14.1GiB |        |        |        |        |
-|H48 h8 k2 | 7.1GiB |        |        |        |        |
-|H48 h7 k2 | 3.6GiB |        |        |        |        |
-|H48 h6 k2 | 1.8GiB |        |        |        |        |
+|H48 h11 k2|56.1GiB |  2.81  | 28.05  | 237.86 |1107.98 |
+|H48 h10 k2|28.1GiB |  2.25  | 24.73  | 195.01 |        |
+|H48 h9 k2 |14.1GiB |  1.83  | 19.60  | 190.35 |        |
+|H48 h8 k2 | 7.1GiB |  1.77  | 20.24  |        |        |
+|H48 h7 k2 | 3.6GiB |  1.30  | 15.26  |        |        |
+|H48 h6 k2 | 1.8GiB |  1.24  | 14.76  |        |        |
 
 ## Other notes
 
