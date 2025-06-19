@@ -20,6 +20,7 @@ void run(void) {
 	for (i = 0; i < N; i++) {
 		printf("%" PRId64 ". %s\n", i+1, scrambles[i]);
 		printf("Solving scramble %s\n", scrambles[i]);
+		fflush(stdout);
 		if (nissy_applymoves(NISSY_SOLVED_CUBE, scrambles[i], cube)
 		     != NISSY_OK) {
 			printf("Invalid scramble\n");
@@ -32,6 +33,7 @@ void run(void) {
 			printf("No solution found\n");
 		else
 			printf("Solutions:\n%s\n", sol);
+		fflush(stdout);
 	}
 }
 

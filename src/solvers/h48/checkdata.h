@@ -135,7 +135,7 @@ struct {
 				[0] = 1051579940,
 				[1] = 8136021316,
 				[2] = 19024479822,
-				[3] = 18851861220,
+				[3] = 1885186122,
 			},
 		},
 	},
@@ -216,7 +216,7 @@ checkdata_h48(
 		    "table preamble\n", info.solver);
 		if (!distribution_equal(ed, info.distribution, em)) {
 			LOG("[checkdata] Distribution from the table preamble "
-			    "does not matche the expected one\n");
+			    "does not match the expected one\n");
 			return NISSY_ERROR_DATA;
 		}
 
