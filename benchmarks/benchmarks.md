@@ -98,10 +98,10 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 |H48 h6 k2 | 1.8GiB |  4.10  | 30.40  |        |        |         |
 
 <details><summary>Plots</summary>
-![17-1](img/17moves1thread.png)
-![18-1](img/18moves1thread.png)
-![19-1](img/19moves1thread.png)
-![20-1](img/20moves1thread.png)
+<img src="img/17moves1thread.png">
+<img src="img/18moves1thread.png">
+<img src="img/19moves1thread.png">
+<img src="img/20moves1thread.png">
 </details>
 
 ### Multithread (4 threads)
@@ -137,10 +137,10 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 |H48 h6 k2 | 1.8GiB |  1.17  |  8.62  | 43.04  |        |         |
 
 <details><summary>Plots</summary>
-![17-4](img/17moves4threads.png)
-![18-4](img/18moves4threads.png)
-![19-4](img/19moves4threads.png)
-![20-4](img/20moves4threads.png)
+<img src="img/17moves4threads.png">
+<img src="img/18moves4threads.png">
+<img src="img/19moves4threads.png">
+<img src="img/20moves4threads.png">
 </details>
 
 (a) vcube cannot parallelize on a single scramble, the results for the
@@ -179,10 +179,10 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 |H48 h6 k2 | 1.8GiB |  0.38  |  2.75  | 14.08  |        |         |
 
 <details><summary>Plots</summary>
-![17-16](img/17moves16threads.png)
-![18-16](img/18moves16threads.png)
-![19-16](img/19moves16threads.png)
-![20-16](img/20moves16threads.png)
+<img src="img/17moves16threads.png">
+<img src="img/18moves16threads.png">
+<img src="img/19moves16threads.png">
+<img src="img/20moves16threads.png">
 </details>
 
 (a) vcube cannot parallelize on a single scramble, the results for the
