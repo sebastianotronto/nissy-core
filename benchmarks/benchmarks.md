@@ -216,6 +216,14 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 |H48 h7 k2 | 3.6GiB |  1.30  | 15.26  |        |        |
 |H48 h6 k2 | 1.8GiB |  1.24  | 14.76  |        |        |
 
+## Comments on the results
+
+* Adjusting for table size, vcube generally is a bit faster than H48,
+  except for 20 moves scrambles where H48 is a clear winner.
+* On sets of 25 scrambles, H48 performs better than vcube when using
+  multiple threads. However, this advantage will likely disappear (or
+  even invert) if we increase the size of the set.
+
 ## Other notes
 
 * Missing values in the table mean that the test is very slow and I did
