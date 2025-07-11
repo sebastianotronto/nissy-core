@@ -119,6 +119,7 @@ parsesanitize() {
 
 # Build flags
 CFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread"
+PYCFLAGS="-std=c11 -fPIC -pthread"
 [ "$ARCH" = "AVX2" ] && CFLAGS="$CFLAGS -mavx2"
 WFLAGS="-pedantic -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 OFLAGS="$OPTIMIZE"
@@ -261,7 +262,7 @@ build_python() {
 		exit 1
 	fi
 	build_nissy || exit 1
-	run $CC $CFLAGS $WFLAGS $PYTHON3_INCLUDES $(odflags) -shared \
+	run $CC $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES $(odflags) -shared \
 		-o nissy_python_module.so nissy.o python/nissy_module.c
 }
 
