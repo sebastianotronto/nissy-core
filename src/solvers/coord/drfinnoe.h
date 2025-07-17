@@ -17,21 +17,21 @@ STATIC uint64_t coordinate_cp_coord(cube_t);
 STATIC cube_t coordinate_cp_cube(uint64_t);
 STATIC uint64_t coordinate_epud_coord(cube_t);
 STATIC cube_t coordinate_epud_cube(uint64_t);
-STATIC cube_t coordinate_drslice_merge(cube_t, cube_t);
+STATIC cube_t coordinate_drfinnoe_merge(cube_t, cube_t);
 
-STATIC uint64_t coordinate_drslice_coord(cube_t, const unsigned char *);
-STATIC cube_t coordinate_drslice_cube(uint64_t, const unsigned char *);
-STATIC bool coordinate_drslice_isnasty(uint64_t, const unsigned char *);
-STATIC size_t coordinate_drslice_gendata(unsigned char *);
+STATIC uint64_t coordinate_drfinnoe_coord(cube_t, const unsigned char *);
+STATIC cube_t coordinate_drfinnoe_cube(uint64_t, const unsigned char *);
+STATIC bool coordinate_drfinnoe_isnasty(uint64_t, const unsigned char *);
+STATIC size_t coordinate_drfinnoe_gendata(unsigned char *);
 
-STATIC bool is_drslice_solvable(cube_t);
+STATIC bool is_drfinnoe_solvable(cube_t);
 
-STATIC coord_t coordinate_drslice = {
-	.name = "DRSLICE",
-	.coord = &coordinate_drslice_coord,
-	.cube = &coordinate_drslice_cube,
-	.isnasty = &coordinate_drslice_isnasty,
-	.gendata = coordinate_drslice_gendata,
+STATIC coord_t coordinate_drfinnoe = {
+	.name = "DRFINNOE",
+	.coord = &coordinate_drfinnoe_coord,
+	.cube = &coordinate_drfinnoe_cube,
+	.isnasty = &coordinate_drfinnoe_isnasty,
+	.gendata = coordinate_drfinnoe_gendata,
 	.max = CLASSES_CP_16 * FACT_8,
 	.trans_mask = TM_UDFIX,
 	.moves_mask = MM18_DR,
@@ -41,7 +41,7 @@ STATIC coord_t coordinate_drslice = {
 		[AXIS_FB] = TRANS_FDr,
 	},
 	.is_admissible = &solution_always_valid,
-	.is_solvable = &is_drslice_solvable,
+	.is_solvable = &is_drfinnoe_solvable,
 	.pruning_distribution = {
  		[0] = 1,
 		[1] = 3,
@@ -69,7 +69,7 @@ STATIC coord_t coordinate_drslice = {
 		.max2 = FACT_8,
 		.coord2 = &coordinate_epud_coord,
 		.cube2 = &coordinate_epud_cube,
-		.merge = &coordinate_drslice_merge,
+		.merge = &coordinate_drfinnoe_merge,
 	},
 };
 
@@ -98,7 +98,7 @@ coordinate_epud_cube(uint64_t i)
 }
 
 STATIC cube_t
-coordinate_drslice_merge(cube_t c1, cube_t c2)
+coordinate_drfinnoe_merge(cube_t c1, cube_t c2)
 {
 	cube_t merged;
 
@@ -109,31 +109,31 @@ coordinate_drslice_merge(cube_t c1, cube_t c2)
 }
 
 STATIC uint64_t
-coordinate_drslice_coord(cube_t cube, const unsigned char *data)
+coordinate_drfinnoe_coord(cube_t cube, const unsigned char *data)
 {
-	return coord_coord_generic(&coordinate_drslice, cube, data);
+	return coord_coord_generic(&coordinate_drfinnoe, cube, data);
 }
 
 STATIC cube_t
-coordinate_drslice_cube(uint64_t i, const unsigned char *data)
+coordinate_drfinnoe_cube(uint64_t i, const unsigned char *data)
 {
-	return coord_cube_generic(&coordinate_drslice, i, data);
+	return coord_cube_generic(&coordinate_drfinnoe, i, data);
 }
 
 STATIC bool
-coordinate_drslice_isnasty(uint64_t i, const unsigned char *data)
+coordinate_drfinnoe_isnasty(uint64_t i, const unsigned char *data)
 {
-	return coord_isnasty_generic(&coordinate_drslice, i, data);
+	return coord_isnasty_generic(&coordinate_drfinnoe, i, data);
 }
 
 STATIC size_t
-coordinate_drslice_gendata(unsigned char *data)
+coordinate_drfinnoe_gendata(unsigned char *data)
 {
-	return coord_gendata_generic(&coordinate_drslice, data);
+	return coord_gendata_generic(&coordinate_drfinnoe, data);
 }
 
 STATIC bool
-is_drslice_solvable(cube_t cube) {
+is_drfinnoe_solvable(cube_t cube) {
 	return coord_eo(cube) == 0 &&
 	       coord_eo(transform_edges(cube, TRANS_URr)) == 0 &&
 	       coord_co(cube) == 0;
