@@ -3,6 +3,7 @@
 #include "eo.h"
 #include "dr.h"
 #include "dreo.h"
+#include "drslice.h"
 #include "list.h"
 #include "utils.h"
 #include "gendata.h"

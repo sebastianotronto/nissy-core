@@ -160,6 +160,12 @@ solution_lastqt_cw(const solution_moves_t s[static 1])
 }
 
 STATIC bool
+solution_always_valid(const solution_moves_t s[static 1])
+{
+	return true;
+}
+
+STATIC bool
 coord_can_switch(
 	const coord_t coord[static 1],
 	const unsigned char *data,
