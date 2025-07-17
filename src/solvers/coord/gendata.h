@@ -100,9 +100,6 @@ genptable_coord(
 	tableinfo_t info;
 
 	tablesize = DIV_ROUND_UP(coord->max, 2);
-
-	memset(table, 0xFF, tablesize);
-
 	info = (tableinfo_t) {
 		.solver = "coordinate solver for ",
 		.type = TABLETYPE_PRUNING,
@@ -117,6 +114,7 @@ genptable_coord(
 		.next = 0
 	};
 
+	memset(table, 0xFF, tablesize);
 	memset(info.distribution, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
 	append_coord_name(coord, info.solver);
 
@@ -124,7 +122,7 @@ genptable_coord(
 	i = coord->coord(SOLVED_CUBE, data);
 	set_coord_pval(coord, table, i, 0);
 	info.distribution[0] = 1;
-	for (d = 1, tot = 1; tot < coord->max && d < 20; d++) {
+	for (d = 1, tot = 1; tot < coord->max && d < 15; d++) {
 		t = 0;
 		if (switch_to_fromnew(tot, coord->max, nm)) {
 			for (i = 0; i < coord->max; i++)
@@ -143,7 +141,14 @@ genptable_coord(
 		    PRIu64 " of %" PRIu64 ")\n",
 		    coord->name, d, t, tot, coord->max);
 	}
-	info.maxvalue = d-1;
+	if (tot == coord->max) {
+		info.maxvalue = d-1;
+	} else {
+		LOG("[%s gendata] Depth >= 15: %" PRIu64 " remaining\n",
+		    coord->name, coord->max - tot);
+		info.distribution[d] = coord->max - tot;
+		info.maxvalue = 15;
+	}
 
 	return info;
 }
