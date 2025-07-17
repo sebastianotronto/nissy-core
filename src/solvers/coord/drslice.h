@@ -1,3 +1,16 @@
+/*
+TODO
+
+The pruning table for this coordinate shows some odd behavior, which
+is actually also present in nissy-classic: after completing depth 14,
+if the search is let run for higher depth, no more positions are found.
+This could be as simple as a small bug in the logic of the pruning table
+calculations - I may be assuming somewhere that I am never going to search
+for depths >= 15, since they are the highest possible value anyway -
+or some reason related to symmetry - are some cases actually impossible?
+In the worst case, it is a bug to be fixed, but I find it unlikely.
+*/
+
 #define CLASSES_CP_16 2768
 
 STATIC uint64_t coordinate_cp_coord(cube_t);
@@ -30,7 +43,6 @@ STATIC coord_t coordinate_drslice = {
 	.is_admissible = &solution_always_valid,
 	.is_solvable = &is_drslice_solvable,
 	.pruning_distribution = {
-		/* TODO: copied from nissy-classic, to be verified */
  		[0] = 1,
 		[1] = 3,
 		[2] = 10,
@@ -46,10 +58,9 @@ STATIC coord_t coordinate_drslice = {
 		[12] = 18349792,
 		[13] = 32843350,
 		[14] = 34118883,
-		[15] = 0, /* TODO: unknown, why does nissy-classic not have
-		                   have this value? */
+		[15] = 17284701
 	},
-	.pruning_max = 15, /* TODO - either 14 or 15 */
+	.pruning_max = 15,
 	.sym = {
 		.classes = CLASSES_CP_16,
 		.max = FACT_8,
