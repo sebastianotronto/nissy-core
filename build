@@ -162,11 +162,11 @@ fi
 build_help() {
 	echo "Build system for nissy. Usage:"
 	echo ""
-	echo "$0 TARGET             # build the given TARGET"
-	echo "$0                    # same as '$0 nissy'"
-	echo "$0 test [PATTERN]     # run unit tests (matching PATTERN)"
-	echo "$0 webtest [PATTERN]  # same as test, but for WASM build"
-	echo "$0 tool PATTERN       # run the tool matching PATTERN"
+	echo "$0 [-d] TARGET             # build the given TARGET"
+	echo "$0 [-d]                    # same as '$0 nissy [-d]'"
+	echo "$0 test [PATTERN]          # run unit tests (matching PATTERN)"
+	echo "$0 webtest [PATTERN]       # same as test, but for WASM build"
+	echo "$0 [-d] tool PATTERN       # run the tool matching PATTERN"
 	echo ""
 	echo "targets:"
 	echo ""
@@ -181,6 +181,10 @@ build_help() {
 	echo "help        Show this help message"
 	echo "config      Show build configuration and exit"
 	echo "clean       Remove all build files"
+	echo ""
+	echo "The -d option activates debug mode (slower, used for testing)."
+	echo "Tests are automatically built in debug mode even without -d."
+	echo "For more on build configurations, see the comments in ./build"
 }
 
 build_config() {
