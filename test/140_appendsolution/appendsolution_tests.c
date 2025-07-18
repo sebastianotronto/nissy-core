@@ -18,8 +18,7 @@ int64_t readmoves(const char *, size_t n, size_t m,
 void solution_moves_reset(solution_moves_t [static 1]);
 bool solution_list_init(solution_list_t [static 1], size_t n, char [n]);
 int64_t appendsolution(const solution_moves_t [static 1],
-    const solution_settings_t [static 1], solution_list_t [static 1], bool,
-    const char *);
+    const solution_settings_t [static 1], solution_list_t [static 1]);
 
 void run(void) {
 	int i, ntrans;
@@ -59,7 +58,7 @@ void run(void) {
 	fgets(str, STRLENMAX, stdin);
 	settings.orientation = atoi(str);
 
-	appendsolution(&moves, &settings, &list, false, "Test");
+	appendsolution(&moves, &settings, &list);
 
 	printf("%s", list.buf);
 	printf("Number of solutions: %" PRIu64 "\n", list.nsols);
