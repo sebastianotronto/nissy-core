@@ -355,7 +355,8 @@ build_test() {
 build_webtest() {
 	obj="web"
 	testobj="runtest.js"
-	testbuild="$EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $DFLAGS -o $testobj"
+	testbuild="$EMCC $WASMCFLAGS $WFLAGS $WASMMFLAGS $DFLAGS \
+		   -sSTACK_SIZE=5MB -o $testobj"
 	testrun="$NODE $testobj"
 	build_test_generic $@
 	rm -f runtest.js runtest.wasm
