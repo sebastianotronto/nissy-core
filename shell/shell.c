@@ -282,9 +282,12 @@ solverinfo_exec(args_t *args)
 	char buf[NISSY_SIZE_DATAID];
 
 	ret = nissy_solverinfo(args->str_solver, buf);
-	if (ret < 0)
+	if (ret < 0) {
 		fprintf(stderr, "Unknown error (make sure solver is valid)\n");
-	printf("%" PRId64 "\n%s\n", ret, buf);
+	} else {
+		printf("%" PRId64 "\n%s\n", ret, buf);
+		ret = 0;
+	}
 
 	return ret;
 }
