@@ -265,8 +265,12 @@ build_python() {
 		echo "Cannot build python module"
 		exit 1
 	fi
+	if [ "$debug" = "yes" ]; then
+		echo "Cannot build Python library in debug mode"
+		exit 1
+	fi
 	build_nissy || exit 1
-	run $CC $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES $(odflags) -shared \
+	run $CC $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES $OFLAGS -shared \
 		-o nissy_python_module.so nissy.o python/nissy_module.c
 }
 
@@ -278,7 +282,7 @@ build_cpp() {
 	fi
 
 	build_nissy || exit 1
-	run $CXX -std=c++20 -o runcpp cpp/nissy.cpp nissy.o $@
+	run $CXX $(odflags) -std=c++20 -o runcpp cpp/nissy.cpp nissy.o $@
 	run ./runcpp
 }
 
