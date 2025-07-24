@@ -30,16 +30,17 @@ STATIC_INLINE uint8x8_t compose_corners_slim(uint8x8_t, uint8x8_t);
 #define SOLVED_CUBE STATIC_CUBE( \
 	0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
 
-/* TODO: optimize this (use intrinsics?) */
 STATIC_INLINE int
 popcount_u32(uint32_t x)
 {
-	int ret;
+	/* Same as the portable version */
+	x -= (x >> UINT32_C(1)) & UINT32_C(0x55555555);
+	x = (x & UINT32_C(0x33333333)) +
+	    ((x >> UINT32_C(2)) & UINT32_C(0x33333333));
+	x = (x + (x >> UINT32_C(4))) & UINT32_C(0x0F0F0F0F);
+	x = (x * UINT32_C(0x01010101)) >> UINT32_C(24);
 
-	for (ret = 0; x != 0; x >>= 1)
-		ret += x & 1;
-
-	return ret;
+	return (int)x;
 }
 
 STATIC void

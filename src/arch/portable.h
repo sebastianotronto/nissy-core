@@ -9,16 +9,29 @@
 #define SOLVED_CUBE STATIC_CUBE( \
     0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
 
-/* TODO: optimize this (use bit tricks?) */
 STATIC_INLINE int
 popcount_u32(uint32_t x)
 {
-	int ret;
+	/*
+	Bit trick: accumulate in pairs of bits, quads of bits and so on,
+	until the final result is the sum of all bits.
 
-	for (ret = 0; x != 0; x >>= 1)
-		ret += x & 1;
+	x = (x & 0x55555555) + ((x >> 1) & 0x55555555);
+	x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
+	x = (x & 0x0F0F0F0F) + ((x >> 4) & 0x0F0F0F0F);
+	x = (x & 0x00FF00FF) + ((x >> 8) & 0x00FF00FF);
+	x = (x & 0x0000FFFF) + ((x >> 16) & 0x0000FFFF);
 
-	return ret;
+	The actual method we use is a small optimization of the one above.
+	*/
+
+	x -= (x >> UINT32_C(1)) & UINT32_C(0x55555555);
+	x = (x & UINT32_C(0x33333333)) +
+	    ((x >> UINT32_C(2)) & UINT32_C(0x33333333));
+	x = (x + (x >> UINT32_C(4))) & UINT32_C(0x0F0F0F0F);
+	x = (x * UINT32_C(0x01010101)) >> UINT32_C(24);
+
+	return (int)x;
 }
 
 STATIC void
