@@ -7,7 +7,7 @@
 # ./container-run.sh arm ./build test
 #
 # builds nissy and runs the unit tests in an ARM container.
-# The container images are based on Alpine Linux, see Dockerfile for details.
+# The container images are based on Debian Linux, see Dockerfile for details.
 # The images are built with a tag starting with 'localhost/nissy/'.
 # See below for a list of options.
 
@@ -46,12 +46,12 @@ arm|arm64)
 esac
 
 platform="--platform=linux/$p"
-image="localhost/nissy/alpine-$p"
+image="localhost/nissy/debian-$p"
 
 docker build "$platform" -t "$image" .
 
 if [ -z "$2" ]; then 
-	docker run "$platform" -it "$image" /bin/sh
+	docker run --rm "$platform" -it "$image" /bin/sh
 else
-	docker run "$platform" -t "$image" $@
+	docker run --rm "$platform" -t "$image" $@
 fi
