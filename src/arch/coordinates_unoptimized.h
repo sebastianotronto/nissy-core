@@ -34,8 +34,6 @@ coord_epud(cube_t cube)
 	uint8_t c[8], e[12];
 
 	pieces(&cube, c, e);
-	DBG_ASSERT(isperm(8, e), -1,
-	    "Cannot compute epud coordinate: edges not separated");
 
 	for (i = 0; i < 8; i++)
 		e[i] &= PBITS;

@@ -15,7 +15,7 @@ coord_h48(
 	uint32_t data;
 	uint8_t ttrep;
 
-	DBG_ASSERT(h <= 11, -1, "coord_h48: h must be between 0 and 11\n");
+	DBG_ASSERT(h <= 11, "coord_h48: h must be between 0 and 11\n");
 
 	cocsep = coord_cocsep(c);
 	data = cocsepdata[cocsep];
@@ -54,8 +54,7 @@ invcoord_h48(
 	cube_t ret;
 	int64_t hh, coclass, ee, esep, eo;
 
-	DBG_ASSERT(h <= 11, ZERO_CUBE,
-	    "invcoord_h48: h must be between 0 and 11\n");
+	DBG_ASSERT(h <= 11, "invcoord_h48: h must be between 0 and 11\n");
 
 	hh = (int64_t)h;
 	coclass = i / H48_ESIZE(h);

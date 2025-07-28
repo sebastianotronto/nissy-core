@@ -56,8 +56,7 @@ applymoves(oriented_cube_t cube, const char *buf)
 	uint8_t m;
 	oriented_cube_t c, cinv;
 
-	DBG_ASSERT(isconsistent(cube), ZERO_ORIENTED_CUBE,
-	    "move error: inconsistent cube\n");
+	DBG_ASSERT(isconsistent(cube), "move error: inconsistent cube\n");
 
 	c = cube;
 	cinv = SOLVED_ORIENTED_CUBE;

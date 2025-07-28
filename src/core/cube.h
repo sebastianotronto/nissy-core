@@ -87,8 +87,7 @@ issolvable(oriented_cube_t cube)
 {
 	uint8_t i, eo, co, piece, edge[12], corner[8], ep[12], cp[8];
 
-	DBG_ASSERT(isconsistent(cube), false,
-	    "issolvable: cube is inconsistent\n");
+	DBG_ASSERT(isconsistent(cube), "issolvable: cube is inconsistent\n");
 
 	pieces(&cube.cube, corner, edge);
 	for (i = 0; i < 12; i++)
@@ -175,16 +174,16 @@ getcube(int64_t ep, int64_t eo, int64_t cp, int64_t co)
 	uint8_t i, earr[12], carr[8], eoarr[12], coarr[8];
 
 	sumzerotodigits(eo, 12, 2, eoarr);
-	DBG_ASSERT(eoarr[0] != UINT8_ERROR, ZERO_CUBE, "Error making EO");
+	DBG_ASSERT(eoarr[0] != UINT8_ERROR, "Error making EO");
 	indextoperm(ep, 12, earr);
-	DBG_ASSERT(earr[0] != UINT8_ERROR, ZERO_CUBE, "Error making EP");
+	DBG_ASSERT(earr[0] != UINT8_ERROR, "Error making EP");
 	for (i = 0; i < 12; i++)
 		earr[i] |= eoarr[i] << EOSHIFT;
 
 	sumzerotodigits(co, 8, 3, coarr);
-	DBG_ASSERT(coarr[0] != UINT8_ERROR, ZERO_CUBE, "Error making CO");
+	DBG_ASSERT(coarr[0] != UINT8_ERROR, "Error making CO");
 	indextoperm(cp, 8, carr);
-	DBG_ASSERT(carr[0] != UINT8_ERROR, ZERO_CUBE, "Error making CP");
+	DBG_ASSERT(carr[0] != UINT8_ERROR, "Error making CP");
 	for (i = 0; i < 8; i++)
 		carr[i] |= coarr[i] << COSHIFT;
 

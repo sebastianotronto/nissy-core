@@ -61,9 +61,8 @@ gendata_cocsep(
 
 	writetableinfo(&info, COCSEP_FULLSIZE, buf);
 
-	DBG_ASSERT(n == COCSEP_CLASSES, 0,
-	    "cocsep: computed %" PRIu16 " symmetry classes, "
-	    "expected %zu\n", n, COCSEP_CLASSES);
+	DBG_ASSERT(n == COCSEP_CLASSES, "cocsep: computed %" PRIu16
+	    " symmetry classes, expected %zu\n", n, COCSEP_CLASSES);
 
 	LOG("[H48 gendata] cocsep data computed\n");
 

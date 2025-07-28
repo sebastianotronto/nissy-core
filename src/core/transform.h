@@ -371,7 +371,7 @@ applytrans(oriented_cube_t cube, const char *buf)
 {
 	uint8_t t;
 
-	DBG_ASSERT(isconsistent(cube), ZERO_ORIENTED_CUBE,
+	DBG_ASSERT(isconsistent(cube),
 	    "transformation error: inconsistent cube\n");
 
 	t = readtrans(buf);

@@ -133,7 +133,7 @@ coord_gendata_generic(
 
 	writetableinfo(&info, coord_datasize, data);
 
-	DBG_ASSERT(n == coord->sym.classes, SIZE_MAX,
+	DBG_ASSERT(n == coord->sym.classes,
 	    "%s coordinate data: computed %" PRIu64 " classes, "
 	    "expected %" PRIu64 "\n", coord->name, n, coord->sym.classes);
 
