@@ -137,7 +137,7 @@ intpow(double b, uint64_t e)
 	double r;
 
 	if (e == 0)
-		return 1;
+		return 1.0;
 
 	r = intpow(b, e/2);
 
