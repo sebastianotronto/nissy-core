@@ -7,8 +7,13 @@
 # ./container-run.sh arm ./build test
 #
 # builds nissy and runs the unit tests in an ARM container.
-# The container images are based on Debian Linux, see Dockerfile for details.
-# The images are built with a tag starting with 'localhost/nissy/'.
+#
+# The containers are based on Alpine Linux and the contain the necessary tools
+# to build the main library and the C++ and Python examples. They DO NOT
+# contain the emscripten compiler, so they cannot be used to build the web
+# version (e.g. ./build web or ./buidl webtest).
+# The images are given a tag starting with 'localhost/nissy/'.
+#
 # See below for a list of options.
 
 usage() {
@@ -45,13 +50,27 @@ arm|arm64)
 	;;
 esac
 
+image="localhost/nissy/alpine-$p"
 platform="--platform=linux/$p"
-image="localhost/nissy/debian-$p"
+mount="--mount type=bind,src=./,dst=/nissy-core"
+flags="--rm --privileged"
 
-docker build "$platform" -t "$image" .
+dockerfile="$(mktemp)"
+cat > "$dockerfile" << EOF
+FROM alpine:3.22.1
+RUN apk update
+RUN apk add gcc g++ clang python3 python3-dev
+#COPY . ./nissy-core
+RUN mkdir /nissy-core
+WORKDIR /nissy-core
+USER 1000:1000
+EOF
+
+docker build "$platform" -f "$dockerfile" -t "$image" .
+rm "$dockerfile"
 
 if [ -z "$2" ]; then 
-	docker run --rm "$platform" -it "$image" /bin/sh
+	docker run $flags $mount "$platform" -it "$image" /bin/sh
 else
-	docker run --rm "$platform" -t "$image" $@
+	docker run $flags $mount "$platform" -t "$image" $@
 fi
