@@ -3,7 +3,6 @@
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
 
-STATIC bool isperm(size_t, const uint8_t *);
 STATIC int64_t permtoindex(size_t, const uint8_t *);
 STATIC void indextoperm(int64_t, size_t, uint8_t *);
 STATIC int permsign(size_t, const uint8_t *);
@@ -11,17 +10,14 @@ STATIC int64_t digitstosumzero(size_t, const uint8_t *, uint8_t);
 STATIC void sumzerotodigits(int64_t, size_t, uint8_t, uint8_t *);
 STATIC double intpow(double, uint64_t);
 
+/* This code is only used for assertions in debug mode */
+#ifdef DEBUG
+STATIC bool isperm(size_t, const uint8_t *);
 STATIC bool
 isperm(size_t n, const uint8_t *a)
 {
 	size_t i;
 	bool aux[FACTORIAL_MAX+1];
-
-	if (n > (size_t)FACTORIAL_MAX) {
-		LOG("Error: won't compute 'isperm()' for n=%zu because"
-		    " it is larger than %" PRId64 "\n", n, FACTORIAL_MAX);
-		return false;
-	}
 
 	memset(aux, false, n);
 	
@@ -38,6 +34,7 @@ isperm(size_t n, const uint8_t *a)
 
 	return true;
 }
+#endif
 
 STATIC int64_t
 permtoindex(size_t n, const uint8_t *a)
@@ -45,14 +42,10 @@ permtoindex(size_t n, const uint8_t *a)
 	size_t i, j;
 	int64_t c, ret;
 
-	if (n > (size_t)FACTORIAL_MAX) {
-		LOG("Error: won't compute 'permtoindex()' for n=%zu because "
-		    "it is larger than %" PRId64 "\n", n, FACTORIAL_MAX);
-		return -1;
-	}
-
-	if (!isperm(n, a))
-		return -1;
+	DBG_ASSERT(n <= FACTORIAL_MAX, "Error: cannot compute permtoindex() "
+	    "for set of size %zu > %" PRId64 "\n", n, FACTORIAL_MAX);
+	DBG_ASSERT(isperm(n, a), "Error: cannot compute permtoindex() for "
+	    "invalid permutation\n");
 
 	for (i = 0, ret = 0; i < n; i++) {
 		for (j = i+1, c = 0; j < n; j++)
@@ -70,17 +63,12 @@ indextoperm(int64_t p, size_t n, uint8_t *r)
 	size_t i, j;
 	uint8_t a[FACTORIAL_MAX+1];
 
-	if (n > FACTORIAL_MAX) {
-		LOG("Error: won't compute 'indextoperm()' for n=%zu because "
-		    "it is larger than %" PRId64 "\n", n, FACTORIAL_MAX);
-		goto indextoperm_error;
-	}
+	DBG_ASSERT(n <= FACTORIAL_MAX, "Error: cannot compute indextoperm() "
+	    "for set of size %zu > %" PRId64 "\n", n, FACTORIAL_MAX);
+	DBG_ASSERT(p >= 0 && p < factorial[n], "Error: invalid permutation "
+	    "index %" PRId64 " for set of size %zu\n", p, n);
 
 	memset(a, 0, n);
-
-	if (p < 0 || p >= factorial[n])
-		goto indextoperm_error;
-
 	for (i = 0; i < n; i++) {
 		for (j = 0, c = 0; c <= p / factorial[n-i-1]; j++)
 			c += a[j] ? 0 : 1;
@@ -89,13 +77,7 @@ indextoperm(int64_t p, size_t n, uint8_t *r)
 		p %= factorial[n-i-1];
 	}
 
-	if (!isperm(n, r))
-		goto indextoperm_error;
-
 	return;
-
-indextoperm_error:
-	memset(r, UINT8_ERROR, n);
 }
 
 STATIC int
@@ -116,25 +98,15 @@ digitstosumzero(size_t n, const uint8_t *a, uint8_t b)
 	int64_t ret, p;
 	size_t i, sum;
 
-	if (!((n == 8 && b == 3 ) || (n == 12 && b == 2))) {
-		LOG("Error: won't compute 'sumzero' for n=%zu and b=%" PRIu8
-		    " (use n=8 b=3 or n=12 b=2)\n", n, b);
-		return -1;
-	}
+	DBG_ASSERT((n == 8 && b == 3 ) || (n == 12 && b == 2),
+	    "Error: digitstosumzero() called with n=%zu and b=%" PRIu8
+	    " (use n=8 b=3 or n=12 b=2)\n", n, b);
 
 	for (i = 1, ret = 0, p = 1, sum = 0; i < n; i++, p *= (int64_t)b) {
-		if (a[i] >= b) {
-			LOG("Error: digit %" PRIu8 " larger than maximum"
-			    " (b=%" PRIu8 "\n", a[i], b);
-			return -1;
-		}
+		DBG_ASSERT(a[i] < b, "Error: digit %" PRIu8
+		    " > %" PRIu8 "in digitstosumzero()\n", a[i], b);
 		sum += a[i];
 		ret += p * (int64_t)a[i];
-	}
-
-	if ((sum + a[0]) % b != 0) {
-		LOG("Error: digits do not have sum zero modulo b\n");
-		return -1;
 	}
 
 	return ret;
@@ -146,11 +118,9 @@ sumzerotodigits(int64_t d, size_t n, uint8_t b, uint8_t *a)
 	uint8_t sum;
 	size_t i;
 
-	if (!((n == 8 && b == 3 ) || (n == 12 && b == 2))) {
-		LOG("Error: won't compute 'digits' for n=%zu and b=%" PRIu8
-		    " (use n=8 b=3 or n=12 b=2)\n", n, b);
-		goto sumzerotodigits_error;
-	}
+	DBG_ASSERT((n == 8 && b == 3 ) || (n == 12 && b == 2),
+	    "Error: sumzerotodigits() called with n=%zu and b=%" PRIu8
+	    " (use n=8 b=3 or n=12 b=2)\n", n, b);
 
 	for (i = 1, sum = 0; i < n; i++, d /= (int64_t)b) {
 		a[i] = (uint8_t)(d % (int64_t)b);
@@ -159,9 +129,6 @@ sumzerotodigits(int64_t d, size_t n, uint8_t b, uint8_t *a)
 	a[0] = (b - (sum % b)) % b;
 
 	return;
-
-sumzerotodigits_error:
-	memset(a, UINT8_ERROR, n);
 }
 
 STATIC double

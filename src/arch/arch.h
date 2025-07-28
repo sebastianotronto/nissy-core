@@ -12,7 +12,6 @@ typedef __m256i cube_t;
 
 #elif defined(NEON)
 
-#include <stdlib.h>
 #include <arm_neon.h>
 
 typedef struct {
@@ -27,8 +26,6 @@ typedef struct {
 #endif
 
 #else
-
-#include <stdlib.h>
 
 typedef struct {
 	uint8_t corner[8];
