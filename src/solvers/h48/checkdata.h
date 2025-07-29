@@ -1,10 +1,7 @@
 STATIC long long checkdata_h48(
     const char *, unsigned long long, const unsigned char *);
 
-/*
-Currently unused.
-TODO: re-introduce check on cocsep table
-*/
+/* TODO: Currently unused, re-introduce check on cocsep table */
 uint64_t expected_cocsep[21] = {
 	[0] = 1,
 	[1] = 6,

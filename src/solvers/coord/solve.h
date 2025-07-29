@@ -312,14 +312,6 @@ solve_coord(
 		.solution_settings = &solution_settings,
 		.solution_list = &solution_list,
 		.nissflag = nissflag,
-
-		/*
-		Since no move has been done yet, this field should be
-		neither true nor false; using its value now is logically
-		undefined behavior.
-		TODO: find a more elegant solution
-		*/
-		.lastisnormal = true,
 	};
 
 	if (coord->coord(c, coord_data) == 0) {

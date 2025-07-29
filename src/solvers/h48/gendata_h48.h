@@ -117,7 +117,7 @@ gendata_h48(gendata_h48_arg_t arg[static 1])
 	arg->cocsepdata = (uint32_t *)cocsepdata_offset;
 	arg->h48buf = (_Atomic unsigned char*)arg->buf + cocsepsize;
 
-	arg->base = 99; /* TODO: set this somewhere else */
+	arg->base = 99;
 
 	if (arg->h == 0 && arg->k == 4) {
 		gendata_h48h0k4(arg);
@@ -220,7 +220,7 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 		.type = TABLETYPE_PRUNING,
 		.infosize = INFOSIZE,
 		.fullsize = H48_TABLESIZE(0, 4) + INFOSIZE,
-		.hash = 0, /* TODO */
+		.hash = 0,
 		.entries = H48_COORDMAX(0),
 		.classes = 0,
 		.h48h = 0,
@@ -676,7 +676,7 @@ makeinfo_h48k2(gendata_h48_arg_t arg[static 1])
 		.type = TABLETYPE_PRUNING,
 		.infosize = INFOSIZE,
 		.fullsize = H48_TABLESIZE(arg->h, 2) + INFOSIZE,
-		.hash = 0, /* TODO */
+		.hash = 0,
 		.entries = H48_COORDMAX(arg->h),
 		.classes = 0,
 		.h48h = arg->h,

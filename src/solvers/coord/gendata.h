@@ -57,7 +57,7 @@ gendata_coord(const coord_t coord[static 1], unsigned char *buf)
 			.type = TABLETYPE_SPECIAL,
 			.infosize = INFOSIZE,
 			.fullsize = INFOSIZE + coord_dsize,
-			.hash = 0, /* TODO */
+			.hash = 0,
 			.next = INFOSIZE + coord_dsize,
 
 			/* Unknown / non-applicable values */
@@ -105,7 +105,7 @@ genptable_coord(
 		.type = TABLETYPE_PRUNING,
 		.infosize = INFOSIZE,
 		.fullsize = INFOSIZE + tablesize,
-		.hash = 0, /* TODO */
+		.hash = 0,
 		.entries = coord->max,
 		.classes = 0,
 		.bits = 4,

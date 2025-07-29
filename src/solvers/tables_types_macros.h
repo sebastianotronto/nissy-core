@@ -26,7 +26,7 @@ typedef struct {
 	uint64_t type;
 	uint64_t infosize;
 	uint64_t fullsize;
-	uint64_t hash;
+	uint64_t hash; /* Currently unused */
 	uint64_t entries;
 	uint64_t classes; /* Used only by cocsepdata, for now */
 	uint64_t next;

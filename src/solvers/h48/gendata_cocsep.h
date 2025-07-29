@@ -35,7 +35,7 @@ gendata_cocsep(
 		.type = TABLETYPE_SPECIAL,
 		.infosize = INFOSIZE,
 		.fullsize = COCSEP_FULLSIZE,
-		.hash = 0, /* TODO */
+		.hash = 0,
 		.entries = COCSEP_TABLESIZE,
 		.classes = COCSEP_CLASSES,
 		.bits = 32,

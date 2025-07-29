@@ -186,7 +186,6 @@ appendsolution(
 			later, because the allowedmoves check would fail with
 			improperly sorted parallel moves, but then transforming
 			could swap the pairs the wrong way around.
-			TODO: maybe fix this
 			*/
 			sortparallel_moves(tsol[r].nmoves, tsol[r].moves);
 
