@@ -7,7 +7,6 @@ typedef __m256i cube_t;
 #if !defined(TEST_H)
 #include "common.h"
 #include "avx2.h"
-#include "coordinates_unoptimized.h"
 #endif
 
 #elif defined(NEON)
@@ -22,7 +21,6 @@ typedef struct {
 #if !defined(TEST_H)
 #include "common.h"
 #include "neon.h"
-#include "coordinates_unoptimized.h"
 #endif
 
 #else
@@ -35,7 +33,6 @@ typedef struct {
 #if !defined(TEST_H)
 #include "common.h"
 #include "portable.h"
-#include "coordinates_unoptimized.h"
 #endif
 
 #endif

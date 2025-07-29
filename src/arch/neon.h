@@ -1,8 +1,6 @@
 #define CO2_NEON vdup_n_u8(0x60)
 #define COCW_NEON vdup_n_u8(0x20)
-#define CP_NEON vdup_n_u8(0x07)
-#define EP_NEON vcombine_u8(vdupq_n_u8(0x0F), vdupq_n_u8(0x0F))
-#define EO_NEON vcombine_u8(vdupq_n_u8(0x10), vdupq_n_u8(0x10))
+#define PBITS8_NEON vdup_n_u8(0x07)
 
 STATIC_INLINE uint8x16_t compose_edges_slim(uint8x16_t, uint8x16_t);
 STATIC_INLINE uint8x8_t compose_corners_slim(uint8x8_t, uint8x8_t);
@@ -20,15 +18,19 @@ STATIC_INLINE uint8x8_t compose_corners_slim(uint8x8_t, uint8x8_t);
 			e_dl, e_dr, e_fr, e_fl, e_bl, e_br, 0, 0, 0, 0 \
 		} \
 	})
-
 #define ZERO_CUBE \
 	((cube_t){ \
 		.corner = vdup_n_u8(0), \
 		.edge = vdupq_n_u8(0) \
 	})
-
 #define SOLVED_CUBE STATIC_CUBE( \
 	0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+
+const uint8_t SOLVED_L[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+const uint8_t SOLVED_H[8] = {8, 9, 10, 11, 0, 0, 0};
+
+STATIC_INLINE int64_t permtoindex_8x8(uint8x8_t);
+STATIC_INLINE uint8x8_t indextoperm_8x8(int64_t);
 
 STATIC_INLINE int
 popcount_u32(uint32_t x)
@@ -360,4 +362,78 @@ invcoord_esep(int64_t esep)
 	ret.edge = vld1q_u8(mem);
 
 	return ret;
+}
+
+STATIC_INLINE int64_t
+permtoindex_8x8(uint8x8_t a)
+{
+	int64_t i, c, ret;
+	uint8x8_t cmp;
+	uint64x1_t anum;
+	uint8_t or[8] = {0, 0, 0, 0, 0, 0, 0, 0x0F};
+
+	for (i = 0, ret = 0; i < 8; i++) {
+		cmp = vdup_lane_u8(a, 0);
+		anum = vreinterpret_u64_u8(a);
+		anum = vshr_n_u64(anum, 8);
+		a = vreinterpret_u8_u64(anum);
+		a = vorr_u8(a, vld1_u8(or));
+		cmp = vcgt_u8(cmp, a);
+		c = vaddv_u8(vshr_n_u8(cmp, 7));
+		ret += c * factorial[7-i];
+	}
+
+	return ret;
+}
+
+STATIC_INLINE uint8x8_t
+indextoperm_8x8(int64_t p)
+{
+	int used;
+	int64_t c, k, i, j;
+	uint8_t ret[8];
+
+	for (i = 0, used = 0; i < 8; i++) {
+		k = p / factorial[7-i];
+
+		/* Find k-th unused number */
+		for (j = 0, c = 0; c <= k; j++)
+			c += 1 - ((used & (1 << j)) >> j);
+
+		ret[i] = j-1;
+		used |= 1 << (j-1);
+		p %= factorial[7-i];
+	}
+
+	return vld1_u8(ret);
+}
+
+STATIC_INLINE int64_t
+coord_cp(cube_t cube)
+{
+	return permtoindex_8x8(vand_u8(cube.corner, PBITS8_NEON));
+}
+
+STATIC_INLINE cube_t
+invcoord_cp(int64_t i)
+{
+	return (cube_t) {
+		.corner = indextoperm_8x8(i),
+		.edge = vcombine_u8(vld1_u8(SOLVED_L), vld1_u8(SOLVED_H)) 
+	};
+}
+
+STATIC_INLINE int64_t
+coord_epud(cube_t cube)
+{
+	return permtoindex_8x8(vand_u8(vget_low_u8(cube.edge), PBITS8_NEON));
+}
+
+STATIC_INLINE cube_t
+invcoord_epud(int64_t i)
+{
+	return (cube_t) {
+		.corner = vld1_u8(SOLVED_L),
+		.edge = vcombine_u8(indextoperm_8x8(i), vld1_u8(SOLVED_H))
+	};
 }

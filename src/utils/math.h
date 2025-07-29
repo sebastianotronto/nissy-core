@@ -49,7 +49,7 @@ permtoindex(size_t n, const uint8_t *a)
 
 	for (i = 0, ret = 0; i < n; i++) {
 		for (j = i+1, c = 0; j < n; j++)
-			c += (a[i] > a[j]) ? 1 : 0;
+			c += a[i] > a[j];
 		ret += factorial[n-i-1] * c;
 	}
 
@@ -59,21 +59,23 @@ permtoindex(size_t n, const uint8_t *a)
 STATIC void
 indextoperm(int64_t p, size_t n, uint8_t *r)
 {
-	int64_t c;
-	size_t i, j;
-	uint8_t a[FACTORIAL_MAX+1];
+	int64_t c, k;
+	size_t i, j, used;
 
 	DBG_ASSERT(n <= FACTORIAL_MAX, "Error: cannot compute indextoperm() "
 	    "for set of size %zu > %" PRId64 "\n", n, FACTORIAL_MAX);
 	DBG_ASSERT(p >= 0 && p < factorial[n], "Error: invalid permutation "
 	    "index %" PRId64 " for set of size %zu\n", p, n);
 
-	memset(a, 0, n);
-	for (i = 0; i < n; i++) {
-		for (j = 0, c = 0; c <= p / factorial[n-i-1]; j++)
-			c += a[j] ? 0 : 1;
+	for (i = 0, used = 0; i < n; i++) {
+		k = p / factorial[n-i-1];
+
+		/* Find k-th unused number */
+		for (j = 0, c = 0; c <= k; j++)
+			c += 1 - ((used & (1<<j)) >> j);
+
 		r[i] = j-1;
-		a[j-1] = 1;
+		used |= 1 << (j-1);
 		p %= factorial[n-i-1];
 	}
 
@@ -87,7 +89,7 @@ permsign(size_t n, const uint8_t *a)
 
 	for (i = 0, ret = 0; i < n; i++)
 		for (j = i+1; j < n; j++)
-			ret += a[i] > a[j] ? 1 : 0;
+			ret += a[i] > a[j];
 
 	return ret % 2;
 }

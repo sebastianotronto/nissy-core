@@ -12,6 +12,9 @@
 #define CARRY_AVX2 _mm256_set_epi64x(INT64_C(0x20202020), \
     INT64_C(0x2020202020202020), 0, INT64_C(0x6060606060606060))
 
+#define SOLVED_L INT64_C(0x0706050403020100)
+#define SOLVED_H INT64_C(0x0B0A0908)
+
 #define STATIC_CUBE(c_ufr, c_ubl, c_dfl, c_dbr, c_ufl, c_ubr, c_dfr, c_dbl, \
     e_uf, e_ub, e_db, e_df, e_ur, e_ul, e_dl, e_dr, e_fr, e_fl, e_bl, e_br) \
     _mm256_set_epi8(0, 0, 0, 0, e_br, e_bl, e_fl, e_fr, \
@@ -19,8 +22,11 @@
         0, 0, 0, 0, 0, 0, 0, 0, \
         c_dbl, c_dfr, c_ubr, c_ufl, c_dbr, c_dfl, c_ubl, c_ufr)
 #define ZERO_CUBE _mm256_set_epi64x(0, 0, 0, 0)
-#define SOLVED_CUBE STATIC_CUBE( \
-    0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11)
+#define SOLVED_CUBE _mm256_set_epi64x(SOLVED_H, SOLVED_L, 0, SOLVED_L)
+
+
+STATIC_INLINE int64_t permtoindex_8x8(int64_t);
+STATIC_INLINE int64_t indextoperm_8x8(int64_t);
 
 STATIC_INLINE int
 popcount_u32(uint32_t x)
@@ -286,4 +292,78 @@ set_eo(cube_t cube[static 1], int64_t eo)
 
 	*cube = _mm256_andnot_si256(EO_AVX2, *cube);
 	*cube = _mm256_or_si256(*cube, veo);
+}
+
+STATIC_INLINE int64_t
+permtoindex_8x8(int64_t a)
+{
+	int64_t i, c, ret;
+	__m64 cmp;
+
+	for (i = 0, ret = 0; i < 8; i++) {
+		cmp = _mm_set1_pi8(a & INT64_C(0xFF));
+		a = (a >> INT64_C(8)) | INT64_C(0x0F00000000000000);
+		cmp = _mm_cmpgt_pi8(cmp, _mm_cvtsi64_m64(a));
+		c = _mm_popcnt_u64(_mm_cvtm64_si64(cmp)) >> INT64_C(3);
+		ret += c * factorial[7-i];
+	}
+
+	return ret;
+}
+
+STATIC_INLINE int64_t
+indextoperm_8x8(int64_t p)
+{
+	int used;
+	int64_t c, k, i, j, ret;
+
+	for (i = 0, ret = 0, used = 0; i < 8; i++) {
+		k = p / factorial[7-i];
+
+		/* Find k-th unused number */
+		for (j = 0, c = 0; c <= k; j++)
+			c += 1 - ((used & (1 << j)) >> j);
+
+		ret |= (j-1) << (8*i);
+		used |= 1 << (j-1);
+		p %= factorial[7-i];
+	}
+
+	return ret;
+}
+
+STATIC_INLINE int64_t
+coord_cp(cube_t cube)
+{
+	cube_t cp;
+	int64_t aux[4];
+
+	cp = _mm256_and_si256(cube, CP_AVX2);
+	_mm256_storeu_si256((__m256i_u *)aux, cp);
+
+	return permtoindex_8x8(aux[0]);
+}
+
+STATIC_INLINE cube_t
+invcoord_cp(int64_t i)
+{
+	return _mm256_set_epi64x(SOLVED_H, SOLVED_L, 0, indextoperm_8x8(i));
+}
+
+STATIC_INLINE int64_t
+coord_epud(cube_t cube)
+{
+	cube_t ep;
+	int64_t aux[4];
+
+	ep = _mm256_and_si256(cube, EP_AVX2);
+	_mm256_storeu_si256((__m256i_u *)aux, ep);
+
+	return permtoindex_8x8(aux[2]);
+}
+
+STATIC_INLINE cube_t
+invcoord_epud(int64_t i)
+{
+	return _mm256_set_epi64x(SOLVED_H, indextoperm_8x8(i), 0, SOLVED_L);
 }

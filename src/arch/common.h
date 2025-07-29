@@ -37,6 +37,11 @@ STATIC_INLINE void set_eo(cube_t [static 1], int64_t);
 STATIC_INLINE void invcoord_esep_array(int64_t, int64_t, uint8_t[static 12]);
 STATIC_INLINE cube_t invcoord_eoesep(int64_t);
 
+STATIC_INLINE int64_t coord_cp(cube_t);
+STATIC_INLINE cube_t invcoord_cp(int64_t);
+STATIC_INLINE int64_t coord_epud(cube_t);
+STATIC_INLINE cube_t invcoord_epud(int64_t);
+
 STATIC_INLINE void
 invcoord_esep_array(int64_t set1, int64_t set2, uint8_t mem[static 12])
 {
