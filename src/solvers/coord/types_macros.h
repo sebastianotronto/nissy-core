@@ -21,13 +21,17 @@ typedef struct {
 	bool (*isnasty)(uint64_t, const unsigned char *);
 	size_t (*gendata)(unsigned char *);
 	uint64_t max;
-	uint64_t moves_mask;
+	/* moves_mask_gendata must be invariant under trans_mask */
+	uint64_t moves_mask_gendata;
+	uint64_t moves_mask_solve;
 	uint64_t trans_mask;
 	uint8_t axistrans[3];
 	bool (*is_admissible)(const solution_moves_t[static 1]);
 	bool (*is_solvable)(cube_t);
+	bool (*is_solved)(uint64_t, const unsigned char *);
 	uint64_t pruning_distribution[INFO_DISTRIBUTION_LEN];
 	uint8_t pruning_max;
+	bool allow_niss;
 	struct {
 		size_t classes;
 		uint64_t max;

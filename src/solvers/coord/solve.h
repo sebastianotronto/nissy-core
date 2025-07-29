@@ -76,6 +76,7 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 	if (nn + ni == 0)
 		return f & (NISSY_NISSFLAG_NORMAL | NISSY_NISSFLAG_MIXED);
 
+	/* TODO logic here can probably be simplified */
 	if (arg->lastisnormal)
 		return (f & NISSY_NISSFLAG_NORMAL) ||
 		    ((f & NISSY_NISSFLAG_MIXED) && (ni > 0 || nn <= th));
@@ -98,6 +99,7 @@ coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 	if (nn + ni == 0)
 		return f & (NISSY_NISSFLAG_INVERSE | NISSY_NISSFLAG_MIXED);
 
+	/* TODO logic here can probably be simplified */
 	if (!arg->lastisnormal)
 		return (f & NISSY_NISSFLAG_INVERSE) ||
 		    ((f & NISSY_NISSFLAG_MIXED) && (nn > 0 || ni < th));
@@ -118,7 +120,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 	cube_t backup_cube, backup_inverse;
 
 	coord = arg->coord->coord(arg->cube, arg->coord_data);
-	if (coord == 0) {
+	if (coord_is_solved(arg->coord, coord, arg->coord_data)) {
 		if (!coord_solution_admissible(arg))
 			return 0;
 		return appendsolution(arg->solution_moves,
@@ -137,7 +139,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 	ret = 0;
 	if (coord_continue_onnormal(arg)) {
 		l = arg->solution_moves->nmoves;
-		mm = arg->coord->moves_mask;
+		mm = arg->coord->moves_mask_solve;
 		if (l != 0) {
 			m = arg->solution_moves->moves[l-1];
 			mm &= allowedmask[movebase(m)];
@@ -166,7 +168,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 
 	if (coord_continue_oninverse(arg)) {
 		l = arg->solution_moves->npremoves;
-		mm = arg->coord->moves_mask;
+		mm = arg->coord->moves_mask_solve;
 		if (l != 0) {
 			m = arg->solution_moves->premoves[l-1];
 			mm &= allowedmask[movebase(m)];
@@ -260,6 +262,7 @@ solve_coord(
 	int8_t d;
 	uint8_t t;
 	int64_t ndepth;
+	uint64_t i;
 	cube_t c;
 	const unsigned char *coord_data;
 	const unsigned char *ptable;
@@ -314,7 +317,8 @@ solve_coord(
 		.nissflag = nissflag,
 	};
 
-	if (coord->coord(c, coord_data) == 0) {
+	i = coord->coord(c, coord_data);
+	if (coord_is_solved(coord, i, coord_data)) {
 		if (minmoves == 0 && !appendsolution(&solution_moves,
 		    &solution_settings, &solution_list))
 				goto solve_coord_error_buffer;

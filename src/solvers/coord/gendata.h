@@ -3,6 +3,8 @@ STATIC long long gendata_coord_dispatch(const char *, unsigned long long,
     unsigned char *);
 STATIC tableinfo_t genptable_coord(
     const coord_t [static 1], const unsigned char *, unsigned char *);
+STATIC uint64_t genptable_coord_init_solved(
+    const coord_t [static 1], const unsigned char *, unsigned char *);
 STATIC bool switch_to_fromnew(uint64_t, uint64_t, uint64_t);
 STATIC uint64_t genptable_coord_fillneighbors(const coord_t [static 1],
     const unsigned char *, uint64_t, uint8_t, unsigned char *);
@@ -118,11 +120,10 @@ genptable_coord(
 	memset(info.distribution, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
 	append_coord_name(coord, info.solver);
 
-	nm = popcount_u32(coord->moves_mask);
-	i = coord->coord(SOLVED_CUBE, data);
-	set_coord_pval(coord, table, i, 0);
-	info.distribution[0] = 1;
-	for (d = 1, tot = 1; tot < coord->max && d < 15; d++) {
+	tot = info.distribution[0] =
+	    genptable_coord_init_solved(coord, data, table);
+	nm = popcount_u32(coord->moves_mask_gendata);
+	for (d = 1; tot < coord->max && d < 15; d++) {
 		t = 0;
 		if (switch_to_fromnew(tot, coord->max, nm)) {
 			for (i = 0; i < coord->max; i++)
@@ -151,6 +152,27 @@ genptable_coord(
 	}
 
 	return info;
+}
+
+STATIC uint64_t
+genptable_coord_init_solved(
+	const coord_t coord[static 1],
+	const unsigned char *coord_data,
+	unsigned char *table
+)
+{
+	uint64_t i, max_solved, ret;
+
+	max_solved = coord->is_solved == NULL ? 1 : coord->max;
+
+	for (i = 0, ret = 0; i < max_solved; i++) {
+		if (coord_is_solved(coord, i, coord_data)) {
+			set_coord_pval(coord, table, i, 0);
+			ret++;
+		}
+	}
+
+	return ret;
 }
 
 STATIC bool
@@ -183,7 +205,8 @@ genptable_coord_fillneighbors(
 	c = coord->cube(i, data);
 	tot = 0;
 	for (m = 0; m < NMOVES; m++) {
-		if (!((UINT32_C(1) << (uint32_t)m) & coord->moves_mask))
+		if (!((UINT32_C(1) << (uint32_t)m) &
+		    coord->moves_mask_gendata))
 			continue;
 		moved = move(c, m);
 		ii = coord->coord(moved, data);
@@ -234,7 +257,8 @@ genptable_coord_fillfromnew(
 	for (j = 0, found = false; j < nsim && !found; j++) {
 		c = coord->cube(sim[j], data);
 		for (m = 0; m < NMOVES; m++) {
-			if (!((UINT32_C(1) << (uint32_t)m) & coord->moves_mask))
+			if (!((UINT32_C(1) << (uint32_t)m) &
+			    coord->moves_mask_gendata))
 				continue;
 			ii = coord->coord(move(c, m), data);
 			if (get_coord_pval(coord, table, ii) < d) {

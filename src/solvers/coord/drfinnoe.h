@@ -13,12 +13,7 @@ In the worst case, it is a bug to be fixed, but I find it unlikely.
 
 #define CLASSES_CP_16 2768
 
-STATIC uint64_t coordinate_cp_coord(cube_t);
-STATIC cube_t coordinate_cp_cube(uint64_t);
-STATIC uint64_t coordinate_epud_coord(cube_t);
-STATIC cube_t coordinate_epud_cube(uint64_t);
 STATIC cube_t coordinate_drfinnoe_merge(cube_t, cube_t);
-
 STATIC uint64_t coordinate_drfinnoe_coord(cube_t, const unsigned char *);
 STATIC cube_t coordinate_drfinnoe_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_drfinnoe_isnasty(uint64_t, const unsigned char *);
@@ -34,7 +29,8 @@ STATIC coord_t coordinate_drfinnoe = {
 	.gendata = coordinate_drfinnoe_gendata,
 	.max = CLASSES_CP_16 * FACT_8,
 	.trans_mask = TM_UDFIX,
-	.moves_mask = MM18_DR,
+	.moves_mask_gendata = MM18_DR,
+	.moves_mask_solve = MM18_DR,
 	.axistrans = {
 		[AXIS_UD] = TRANS_UFr,
 		[AXIS_RL] = TRANS_RFr,
@@ -42,6 +38,8 @@ STATIC coord_t coordinate_drfinnoe = {
 	},
 	.is_admissible = &solution_always_valid,
 	.is_solvable = &is_drfinnoe_solvable,
+	.is_solved = NULL,
+	.allow_niss = false,
 	.pruning_distribution = {
  		[0] = 1,
 		[1] = 3,
@@ -64,38 +62,14 @@ STATIC coord_t coordinate_drfinnoe = {
 	.sym = {
 		.classes = CLASSES_CP_16,
 		.max = FACT_8,
-		.coord = &coordinate_cp_coord,
-		.cube = &coordinate_cp_cube,
+		.coord = &coord_cp,
+		.cube = &invcoord_cp,
 		.max2 = FACT_8,
-		.coord2 = &coordinate_epud_coord,
-		.cube2 = &coordinate_epud_cube,
+		.coord2 = &coord_epud,
+		.cube2 = &invcoord_epud,
 		.merge = &coordinate_drfinnoe_merge,
 	},
 };
-
-STATIC uint64_t
-coordinate_cp_coord(cube_t c)
-{
-	return coord_cp(c);
-}
-
-STATIC cube_t
-coordinate_cp_cube(uint64_t i)
-{
-	return invcoord_cp(i);
-}
-
-STATIC uint64_t
-coordinate_epud_coord(cube_t c)
-{
-	return coord_epud(c);
-}
-
-STATIC cube_t
-coordinate_epud_cube(uint64_t i)
-{
-	return invcoord_epud(i);
-}
 
 STATIC cube_t
 coordinate_drfinnoe_merge(cube_t c1, cube_t c2)

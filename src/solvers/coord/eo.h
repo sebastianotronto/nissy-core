@@ -12,7 +12,8 @@ STATIC coord_t coordinate_eo = {
 	.gendata = coordinate_eo_gendata,
 	.max = POW_2_11,
 	.trans_mask = TM_SINGLE(TRANS_UFr),
-	.moves_mask = MM18_ALLMOVES,
+	.moves_mask_gendata = MM18_ALLMOVES,
+	.moves_mask_solve = MM18_ALLMOVES,
 	.axistrans = {
 		[AXIS_UD] = TRANS_FDr,
 		[AXIS_RL] = TRANS_URr,
@@ -20,6 +21,8 @@ STATIC coord_t coordinate_eo = {
 	},
 	.is_admissible = &solution_lastqt_cw,
 	.is_solvable = &is_eo_even,
+	.is_solved = NULL,
+	.allow_niss = true,
 	.pruning_distribution = {
 		[0] = 1,
 		[1] = 2,
@@ -37,7 +40,7 @@ STATIC coord_t coordinate_eo = {
 STATIC uint64_t
 coordinate_eo_coord(cube_t c, const unsigned char *data)
 {
-	return (uint64_t)coord_eo(c);
+	return coord_eo(c);
 }
 
 STATIC cube_t

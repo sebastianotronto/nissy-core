@@ -10,6 +10,8 @@ STATIC void append_coord_name(const coord_t [static 1], char *);
 STATIC bool solution_lastqt_cw(const solution_moves_t [static 1]);
 STATIC bool coord_can_switch(const coord_t [static 1], const unsigned char *,
     size_t, const uint8_t *);
+STATIC bool coord_is_solved(
+    const coord_t [static 1], uint64_t, const unsigned char *);
 
 STATIC uint64_t
 coord_coord_generic(
@@ -182,8 +184,11 @@ coord_can_switch(
 
 	uint64_t i;
 
-	if (n == 0)
-		return true;
+	DBG_ASSERT(n > 0, "Error: cannot check if coordinate solver "
+	    "can use NISS after 0 moves");
+
+	if (!coord->allow_niss)
+		return false;
 
 	i = coord->coord(move(SOLVED_CUBE, moves[n-1]), data);
 	if (i == 0)
@@ -194,4 +199,14 @@ coord_can_switch(
 
 	i = coord->coord(move(SOLVED_CUBE, moves[n-1]), data);
 	return i != 0;
+}
+
+STATIC bool
+coord_is_solved(
+	const coord_t coord[static 1],
+	uint64_t i,
+	const unsigned char *data
+)
+{
+	return coord->is_solved == NULL ? i == 0 : coord->is_solved(i, data);
 }
