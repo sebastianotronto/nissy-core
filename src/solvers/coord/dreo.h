@@ -47,8 +47,8 @@ STATIC coord_t coordinate_dreo = {
 		.coord = &coord_dresep_nosym,
 		.cube = &invcoord_dresep_nosym,
 		.max2 = POW_3_7,
-		.coord2 = &coord_co_u,
-		.cube2 = &invcoord_co_u,
+		.coord2 = &coord_co,
+		.cube2 = &invcoord_co,
 		.merge = &coordinate_dreo_merge,
 	},
 };
@@ -56,7 +56,7 @@ STATIC coord_t coordinate_dreo = {
 STATIC uint64_t
 coord_dresep_nosym(cube_t cube)
 {
-	return (uint64_t)coord_esep(cube) / COMB_8_4;
+	return coord_esep(cube) / COMB_8_4;
 }
 
 STATIC cube_t

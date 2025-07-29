@@ -2,12 +2,12 @@
 
 #define POW_3_7 2187
 
-int64_t coord_co(cube_t);
-cube_t invcoord_co(int64_t);
+uint64_t coord_co(cube_t);
+cube_t invcoord_co(uint64_t);
 
 void run(void) {
 	oriented_cube_t cube;
-	int64_t coord, coord2;
+	uint64_t coord, coord2;
 
 	cube.orientation = 0;
 
@@ -26,8 +26,8 @@ void run(void) {
 
 		coord2 = coord_co(cube.cube);
 		if (coord != coord2) {
-			printf("Error: invcoord of %" PRId64
-			    " returns %" PRId64 "\n", coord, coord2);
+			printf("Error: invcoord of %" PRIu64
+			    " returns %" PRIu64 "\n", coord, coord2);
 			return;
 		}
 	}

@@ -5,7 +5,7 @@ STATIC bool issolved(oriented_cube_t);
 STATIC bool iserror(oriented_cube_t);
 STATIC void getcube_fix(long long *, long long *,
     long long *, long long *, long long *);
-STATIC cube_t getcube(int64_t, int64_t, int64_t, int64_t);
+STATIC cube_t getcube(uint64_t, uint64_t, uint64_t, uint64_t);
 
 STATIC oriented_cube_t readcube(const char *);
 STATIC int64_t writecube(oriented_cube_t, size_t n, char [n]);
@@ -150,26 +150,26 @@ getcube_fix(
 {
 	uint8_t e[12], c[8], coarr[8];
 
-        *ep = (*ep % FACT_12 + FACT_12) % FACT_12;
-	*eo = (*eo % POW_2_11 + POW_2_11) % POW_2_11;
-	*cp = (*cp % FACT_8 + FACT_8) % FACT_8;
-	*co = (*cp % POW_3_7 + POW_3_7) % POW_3_7;
-	*orien = (*orien % 24 + 24) % 24;
+	*ep = POSITIVE_MOD(*ep, (long long)FACT_12);
+	*eo = POSITIVE_MOD(*eo, (long long)POW_2_11);
+	*cp = POSITIVE_MOD(*cp, (long long)FACT_8);
+	*co = POSITIVE_MOD(*co, (long long)POW_3_7);
+	*orien = POSITIVE_MOD(*orien, 24LL);
 
-	indextoperm(*ep, 12, e);
-	indextoperm(*cp, 8, c);
+	indextoperm((uint64_t)*ep, 12, e);
+	indextoperm((uint64_t)*cp, 8, c);
 	if (permsign(12, e) != permsign(8, c)) {
 		SWAP(c[0], c[1]);
-		*cp = permtoindex(8, c);
+		*cp = (long long)permtoindex(8, c);
 
-		sumzerotodigits(*co, 8, 3, coarr);
+		sumzerotodigits((uint64_t)*co, 8, 3, coarr);
 		SWAP(coarr[0], coarr[1]);
-		*co = digitstosumzero(8, coarr, 3);
+		*co = (uint64_t)digitstosumzero(8, coarr, 3);
 	}
 }
 
 STATIC cube_t
-getcube(int64_t ep, int64_t eo, int64_t cp, int64_t co)
+getcube(uint64_t ep, uint64_t eo, uint64_t cp, uint64_t co)
 {
 	uint8_t i, earr[12], carr[8], eoarr[12], coarr[8];
 

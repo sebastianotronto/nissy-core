@@ -1,11 +1,11 @@
 #include "../test.h"
 
-void sumzerotodigits(int64_t, size_t n, uint8_t, uint8_t [n]);
+void sumzerotodigits(uint64_t, size_t n, uint8_t, uint8_t [n]);
 
 void run(void) {
 	char str[STRLENMAX];
 	uint8_t i, n, b, a[100];
-	int64_t d;
+	uint64_t d;
 
 	fgets(str, STRLENMAX, stdin);
 	n = atoi(str);

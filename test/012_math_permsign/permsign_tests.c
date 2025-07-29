@@ -6,7 +6,7 @@ void run(void) {
 	char str[STRLENMAX];
 	uint8_t a[100];
 	int p;
-	int64_t n, i;
+	uint64_t n, i;
 
 	fgets(str, STRLENMAX, stdin);
 	n = atoll(str);

@@ -1,4 +1,4 @@
-#define H48_ESIZE(h) ((COMB_12_4 * COMB_8_4) << (int64_t)(h))
+#define H48_ESIZE(h) ((COMB_12_4 * COMB_8_4) << (uint64_t)(h))
 
 #define COCLASS_MASK (UINT32_C(0xFFFF) << UINT32_C(16))
 #define COCLASS(x)   (((x) & COCLASS_MASK) >> UINT32_C(16))

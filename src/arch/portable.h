@@ -154,7 +154,7 @@ inverse(cube_t cube)
 	return ret;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_co(cube_t c)
 {
 	int i, p, ret;
@@ -166,9 +166,9 @@ coord_co(cube_t c)
 }
 
 STATIC_INLINE cube_t
-invcoord_co(int64_t coord)
+invcoord_co(uint64_t coord)
 {
-	int64_t i, c, p;
+	uint64_t i, c, p;
 	cube_t cube;
 
 	cube = SOLVED_CUBE;
@@ -189,11 +189,11 @@ Ignoring the last bit, we have a value up to 2^7, but not all values are
 possible. Encoding this as a number from 0 to C(8,4) would save about 40%
 of space, but we are not going to use this coordinate in large tables.
 */
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_csep(cube_t c)
 {
 	int i, p;
-	int64_t ret;
+	uint64_t ret;
 
 	for (ret = 0, i = 0, p = 1; i < 7; i++, p *= 2)
 		ret += p * ((c.corner[i] & CSEPBIT) >> 2);
@@ -201,17 +201,17 @@ coord_csep(cube_t c)
 	return ret;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_cocsep(cube_t c)
 {
 	return (coord_co(c) << 7) + coord_csep(c);
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_eo(cube_t c)
 {
 	int i, p;
-	int64_t ret;
+	uint64_t ret;
 
 	for (ret = 0, i = 1, p = 1; i < 12; i++, p *= 2)
 		ret += p * (c.edge[i] >> EOSHIFT);
@@ -223,10 +223,10 @@ coord_eo(cube_t c)
 We encode the edge separation as a number from 0 to C(12,4)*C(8,4).
 It can be seen as the composition of two "subset index" coordinates.
 */
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_esep(cube_t c)
 {
-	int64_t i, j, jj, k, l, ret1, ret2, bit1, bit2, is1;
+	uint64_t i, j, jj, k, l, ret1, ret2, bit1, bit2, is1;
 
 	for (i = 0, j = 0, k = 4, l = 4, ret1 = 0, ret2 = 0; i < 12; i++) {
 		/* Simple version:
@@ -256,7 +256,7 @@ coord_esep(cube_t c)
 }
 
 STATIC_INLINE cube_t
-invcoord_esep(int64_t esep)
+invcoord_esep(uint64_t esep)
 {
 	cube_t ret;
 
@@ -279,7 +279,7 @@ copy_edges(cube_t dest[static 1], cube_t src)
 }
 
 STATIC_INLINE void
-set_eo(cube_t cube[static 1], int64_t eo)
+set_eo(cube_t cube[static 1], uint64_t eo)
 {
 	uint8_t i, sum, flip;
 
@@ -291,7 +291,7 @@ set_eo(cube_t cube[static 1], int64_t eo)
 	cube->edge[0] = (cube->edge[0] & ~EOBIT) | (EOBIT * (sum % 2));
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_cp(cube_t cube)
 {
 	int i;
@@ -303,7 +303,7 @@ coord_cp(cube_t cube)
 }
 
 STATIC_INLINE cube_t
-invcoord_cp(int64_t i)
+invcoord_cp(uint64_t i)
 {
 	uint8_t c[8];
 
@@ -313,7 +313,7 @@ invcoord_cp(int64_t i)
 	    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11);
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_epud(cube_t cube)
 {
 	int i;
@@ -325,7 +325,7 @@ coord_epud(cube_t cube)
 }
 
 STATIC_INLINE cube_t
-invcoord_epud(int64_t i)
+invcoord_epud(uint64_t i)
 {
 	uint8_t e[8];
 

@@ -1,14 +1,14 @@
 #include "../test.h"
 
-int64_t coord_eo(cube_t);
-void set_eo(cube_t *, int64_t);
+uint64_t coord_eo(cube_t);
+void set_eo(cube_t *, uint64_t);
 void pieces(cube_t *, uint8_t [static 8], uint8_t [static 12]);
 
 void run(void) {
 	char str[STRLENMAX];
 	oriented_cube_t cube;
 	uint8_t edge[12], corner[8];
-	int64_t eo;
+	uint64_t eo;
 
 	fgets(str, STRLENMAX, stdin);
 	cube = readcube(str);

@@ -18,12 +18,12 @@ STATIC tableinfo_t makeinfo_h48k2(gendata_h48_arg_t [static 1]);
 STATIC const uint32_t *get_cocsepdata_constptr(const unsigned char *);
 STATIC const unsigned char *get_h48data_constptr(const unsigned char *);
 
-STATIC_INLINE uint8_t get_h48_pval(const unsigned char *, int64_t, uint8_t);
-STATIC_INLINE void set_h48_pval(unsigned char *, int64_t, uint8_t, uint8_t);
+STATIC_INLINE uint8_t get_h48_pval(const unsigned char *, uint64_t, uint8_t);
+STATIC_INLINE void set_h48_pval(unsigned char *, uint64_t, uint8_t, uint8_t);
 STATIC_INLINE uint8_t get_h48_pval_atomic(
-    _Atomic const unsigned char *, int64_t, uint8_t);
+    _Atomic const unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE void set_h48_pval_atomic(
-    _Atomic unsigned char *, int64_t, uint8_t, uint8_t);
+    _Atomic unsigned char *, uint64_t, uint8_t, uint8_t);
 
 STATIC long long
 gendata_h48_dispatch(
@@ -50,7 +50,7 @@ STATIC uint64_t
 gendata_h48short(gendata_h48short_arg_t arg[static 1])
 {
 	uint8_t i, m;
-	int64_t coord;
+	uint64_t coord;
 	uint64_t j;
 	kvpair_t kv;
 	cube_t cube, d;
@@ -106,7 +106,7 @@ gendata_h48(gendata_h48_arg_t arg[static 1])
 
 	if (arg->buf_size < size) {
 		LOG("[H48 gendata] Error: buffer is too small "
-		    "(needed %" PRId64 " bytes but received %" PRId64 ")\n",
+		    "(needed %" PRId64 " bytes but received %" PRIu64 ")\n",
 		    size, arg->buf_size);
 		return NISSY_ERROR_BUFFER_SIZE;
 	}
@@ -209,7 +209,7 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 {
 	_Atomic unsigned char *table;
 	uint8_t val;
-	int64_t i, sc, done, d, h48max;
+	uint64_t i, sc, done, d, h48max;
 	uint64_t t, tt, isize, cc, bufsize;
 	h48h0k4_bfs_arg_t bfsarg[THREADS];
 	pthread_t thread[THREADS];
@@ -233,7 +233,7 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 	table = arg->h48buf + INFOSIZE;
 	memset(table, 0xFF, H48_TABLESIZE(0, 4));
 
-	h48max = (int64_t)H48_COORDMAX(0);
+	h48max = H48_COORDMAX(0);
 	sc = coord_h48(SOLVED_CUBE, arg->cocsepdata, 0);
 	set_h48_pval_atomic(table, sc, 4, 0);
 	arg->info.distribution[0] = 1;
@@ -249,13 +249,13 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 			.selfsim = arg->selfsim,
 			.crep = arg->crep,
 			.start = isize * t,
-			.end = t == THREADS-1 ? (uint64_t)h48max : isize * (t+1),
+			.end = t == THREADS-1 ? h48max : isize * (t+1),
 		};
 		for (tt = 0; tt < CHUNKS; tt++)
 			bfsarg[t].table_mutex[tt] = &table_mutex[tt];
 	}
 	for (done = 1, d = 1; done < h48max && d <= arg->maxdepth; d++) {
-		LOG("[H48 gendata] Generating depth %" PRId64 "\n", d);
+		LOG("[H48 gendata] Generating depth %" PRIu64 "\n", d);
 
 		for (t = 0; t < THREADS; t++) {
 			bfsarg[t].depth = d;
@@ -274,7 +274,7 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 		done += cc;
 		arg->info.distribution[d] = cc;
 
-		LOG("[H48 gendata] Found %" PRId64 "\n", cc);
+		LOG("[H48 gendata] Found %" PRIu64 "\n", cc);
 	}
 
 	arg->info.maxvalue = d - 1;
@@ -289,7 +289,7 @@ gendata_h48h0k4_runthread(void *arg)
 
 	uint8_t c, m;
 	uint64_t i;
-	int64_t j;
+	uint64_t j;
 	cube_t cube, moved;
 	gendata_h48_mark_t markarg;
 	h48h0k4_bfs_arg_t *bfsarg;
@@ -394,7 +394,7 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 	uint8_t t;
 	int sleeptime;
 	unsigned char *table;
-	int64_t j;
+	uint64_t j;
 	_Atomic uint64_t count;
 	uint64_t i, ii, inext, bufsize, done, nshort, velocity;
 	h48map_t shortcubes;
@@ -510,7 +510,7 @@ gendata_h48k2_runthread(void *arg)
 		pthread_mutex_unlock(dfsarg->shortcubes_mutex);
 
 		if (kv.val < dfsarg->shortdepth) {
-			coord = kv.key >> (int64_t)(11 - dfsarg->h);
+			coord = kv.key >> (uint64_t)(11 - dfsarg->h);
 			mutex = H48_INDEX(coord, dfsarg->k) % CHUNKS;
 			pthread_mutex_lock(dfsarg->table_mutex[mutex]);
 			set_h48_pval(dfsarg->table, coord, dfsarg->k, 0);
@@ -607,7 +607,7 @@ STATIC_INLINE void
 gendata_h48_mark_atomic(gendata_h48_mark_t arg[static 1])
 {
 	uint8_t oldval, newval;
-	int64_t coord, mutex;
+	uint64_t coord, mutex;
 
 	FOREACH_H48SIM(arg->cube, arg->cocsepdata, arg->selfsim,
 		coord = coord_h48(arg->cube, arg->cocsepdata, arg->h);
@@ -627,7 +627,7 @@ STATIC_INLINE void
 gendata_h48_mark(gendata_h48_mark_t arg[static 1])
 {
 	uint8_t oldval, newval;
-	int64_t coord, mutex;
+	uint64_t coord, mutex;
 
 	FOREACH_H48SIM(arg->cube, arg->cocsepdata, arg->selfsim,
 		coord = coord_h48(arg->cube, arg->cocsepdata, arg->h);
@@ -644,7 +644,7 @@ STATIC_INLINE bool
 gendata_h48k2_dfs_stop(cube_t cube, int8_t d, h48k2_dfs_arg_t arg[static 1])
 {
 	uint64_t val;
-	int64_t coord, mutex;
+	uint64_t coord, mutex;
 	int8_t oldval;
 
 	if (arg->h == 0 || arg->h == 11) {
@@ -705,19 +705,19 @@ get_h48data_constptr(const unsigned char *data)
 }
 
 STATIC_INLINE uint8_t
-get_h48_pval(const unsigned char *table, int64_t i, uint8_t k)
+get_h48_pval(const unsigned char *table, uint64_t i, uint8_t k)
 {
 	return (table[H48_INDEX(i, k)] & H48_MASK(i, k)) >> H48_SHIFT(i, k);
 }
 
 STATIC_INLINE uint8_t
-get_h48_pval_atomic(_Atomic const unsigned char *table, int64_t i, uint8_t k)
+get_h48_pval_atomic(_Atomic const unsigned char *table, uint64_t i, uint8_t k)
 {
 	return (table[H48_INDEX(i, k)] & H48_MASK(i, k)) >> H48_SHIFT(i, k);
 }
 
 STATIC_INLINE void
-set_h48_pval(unsigned char *table, int64_t i, uint8_t k, uint8_t val)
+set_h48_pval(unsigned char *table, uint64_t i, uint8_t k, uint8_t val)
 {
 	table[H48_INDEX(i, k)] = (table[H48_INDEX(i, k)] & (~H48_MASK(i, k)))
 	    | (val << H48_SHIFT(i, k));
@@ -726,7 +726,7 @@ set_h48_pval(unsigned char *table, int64_t i, uint8_t k, uint8_t val)
 STATIC_INLINE void
 set_h48_pval_atomic(
 	_Atomic unsigned char *table,
-	int64_t i,
+	uint64_t i,
 	uint8_t k,
 	uint8_t val
 )

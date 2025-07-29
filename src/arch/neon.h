@@ -29,8 +29,8 @@ STATIC_INLINE uint8x8_t compose_corners_slim(uint8x8_t, uint8x8_t);
 const uint8_t SOLVED_L[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 const uint8_t SOLVED_H[8] = {8, 9, 10, 11, 0, 0, 0};
 
-STATIC_INLINE int64_t permtoindex_8x8(uint8x8_t);
-STATIC_INLINE uint8x8_t indextoperm_8x8(int64_t);
+STATIC_INLINE uint64_t permtoindex_8x8(uint8x8_t);
+STATIC_INLINE uint8x8_t indextoperm_8x8(uint64_t);
 
 STATIC_INLINE int
 popcount_u32(uint32_t x)
@@ -215,15 +215,14 @@ inverse(cube_t cube)
 	return ret;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_co(cube_t c)
 {
+	uint64_t i, p, ret;
+
 	// Temp array to store the NEON vector
 	uint8_t mem[8];
 	vst1_u8(mem, c.corner);
-
-	int i, p;
-	int64_t ret;
 
 	for (ret = 0, i = 0, p = 1; i < 7; i++, p *= 3)
 		ret += p * (mem[i] >> COSHIFT);
@@ -232,9 +231,9 @@ coord_co(cube_t c)
 }
 
 STATIC_INLINE cube_t
-invcoord_co(int64_t coord)
+invcoord_co(uint64_t coord)
 {
-	int64_t co, c, i, p;
+	uint64_t co, c, i, p;
 	uint8_t mem[8];
 	cube_t cube;
 
@@ -250,15 +249,15 @@ invcoord_co(int64_t coord)
 	return cube;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_csep(cube_t c)
 {
+	uint64_t ret, i, p;
+
 	// Temp array to store the NEON vector
 	uint8_t mem[8];
 	vst1_u8(mem, c.corner);
 
-	int64_t ret = 0;
-	int i, p;
 	for (ret = 0, i = 0, p = 1; i < 7; i++, p *= 2)
 		ret += p * ((mem[i] & CSEPBIT) >> 2);
 
@@ -266,23 +265,23 @@ coord_csep(cube_t c)
 	return 0;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_cocsep(cube_t c)
 {
-	return (coord_co(c) << 7) + coord_csep(c);
+	return (coord_co(c) << UINT64_C(7)) + coord_csep(c);
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_eo(cube_t c)
 {
-	int64_t ret = 0;
-	int64_t p = 1;
+	uint64_t ret, p;
+	int i;
 
 	// Temp array to store the NEON vector
 	uint8_t mem[16];
 	vst1q_u8(mem, c.edge);
 
-	for (int i = 1; i < 12; i++, p *= 2)
+	for (i = 1, ret = 0, p = 1; i < 12; i++, p *= 2)
 	{
 		ret += p * (mem[i] >> EOSHIFT);
 	}
@@ -290,10 +289,10 @@ coord_eo(cube_t c)
 	return ret;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_esep(cube_t c)
 {
-	int64_t i, j, jj, k, l, ret1, ret2, bit1, bit2, is1;
+	uint64_t i, j, jj, k, l, ret1, ret2, bit1, bit2, is1;
 
 	// Temp array to store the NEON vector
 	uint8_t mem[16];
@@ -330,7 +329,7 @@ copy_edges(cube_t dst[static 1], cube_t src)
 }
 
 STATIC_INLINE void
-set_eo(cube_t cube[static 1], int64_t eo)
+set_eo(cube_t cube[static 1], uint64_t eo)
 {
 	// Temp array to store the NEON vector
 	uint8_t mem[16];
@@ -351,12 +350,12 @@ set_eo(cube_t cube[static 1], int64_t eo)
 }
 
 STATIC_INLINE cube_t
-invcoord_esep(int64_t esep)
+invcoord_esep(uint64_t esep)
 {
 	cube_t ret;
 	uint8_t mem[16] = {0};
 
-	invcoord_esep_array(esep % 70, esep / 70, mem);
+	invcoord_esep_array(esep % UINT64_C(70), esep / UINT64_C(70), mem);
 
 	ret = SOLVED_CUBE;
 	ret.edge = vld1q_u8(mem);
@@ -364,10 +363,10 @@ invcoord_esep(int64_t esep)
 	return ret;
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 permtoindex_8x8(uint8x8_t a)
 {
-	int64_t i, c, ret;
+	uint64_t i, c, ret;
 	uint8x8_t cmp;
 	uint64x1_t anum;
 	uint8_t or[8] = {0, 0, 0, 0, 0, 0, 0, 0x0F};
@@ -387,10 +386,10 @@ permtoindex_8x8(uint8x8_t a)
 }
 
 STATIC_INLINE uint8x8_t
-indextoperm_8x8(int64_t p)
+indextoperm_8x8(uint64_t p)
 {
 	int used;
-	int64_t c, k, i, j;
+	uint64_t c, k, i, j;
 	uint8_t ret[8];
 
 	for (i = 0, used = 0; i < 8; i++) {
@@ -408,14 +407,14 @@ indextoperm_8x8(int64_t p)
 	return vld1_u8(ret);
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_cp(cube_t cube)
 {
 	return permtoindex_8x8(vand_u8(cube.corner, PBITS8_NEON));
 }
 
 STATIC_INLINE cube_t
-invcoord_cp(int64_t i)
+invcoord_cp(uint64_t i)
 {
 	return (cube_t) {
 		.corner = indextoperm_8x8(i),
@@ -423,14 +422,14 @@ invcoord_cp(int64_t i)
 	};
 }
 
-STATIC_INLINE int64_t
+STATIC_INLINE uint64_t
 coord_epud(cube_t cube)
 {
 	return permtoindex_8x8(vand_u8(vget_low_u8(cube.edge), PBITS8_NEON));
 }
 
 STATIC_INLINE cube_t
-invcoord_epud(int64_t i)
+invcoord_epud(uint64_t i)
 {
 	return (cube_t) {
 		.corner = vld1_u8(SOLVED_L),

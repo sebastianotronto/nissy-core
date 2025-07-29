@@ -12,10 +12,6 @@ STATIC size_t coordinate_dr_gendata(unsigned char *);
 
 STATIC bool is_eoco_solvable(cube_t);
 
-/* TODO: remove the following two when all coordinates are converted to unsigned */
-STATIC uint64_t coord_co_u(cube_t c) { return (uint64_t)coord_co(c); }
-STATIC cube_t invcoord_co_u(uint64_t i) { return invcoord_co((int64_t)i); }
-
 STATIC coord_t coordinate_dr = {
 	.name = "DR",
 	.coord = &coordinate_dr_coord,
@@ -54,8 +50,8 @@ STATIC coord_t coordinate_dr = {
 		.coord = &coord_dreoesep_nosym,
 		.cube = &invcoord_dreoesep_nosym,
 		.max2 = POW_3_7,
-		.coord2 = &coord_co_u,
-		.cube2 = &invcoord_co_u,
+		.coord2 = &coord_co,
+		.cube2 = &invcoord_co,
 		.merge = &coordinate_dr_merge,
 	},
 };

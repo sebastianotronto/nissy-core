@@ -1,4 +1,4 @@
-STATIC int64_t coord_eoesep_sym(cube_t, const uint32_t [static ESEP_MAX]);
+STATIC uint64_t coord_eoesep_sym(cube_t, const uint32_t [static ESEP_MAX]);
 STATIC size_t gendata_esep_classes(
     uint32_t [static ESEP_MAX], uint16_t [static ESEP_CLASSES]);
 STATIC size_t gendata_eoesep(unsigned char *, uint8_t);
@@ -8,22 +8,22 @@ STATIC uint32_t gendata_eoesep_fromnew(uint8_t, uint8_t [static EOESEP_BUF],
     uint32_t [static ESEP_MAX], uint16_t [static ESEP_CLASSES]);
 STATIC uint32_t gendata_eoesep_fromdone(uint8_t, uint8_t [static EOESEP_BUF],
     uint32_t [static ESEP_MAX], uint16_t [static ESEP_CLASSES]);
-STATIC uint32_t gendata_eoesep_marksim(int64_t, uint8_t,
+STATIC uint32_t gendata_eoesep_marksim(uint64_t, uint8_t,
     uint8_t [static EOESEP_BUF], uint32_t [static ESEP_MAX]);
 STATIC bool gendata_eoesep_next(cube_t, uint8_t,
     uint8_t [static EOESEP_BUF], uint32_t [static ESEP_MAX]);
 STATIC uint8_t get_eoesep_pval(
-    const uint8_t [static DIV_ROUND_UP(EOESEP_TABLESIZE, 2)], int64_t);
+    const uint8_t [static DIV_ROUND_UP(EOESEP_TABLESIZE, 2)], uint64_t);
 STATIC uint8_t get_eoesep_pval_cube(const unsigned char *, cube_t);
 STATIC void set_eoesep_pval(
-    uint8_t [static DIV_ROUND_UP(EOESEP_TABLESIZE, 2)], int64_t, uint8_t);
+    uint8_t [static DIV_ROUND_UP(EOESEP_TABLESIZE, 2)], uint64_t, uint8_t);
 
-STATIC int64_t
+STATIC uint64_t
 coord_eoesep_sym(cube_t c, const uint32_t esep_classes[static ESEP_MAX])
 {
 	uint8_t ttrep;
 	uint32_t edata, class;
-	int64_t esep, eo;
+	uint64_t esep, eo;
 
 	esep = coord_esep(c);
 	edata = esep_classes[esep];
@@ -43,7 +43,7 @@ gendata_esep_classes(
 	bool visited[ESEP_MAX];
 	uint8_t t;
 	uint32_t class, cl, ti;
-	int64_t i, j;
+	uint64_t i, j;
 	cube_t c;
 
 	memset(visited, 0, ESEP_MAX * sizeof(bool));
@@ -73,7 +73,7 @@ gendata_eoesep(unsigned char *buf, uint8_t maxdepth)
 	unsigned char *buf8;
 	uint16_t rep[ESEP_CLASSES];
 	uint32_t *esep_classes, done, level;
-	int64_t coord;
+	uint64_t coord;
 	tableinfo_t info;
 
 	if (buf == NULL)
@@ -140,18 +140,18 @@ gendata_eoesep_fromdone(
 )
 {
 	uint8_t pval;
-	int64_t i, esep, eo, coord, done;
+	uint64_t i, esep, eo, coord, done;
 
 	done = 0;
-	for (i = 0; i < (int64_t)ESEP_CLASSES; i++) {
+	for (i = 0; i < ESEP_CLASSES; i++) {
 		esep = rep[i];
 		for (eo = 0; eo < POW_2_11; eo++) {
-			coord = (i << INT64_C(11)) + eo;
+			coord = (i << UINT64_C(11)) + eo;
 			pval = get_eoesep_pval(buf8, coord);
 			if (pval != d-1)
 				continue;
 
-			coord = (esep << INT64_C(11)) + eo;
+			coord = (esep << UINT64_C(11)) + eo;
 			done += gendata_eoesep_marksim(
 			    coord, d, buf8, esep_classes);
 		}
@@ -169,19 +169,19 @@ gendata_eoesep_fromnew(
 )
 {
 	uint8_t pval;
-	int64_t i, esep, eo, coord, done;
+	uint64_t i, esep, eo, coord, done;
 	cube_t c;
 
 	done = 0;
-	for (i = 0; i < (int64_t)ESEP_CLASSES; i++) {
+	for (i = 0; i < ESEP_CLASSES; i++) {
 		esep = rep[i];
 		for (eo = 0; eo < POW_2_11; eo++) {
-			coord = (i << INT64_C(11)) + eo;
+			coord = (i << UINT64_C(11)) + eo;
 			pval = get_eoesep_pval(buf8, coord);
 			if (pval != 15)
 				continue;
 
-			c = invcoord_eoesep((esep << INT64_C(11)) + eo);
+			c = invcoord_eoesep((esep << UINT64_C(11)) + eo);
 			if (gendata_eoesep_next(c, d, buf8, esep_classes)) {
 				set_eoesep_pval(buf8, coord, d);
 				done++;
@@ -194,7 +194,7 @@ gendata_eoesep_fromnew(
 
 STATIC uint32_t
 gendata_eoesep_marksim(
-	int64_t i,
+	uint64_t i,
 	uint8_t d,
 	uint8_t buf8[static EOESEP_BUF],
 	uint32_t esep_classes[static ESEP_MAX]
@@ -232,7 +232,7 @@ gendata_eoesep_next(
 )
 {
 	uint8_t m, t, pval;
-	int64_t coord;
+	uint64_t coord;
 	cube_t moved, transformed;
 
 	for (t = 0; t < NTRANS; t++) {
@@ -252,7 +252,7 @@ gendata_eoesep_next(
 STATIC uint8_t
 get_eoesep_pval(
 	const uint8_t table[static DIV_ROUND_UP(EOESEP_TABLESIZE, 2)],
-	int64_t i
+	uint64_t i
 )
 {
 	return (table[EOESEP_INDEX(i)] & EOESEP_MASK(i)) >> EOESEP_SHIFT(i);
@@ -261,7 +261,7 @@ get_eoesep_pval(
 STATIC uint8_t
 get_eoesep_pval_cube(const unsigned char *data, cube_t c)
 {
-	int64_t coord;
+	uint64_t coord;
 
 	coord = coord_eoesep_sym(c, (const uint32_t *)data);
 
@@ -271,7 +271,7 @@ get_eoesep_pval_cube(const unsigned char *data, cube_t c)
 STATIC void
 set_eoesep_pval(
 	uint8_t table[static DIV_ROUND_UP(EOESEP_TABLESIZE, 2)],
-	int64_t i,
+	uint64_t i,
 	uint8_t val
 )
 {

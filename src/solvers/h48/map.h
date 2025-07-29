@@ -12,7 +12,7 @@ h48map_create(h48map_t map[static 1], uint64_t capacity, uint64_t randomizer)
 	map->capacity = capacity;
 	map->randomizer = randomizer;
 
-	map->table = malloc(map->capacity * sizeof(int64_t));
+	map->table = malloc(map->capacity * sizeof(uint64_t));
 	h48map_clear(map);
 }
 

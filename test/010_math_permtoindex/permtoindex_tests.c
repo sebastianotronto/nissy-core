@@ -1,11 +1,11 @@
 #include "../test.h"
 
-int64_t permtoindex(size_t n, const uint8_t [n]);
+uint64_t permtoindex(size_t n, const uint8_t [n]);
 
 void run(void) {
 	char str[STRLENMAX];
 	uint8_t a[100];
-	int64_t n, i, p;
+	uint64_t n, i, p;
 
 	fgets(str, STRLENMAX, stdin);
 	n = atoll(str);
@@ -15,5 +15,5 @@ void run(void) {
 	}
 
 	p = permtoindex(n, a);
-	printf("%" PRId64 "\n", p);
+	printf("%" PRIu64 "\n", p);
 }

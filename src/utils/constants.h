@@ -1,17 +1,17 @@
 #define UINT8_BIT(i) (UINT8_C(1) << (uint8_t)(i))
 
-#define FACTORIAL_MAX INT64_C(12)
+#define FACTORIAL_MAX UINT64_C(12)
 
-#define POW_2_11   INT64_C(2048)
-#define POW_3_7    INT64_C(2187)
-#define FACT_12    INT64_C(479001600)
-#define FACT_8     INT64_C(40320)
-#define COMB_12_4  INT64_C(495)
-#define COMB_8_4   INT64_C(70)
+#define POW_2_11   UINT64_C(2048)
+#define POW_3_7    UINT64_C(2187)
+#define FACT_12    UINT64_C(479001600)
+#define FACT_8     UINT64_C(40320)
+#define COMB_12_4  UINT64_C(495)
+#define COMB_8_4   UINT64_C(70)
 
 #define UINT8_ERROR UINT8_MAX
 
-STATIC int64_t factorial[FACTORIAL_MAX+1] = {
+STATIC uint64_t factorial[FACTORIAL_MAX+1] = {
 	[0] = 1,
 	[1] = 1,
 	[2] = 2,
@@ -27,7 +27,7 @@ STATIC int64_t factorial[FACTORIAL_MAX+1] = {
 	[12] = 479001600,
 };
 
-STATIC int64_t binomial[12][12] = {
+STATIC uint64_t binomial[12][12] = {
 	{1,  0,  0,   0,   0,   0,   0,   0,   0,  0,  0, 0},
 	{1,  1,  0,   0,   0,   0,   0,   0,   0,  0,  0, 0},
 	{1,  2,  1,   0,   0,   0,   0,   0,   0,  0,  0, 0},

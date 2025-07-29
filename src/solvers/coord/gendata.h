@@ -29,7 +29,7 @@ gendata_coord_dispatch(
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	return (int64_t)gendata_coord(coord, buf);
+	return gendata_coord(coord, buf);
 }
 
 STATIC size_t

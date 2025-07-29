@@ -8,13 +8,13 @@
 #include "../test.h"
 
 size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
-int64_t coord_cocsep(cube_t);
+uint64_t coord_cocsep(cube_t);
 
 void run(void) {
 	char str[STRLENMAX];
 	unsigned char buf[2000000];
 	uint32_t *cocsepdata, data;
-	int64_t coord, coclass;
+	uint64_t coord, coclass;
 	uint64_t selfsim[COCSEP_CLASSES], sim, t;
 	oriented_cube_t cube;
 	cube_t rep[COCSEP_CLASSES];
@@ -32,7 +32,7 @@ void run(void) {
 		sim = selfsim[coclass];
 		for (t = 0; t < 48 && sim; t++, sim >>= 1) {
 			if (sim & 1)
-				printf("%" PRId64 " ", t);
+				printf("%" PRIu64 " ", t);
 		}
 		printf("\n");
 	}

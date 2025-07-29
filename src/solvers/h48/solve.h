@@ -36,9 +36,9 @@ typedef struct {
 	const unsigned char *h48data_fallback_eoesep;
 	uint64_t movemask_normal;
 	uint64_t movemask_inverse;
-	int64_t nodes_visited;
-	int64_t table_fallbacks;
-	int64_t table_lookups;
+	uint64_t nodes_visited;
+	uint64_t table_fallbacks;
+	uint64_t table_lookups;
 	int8_t threads;
 	int ntasks;
 	solve_h48_task_t *tasks;
@@ -463,7 +463,7 @@ solve_h48(
 	dfsarg_solve_h48_maketasks_t maketasks_arg;
 	long double fallback_rate, lookups_per_node;
 	uint64_t offset;
-	int64_t nodes_visited, table_lookups, table_fallbacks;
+	uint64_t nodes_visited, table_lookups, table_fallbacks;
 	tableinfo_t info, fbinfo, fbinfo2;
 	const uint32_t *cocsepdata;
 	const unsigned char *fallback, *h48data;
@@ -579,7 +579,7 @@ solve_h48(
 	    d++
 	) {
 		if (d >= H48_LOG_PROGRESS_MIN_DEPTH) {
-			LOG("[H48 solve] Found %" PRId64 " solutions, "
+			LOG("[H48 solve] Found %" PRIu64 " solutions, "
 			    "searching at depth %" PRId8 "\n",
 			    sollist.nsols, d);
 		}

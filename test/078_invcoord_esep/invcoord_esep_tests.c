@@ -1,12 +1,12 @@
 #include "../test.h"
 
-int64_t coord_esep(cube_t);
-cube_t invcoord_esep(int64_t);
+uint64_t coord_esep(cube_t);
+cube_t invcoord_esep(uint64_t);
 
 void run(void) {
 	char str[STRLENMAX];
 	oriented_cube_t cube;
-	int64_t i;
+	uint64_t i;
 
 	fgets(str, STRLENMAX, stdin);
 	cube = readcube(str);
@@ -15,5 +15,5 @@ void run(void) {
 	cube.cube = invcoord_esep(i);
 	i = coord_esep(cube.cube);
 
-	printf("%" PRId64 "\n", i);
+	printf("%" PRIu64 "\n", i);
 }

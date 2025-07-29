@@ -1,7 +1,6 @@
 #include "../test.h"
 
 size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
-int64_t coord_cocsep(cube_t);
 
 int bcount(uint64_t x) {
 	int ret;

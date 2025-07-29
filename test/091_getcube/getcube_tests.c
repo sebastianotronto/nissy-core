@@ -1,11 +1,11 @@
 #include "../test.h"
 
-cube_t getcube(int64_t, int64_t, int64_t, int64_t);
+cube_t getcube(uint64_t, uint64_t, uint64_t, uint64_t);
 
 void run(void) {
 	char str[STRLENMAX];
 	oriented_cube_t cube;
-	int64_t ep, eo, cp, co;
+	uint64_t ep, eo, cp, co;
 
 	fgets(str, STRLENMAX, stdin);
 	ep = atoll(str);

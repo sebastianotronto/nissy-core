@@ -18,12 +18,12 @@
 #define CBOUND_MASK         UINT32_C(0xFF)
 #define CBOUND(x)           ((x) & CBOUND_MASK)
 
-#define H48_COORDMAX_NOEO   ((int64_t)(COCSEP_CLASSES * ESEP_MAX))
-#define H48_COORDMAX(h)     (H48_COORDMAX_NOEO << (int64_t)(h))
+#define H48_COORDMAX_NOEO   (COCSEP_CLASSES * ESEP_MAX)
+#define H48_COORDMAX(h)     (H48_COORDMAX_NOEO << (uint64_t)(h))
 #define H48_DIV(k)          ((size_t)8 / (size_t)(k))
 #define H48_TABLESIZE(h, k) DIV_ROUND_UP((size_t)H48_COORDMAX((h)), H48_DIV(k))
 
-#define H48_COEFF(k)        (INT64_C(8) / (int64_t)(k))
+#define H48_COEFF(k)        (UINT64_C(8) / (uint64_t)(k))
 #define H48_INDEX(i, k)     ((i) / H48_COEFF(k))
 #define H48_SHIFT(i, k)     ((uint8_t)(k) * (uint8_t)((i) % H48_COEFF(k)))
 #define H48_MASK(i, k)      ((UINT8_BIT(k) - UINT8_C(1)) << H48_SHIFT(i, k))
@@ -36,10 +36,10 @@ transforming edges, but we need to compose transformations (i.e. conjugate
 VAR_T by VAR_TTREP).
 */
 #define FOREACH_H48SIM(ARG_CUBE, ARG_COCSEPDATA, ARG_SELFSIM, ARG_ACTION) \
-	int64_t VAR_COCSEP = coord_cocsep(ARG_CUBE); \
+	uint64_t VAR_COCSEP = coord_cocsep(ARG_CUBE); \
 	uint8_t VAR_TTREP = TTREP(ARG_COCSEPDATA[VAR_COCSEP]); \
 	uint8_t VAR_INVERSE_TTREP = inverse_trans(VAR_TTREP); \
-	int64_t VAR_COCLASS = COCLASS(ARG_COCSEPDATA[VAR_COCSEP]); \
+	uint64_t VAR_COCLASS = COCLASS(ARG_COCSEPDATA[VAR_COCSEP]); \
 	cube_t VAR_REP = transform(ARG_CUBE, VAR_TTREP); \
 	uint64_t VAR_S = ARG_SELFSIM[VAR_COCLASS]; \
 	for (uint8_t VAR_T = 0; VAR_T < NTRANS && VAR_S; VAR_T++, VAR_S >>= 1) { \

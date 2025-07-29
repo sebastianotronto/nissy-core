@@ -2,9 +2,9 @@ STATIC size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
 STATIC uint32_t gendata_cocsep_dfs(cocsep_dfs_arg_t [static 1]);
 
 STATIC_INLINE bool gendata_cocsep_get_visited(
-    const uint8_t [static COCSEP_VISITEDSIZE], int64_t);
+    const uint8_t [static COCSEP_VISITEDSIZE], uint64_t);
 STATIC_INLINE void gendata_cocsep_set_visited(
-    uint8_t [static COCSEP_VISITEDSIZE], int64_t);
+    uint8_t [static COCSEP_VISITEDSIZE], uint64_t);
 
 STATIC_INLINE int8_t get_h48_cdata(
     cube_t, const uint32_t [static COCSEP_TABLESIZE], uint32_t *);
@@ -84,7 +84,7 @@ gendata_cocsep_dfs(cocsep_dfs_arg_t arg[static 1])
 	uint8_t m;
 	uint32_t cc, class, ttrep, depth, olddepth, tinv;
 	uint64_t t;
-	int64_t i, j;
+	uint64_t i, j;
 	cube_t d;
 	cocsep_dfs_arg_t nextarg;
 
@@ -136,7 +136,7 @@ gendata_cocsep_dfs(cocsep_dfs_arg_t arg[static 1])
 STATIC_INLINE bool
 gendata_cocsep_get_visited(
 	const uint8_t a[static COCSEP_VISITEDSIZE],
-	int64_t i
+	uint64_t i
 )
 {
 	return a[VISITED_IND(i)] & VISITED_MASK(i);
@@ -145,7 +145,7 @@ gendata_cocsep_get_visited(
 STATIC_INLINE void
 gendata_cocsep_set_visited(
 	uint8_t a[static COCSEP_VISITEDSIZE],
-	int64_t i
+	uint64_t i
 )
 {
 	a[VISITED_IND(i)] |= VISITED_MASK(i);
@@ -158,7 +158,7 @@ get_h48_cdata(
 	uint32_t *cdata
 )
 {
-	int64_t coord;
+	uint64_t coord;
 
 	coord = coord_cocsep(cube);
 	*cdata = cocsepdata[coord];

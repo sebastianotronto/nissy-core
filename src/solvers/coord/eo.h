@@ -44,7 +44,7 @@ STATIC cube_t
 coordinate_eo_cube(uint64_t c, const unsigned char *data)
 {
 	cube_t cube = SOLVED_CUBE;
-	set_eo(&cube, (int64_t)c);
+	set_eo(&cube, c);
 	return cube;
 }
 

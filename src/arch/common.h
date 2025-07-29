@@ -22,30 +22,30 @@ STATIC_INLINE cube_t compose_corners(cube_t, cube_t);
 STATIC_INLINE cube_t compose(cube_t, cube_t);
 STATIC_INLINE cube_t inverse(cube_t);
 
-STATIC_INLINE int64_t coord_co(cube_t);
-STATIC_INLINE cube_t invcoord_co(int64_t);
-STATIC_INLINE int64_t coord_csep(cube_t);
-STATIC_INLINE int64_t coord_cocsep(cube_t);
-STATIC_INLINE int64_t coord_eo(cube_t);
-STATIC_INLINE int64_t coord_esep(cube_t);
-STATIC_INLINE cube_t invcoord_esep(int64_t);
+STATIC_INLINE uint64_t coord_co(cube_t);
+STATIC_INLINE cube_t invcoord_co(uint64_t);
+STATIC_INLINE uint64_t coord_csep(cube_t);
+STATIC_INLINE uint64_t coord_cocsep(cube_t);
+STATIC_INLINE uint64_t coord_eo(cube_t);
+STATIC_INLINE uint64_t coord_esep(cube_t);
+STATIC_INLINE cube_t invcoord_esep(uint64_t);
 
 STATIC_INLINE void copy_corners(cube_t [static 1], cube_t);
 STATIC_INLINE void copy_edges(cube_t [static 1], cube_t);
-STATIC_INLINE void set_eo(cube_t [static 1], int64_t);
+STATIC_INLINE void set_eo(cube_t [static 1], uint64_t);
 
-STATIC_INLINE void invcoord_esep_array(int64_t, int64_t, uint8_t[static 12]);
-STATIC_INLINE cube_t invcoord_eoesep(int64_t);
+STATIC_INLINE void invcoord_esep_array(uint64_t, uint64_t, uint8_t[static 12]);
+STATIC_INLINE cube_t invcoord_eoesep(uint64_t);
 
-STATIC_INLINE int64_t coord_cp(cube_t);
-STATIC_INLINE cube_t invcoord_cp(int64_t);
-STATIC_INLINE int64_t coord_epud(cube_t);
-STATIC_INLINE cube_t invcoord_epud(int64_t);
+STATIC_INLINE uint64_t coord_cp(cube_t);
+STATIC_INLINE cube_t invcoord_cp(uint64_t);
+STATIC_INLINE uint64_t coord_epud(cube_t);
+STATIC_INLINE cube_t invcoord_epud(uint64_t);
 
 STATIC_INLINE void
-invcoord_esep_array(int64_t set1, int64_t set2, uint8_t mem[static 12])
+invcoord_esep_array(uint64_t set1, uint64_t set2, uint8_t mem[static 12])
 {
-	int64_t bit1, bit2, i, j, jj, k, l, s, v, w, is1;
+	uint64_t bit1, bit2, i, j, jj, k, l, s, v, w, is1;
 	uint8_t slice[3] = {0};
 
 	for (i = 0, j = 0, k = 4, l = 4; i < 12; i++)
@@ -69,10 +69,10 @@ invcoord_esep_array(int64_t set1, int64_t set2, uint8_t mem[static 12])
 }
 
 STATIC_INLINE cube_t
-invcoord_eoesep(int64_t i)
+invcoord_eoesep(uint64_t i)
 {
 	cube_t c;
-	int64_t esep, eo;
+	uint64_t esep, eo;
 
 	esep = i >> INT64_C(11);
 	eo = i % POW_2_11;

@@ -2,12 +2,13 @@
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
 #define DIV_ROUND_UP(n, d) (((n) + (d) - 1) / (d))
+#define POSITIVE_MOD(x, y) (((x) % (y) + (y)) % (y))
 
-STATIC int64_t permtoindex(size_t, const uint8_t *);
-STATIC void indextoperm(int64_t, size_t, uint8_t *);
+STATIC uint64_t permtoindex(size_t, const uint8_t *);
+STATIC void indextoperm(uint64_t, size_t, uint8_t *);
 STATIC int permsign(size_t, const uint8_t *);
-STATIC int64_t digitstosumzero(size_t, const uint8_t *, uint8_t);
-STATIC void sumzerotodigits(int64_t, size_t, uint8_t, uint8_t *);
+STATIC uint64_t digitstosumzero(size_t, const uint8_t *, uint8_t);
+STATIC void sumzerotodigits(uint64_t, size_t, uint8_t, uint8_t *);
 STATIC double intpow(double, uint64_t);
 
 /* This code is only used for assertions in debug mode */
@@ -36,14 +37,14 @@ isperm(size_t n, const uint8_t *a)
 }
 #endif
 
-STATIC int64_t
+STATIC uint64_t
 permtoindex(size_t n, const uint8_t *a)
 {
 	size_t i, j;
-	int64_t c, ret;
+	uint64_t c, ret;
 
 	DBG_ASSERT(n <= FACTORIAL_MAX, "Error: cannot compute permtoindex() "
-	    "for set of size %zu > %" PRId64 "\n", n, FACTORIAL_MAX);
+	    "for set of size %zu > %" PRIu64 "\n", n, FACTORIAL_MAX);
 	DBG_ASSERT(isperm(n, a), "Error: cannot compute permtoindex() for "
 	    "invalid permutation\n");
 
@@ -57,15 +58,15 @@ permtoindex(size_t n, const uint8_t *a)
 }
 
 STATIC void
-indextoperm(int64_t p, size_t n, uint8_t *r)
+indextoperm(uint64_t p, size_t n, uint8_t *r)
 {
-	int64_t c, k;
+	uint64_t c, k;
 	size_t i, j, used;
 
 	DBG_ASSERT(n <= FACTORIAL_MAX, "Error: cannot compute indextoperm() "
-	    "for set of size %zu > %" PRId64 "\n", n, FACTORIAL_MAX);
-	DBG_ASSERT(p >= 0 && p < factorial[n], "Error: invalid permutation "
-	    "index %" PRId64 " for set of size %zu\n", p, n);
+	    "for set of size %zu > %" PRIu64 "\n", n, FACTORIAL_MAX);
+	DBG_ASSERT(p < factorial[n], "Error: invalid permutation index %"
+	    PRIu64 " for set of size %zu\n", p, n);
 
 	for (i = 0, used = 0; i < n; i++) {
 		k = p / factorial[n-i-1];
@@ -94,28 +95,28 @@ permsign(size_t n, const uint8_t *a)
 	return ret % 2;
 }
 
-STATIC int64_t
+STATIC uint64_t
 digitstosumzero(size_t n, const uint8_t *a, uint8_t b)
 {
-	int64_t ret, p;
+	uint64_t ret, p;
 	size_t i, sum;
 
 	DBG_ASSERT((n == 8 && b == 3 ) || (n == 12 && b == 2),
 	    "Error: digitstosumzero() called with n=%zu and b=%" PRIu8
 	    " (use n=8 b=3 or n=12 b=2)\n", n, b);
 
-	for (i = 1, ret = 0, p = 1, sum = 0; i < n; i++, p *= (int64_t)b) {
+	for (i = 1, ret = 0, p = 1, sum = 0; i < n; i++, p *= (uint64_t)b) {
 		DBG_ASSERT(a[i] < b, "Error: digit %" PRIu8
 		    " > %" PRIu8 "in digitstosumzero()\n", a[i], b);
 		sum += a[i];
-		ret += p * (int64_t)a[i];
+		ret += p * (uint64_t)a[i];
 	}
 
 	return ret;
 }
 
 STATIC void
-sumzerotodigits(int64_t d, size_t n, uint8_t b, uint8_t *a)
+sumzerotodigits(uint64_t d, size_t n, uint8_t b, uint8_t *a)
 {
 	uint8_t sum;
 	size_t i;
@@ -124,8 +125,8 @@ sumzerotodigits(int64_t d, size_t n, uint8_t b, uint8_t *a)
 	    "Error: sumzerotodigits() called with n=%zu and b=%" PRIu8
 	    " (use n=8 b=3 or n=12 b=2)\n", n, b);
 
-	for (i = 1, sum = 0; i < n; i++, d /= (int64_t)b) {
-		a[i] = (uint8_t)(d % (int64_t)b);
+	for (i = 1, sum = 0; i < n; i++, d /= (uint64_t)b) {
+		a[i] = (uint8_t)(d % (uint64_t)b);
 		sum += a[i];
 	}
 	a[0] = (b - (sum % b)) % b;
