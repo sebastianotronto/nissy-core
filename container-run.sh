@@ -69,7 +69,7 @@ EOF
 docker build "$platform" -f "$dockerfile" -t "$image" .
 rm "$dockerfile"
 
-if [ -z "$2" ]; then 
+if [ -z "$1" ]; then 
 	docker run $flags $mount "$platform" -it "$image" /bin/sh
 else
 	docker run $flags $mount "$platform" -t "$image" $@
