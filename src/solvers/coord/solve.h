@@ -261,8 +261,8 @@ solve_coord(
 {
 	int8_t d;
 	uint8_t t;
-	int64_t ndepth;
 	uint64_t i;
+	int64_t err;
 	cube_t c;
 	const unsigned char *coord_data;
 	const unsigned char *ptable;
@@ -337,12 +337,8 @@ solve_coord(
 
 		arg.target_depth = d;
 		solution_moves_reset(arg.solution_moves);
-		ndepth = solve_coord_dfs(&arg);
-
-		if (ndepth < 0)
-			return ndepth;
-
-		solution_list.nsols += (uint64_t)ndepth;
+		if ((err = solve_coord_dfs(&arg)) < 0)
+			return err;
 	}
 
 solve_coord_done:

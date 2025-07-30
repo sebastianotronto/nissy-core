@@ -255,7 +255,6 @@ solutions_done(
 	int8_t depth
 )
 {
-
 	return depth > settings->maxmoves ||
 	    depth > list->shortest_sol + settings->optimal ||
 	    list->nsols >= settings->maxsolutions;
