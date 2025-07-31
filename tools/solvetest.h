@@ -119,7 +119,7 @@ void run(void) {
 }
 
 int main(int argc, char **argv) {
-	char filename[255], dataid[NISSY_SIZE_DATAID];
+	char filename[7+NISSY_SIZE_DATAID], dataid[NISSY_SIZE_DATAID];
 
 	if (argc < 2) {
 		printf("Error: not enough arguments. "
@@ -131,11 +131,10 @@ int main(int argc, char **argv) {
 	srand(time(NULL));
 	nissy_setlogger(log_stderr, NULL);
 
-	sprintf(filename, "tables/%s", solver);
+	size = nissy_solverinfo(solver, dataid);
+	sprintf(filename, "tables/%s", dataid);
 	if (getdata(solver, &buf, filename) != 0)
 		return 1;
-
-	size = nissy_solverinfo(solver, dataid);
 
 	timerun(run);
 

@@ -80,6 +80,7 @@ generatetable(
 		printf("Error getting table size.\n");
 		return -1;
 	}
+printf("In generatetable %s\n", dataid);
 
 	*buf = malloc(size);
 	gensize = nissy_gendata(solver, size, *buf);
@@ -157,7 +158,6 @@ gendata_run(
 		printf("Succesfully generated %lld bytes. "
 		       "See above for details on the tables.\n", size);
 
-		/* TODO: check that the table is correct */
 		writetable(buf, size, filename);
 		break;
 	}
