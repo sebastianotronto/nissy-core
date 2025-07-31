@@ -20,7 +20,6 @@ STATIC long long solve_coord_dispatch(oriented_cube_t, const char *, unsigned,
     const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
 STATIC bool coord_solution_admissible(const dfsarg_solve_coord_t [static 1]);
-STATIC bool solve_coord_dfs_stop(const dfsarg_solve_coord_t [static 1]);
 STATIC bool coord_continue_onnormal(const dfsarg_solve_coord_t [static 1]);
 STATIC bool coord_continue_oninverse(const dfsarg_solve_coord_t [static 1]);
 STATIC int64_t solve_coord_dfs(dfsarg_solve_coord_t [static 1]);
@@ -39,34 +38,10 @@ coord_solution_admissible(const dfsarg_solve_coord_t arg[static 1])
 }
 
 STATIC bool
-solve_coord_dfs_stop(const dfsarg_solve_coord_t arg[static 1])
-{
-	bool hasnissed;
-	uint8_t n, pval;
-	uint64_t coord;
-	const cube_t *c;
-
-	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
-	if (n >= arg->target_depth)
-		return true;
-
-	hasnissed = arg->solution_moves->nmoves > 0 &&
-	    arg->solution_moves->npremoves > 0;
-	if (!hasnissed && (arg->nissflag & NISSY_NISSFLAG_MIXED))
-		return false;
-
-	c = arg->lastisnormal ? &arg->cube : &arg->inverse;
-
-	coord = arg->coord->coord(*c, arg->coord_data);
-	pval = get_coord_pval(arg->coord, arg->ptable, coord);
-
-	return n + pval > arg->target_depth;
-}
-
-STATIC bool
 coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 {
-	uint8_t flag, nn, ni, swbound_n, swbound_i;
+	uint8_t flag, nn, ni, swbound_n, swbound_i, pval;
+	uint64_t coord;
 
 	flag = arg->nissflag;
 	nn = arg->solution_moves->nmoves;
@@ -81,6 +56,14 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 	/* It's the first move */
 	if (nn + ni == 0)
 		return true;
+
+	/* Pruning table check */
+	if (!(flag & NISSY_NISSFLAG_MIXED) || ni != 0) {
+		coord = arg->coord->coord(arg->cube, arg->coord_data);
+		pval = get_coord_pval(arg->coord, arg->ptable, coord);
+		if (nn + ni + pval > arg->target_depth)
+			return false;
+	}
 
 	if (arg->lastisnormal) {
 		/* Can continue if we have already switched */
@@ -111,7 +94,8 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 STATIC bool
 coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 {
-	uint8_t flag, nn, ni, swbound_n, swbound_i;
+	uint8_t flag, nn, ni, swbound_n, swbound_i, pval;
+	uint64_t coord;
 
 	flag = arg->nissflag;
 	nn = arg->solution_moves->nmoves;
@@ -126,6 +110,14 @@ coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 	/* It's the first move */
 	if (nn + ni == 0)
 		return true;
+
+	/* Pruning table check */
+	if (!(flag & NISSY_NISSFLAG_MIXED) || nn != 0) {
+		coord = arg->coord->coord(arg->inverse, arg->coord_data);
+		pval = get_coord_pval(arg->coord, arg->ptable, coord);
+		if (nn + ni + pval > arg->target_depth)
+			return false;
+	}
 
 	if (!arg->lastisnormal) {
 		/* Can continue if we have already switched */
@@ -157,7 +149,7 @@ STATIC int64_t
 solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 {
 	bool lastbackup;
-	uint8_t m, l, nnbackup, nibackup;
+	uint8_t m, l, nnbackup, nibackup, nmoves;
 	uint32_t mm;
 	uint64_t coord;
 	int64_t n, ret;
@@ -171,14 +163,15 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 		    arg->solution_settings, arg->solution_list);
 	}
 
-	if (solve_coord_dfs_stop(arg))
-		return 0;
-
 	backup_cube = arg->cube;
 	backup_inverse = arg->inverse;
 	lastbackup = arg->lastisnormal;
 	nnbackup = arg->solution_moves->nmoves;
 	nibackup = arg->solution_moves->npremoves;
+	nmoves = nnbackup + nibackup;
+
+	if (nmoves >= arg->target_depth)
+		return 0;
 
 	ret = 0;
 	if (coord_continue_onnormal(arg)) {
