@@ -20,4 +20,4 @@ while read -r scramble; do
 	i=$((i+1))
 done
 
-printf "};\n"
+printf '{\n\t.scramble = "", /* End-of-list signal */\n}\n};\n'

@@ -1,48 +1,94 @@
 #include "tool.h"
 
-#define SOL_BUFFER_LEN 100000
+#define SOL_BUFFER_LEN   100000
+#define MAX_SOLUTIONS    1000
+#define MAX_SOLUTION_LEN 1000
 
 char *solver;
 int64_t size = 0;
 unsigned char *buf;
 
-bool check_one(char *actual, char *expected) {
-	unsigned i;
-	size_t l_actual, l_expected;
+bool check_one(
+	const char *astr,
+	const char *aname,
+	const char *bstr,
+	const char *bname,
+	bool exp[static MAXSOLUTIONS]
+) {
+	size_t i, j, nn, lb;
+	char b[MAX_SOLUTION_LEN];
 
-	for (l_actual = 0; actual[l_actual] != '\n'; l_actual++) ;
-	l_expected = strlen(expected);
-	if (l_actual > l_expected)
-		return false;
-	for (i = 0; i < l_expected; i++) {
-		if (!strncmp(actual, &expected[i], l_actual))
+	lb = strlen(bstr);
+	for (i = 0, j = 0, nn = 0; i < lb; j++, i = ++nn) {
+		while (bstr[nn] != '\n') nn++;
+		strncpy(b, &bstr[i], nn-i);
+		b[nn-i] = '\0';
+		if (nissy_comparemoves(astr, b) == NISSY_COMPARE_MOVES_EQUAL) {
+			if (exp[j]) {
+				printf("%s solution %s found twice\n",
+				    aname, b);
+				return false;
+			}
+			exp[j] = true;
 			return true;
-		while(expected[i] != '\n') i++;
+		}
 	}
+
+	printf("%s solution %s not found in %s\n", aname, astr, bname);
 	return false;
 }
 
-bool check_all(char *actual, char *expected) {
-	unsigned i, found, n_expected;
-	size_t l_actual;
+size_t count_lines(const char *str) {
+	size_t i, ret;
 
-	l_actual = strlen(actual);
-	if (l_actual != strlen(expected))
-		return false;
+	for (i = 0, ret = 0; str[i] != '\0'; i++)
+		ret += str[i] == '\n';
 
-	for (i = 0, n_expected = 0; expected[i]; i++)
-		n_expected += expected[i] == '\n';
+	return ret;
+}
 
-	for (i = 0, found = 0; i < l_actual; i++)
-		if (i == 0 || actual[i-1] == '\n')
-			found += check_one(&actual[i], expected);
+bool find_strlist(
+	const char *astr,
+	const char *aname,
+	const char *bstr,
+	const char *bname
+)
+{
+	size_t i, nn, la;
+	char a[MAX_SOLUTION_LEN];
+	bool exp[MAX_SOLUTIONS];
 
-	return found == n_expected;
+	memset(exp, false, MAX_SOLUTIONS * sizeof(bool));
+
+	la = strlen(astr);
+	for (i = 0, nn = 0; i < la; i = ++nn) {
+		while (astr[nn] != '\n') nn++;
+		strncpy(a, &astr[i], nn-i);
+		a[nn-i] = '\0';
+		if (!check_one(a, aname, bstr, bname, exp))
+			return false;
+	}
+
+	return true;
+}
+
+bool check_all(const char *actual, const char *expected) {
+	size_t n_actual, n_expected;
+
+	n_actual = count_lines(actual);
+	n_expected = count_lines(expected);
+	if (n_actual < n_expected)
+		printf("Found less solutions than expected\n");
+	if (n_actual > n_expected)
+		printf("Found more solutions than expected\n");
+
+	return n_actual > n_expected ?
+	    find_strlist(actual, "actual", expected, "expected") :
+	    find_strlist(expected, "expected", actual, "actual");
 }
 
 void run(void) {
 	int i;
-	int64_t n;
 	long long stats[NISSY_SIZE_SOLVE_STATS];
 	char sol[SOL_BUFFER_LEN], cube[NISSY_SIZE_CUBE];
 
@@ -55,7 +101,7 @@ void run(void) {
 			printf("Invalid scramble\n");
 			continue;
 		}
-		n = nissy_solve(cube, solver,
+		nissy_solve(cube, solver,
 		    NISSFLAG, MINMOVES, MAXMOVES, MAXSOLUTIONS, OPTIMAL,
 		    0, size, buf, SOL_BUFFER_LEN, sol, stats,
 		    NULL, NULL);

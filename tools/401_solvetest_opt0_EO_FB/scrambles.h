@@ -297,4 +297,7 @@ struct {
 		"(R F L F B)\n"
 		"(R F L' F B)\n"
 },
+{
+	.scramble = "", /* End-of-list signal */
+}
 };
