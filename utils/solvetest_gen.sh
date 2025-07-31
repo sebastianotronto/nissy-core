@@ -1,5 +1,9 @@
 #!/bin/sh
 
+# use like e.g.
+# nissy scramble -n 20 | ./utils/solvetest_gen.sh eofb -o -N | \
+#     tee tools/401_solvetest_opt0_EO_FB/scrambles.h
+
 args="$@"
 
 getsolutions() {
