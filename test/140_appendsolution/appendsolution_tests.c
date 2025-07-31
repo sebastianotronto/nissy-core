@@ -14,7 +14,7 @@ See below for the output format.
 
 uint8_t readtrans(const char [NISSY_SIZE_TRANSFORMATION]);
 int64_t readmoves(const char *, size_t n, size_t m,
-    uint64_t *, uint64_t *, uint8_t [n], uint8_t [m]);
+    size_t *, size_t *, uint8_t [n], uint8_t [m]);
 void solution_moves_reset(solution_moves_t [static 1]);
 bool solution_list_init(solution_list_t [static 1], size_t n, char [n]);
 int64_t appendsolution(const solution_moves_t [static 1],
@@ -23,7 +23,7 @@ int64_t appendsolution(const solution_moves_t [static 1],
 void run(void) {
 	int i, ntrans;
 	int64_t tot;
-	uint64_t nm, np;
+	size_t nm, np;
 	char str[STRLENMAX], buf[STRLENMAX];
 	solution_moves_t moves;
 	solution_settings_t settings;

@@ -55,6 +55,14 @@ namespace nissy {
 		static const status PAUSE;
 	};
 
+	class compare_result {
+	public:
+		long long value;
+
+		static const compare_result EQUAL;
+		static const compare_result DIFFERENT;
+	};
+
 	class cube {
 	public:
 		cube();
@@ -103,6 +111,8 @@ namespace nissy {
 	};
 
 	error count_moves(const std::string&);
+	std::variant<error, compare_result> compare_moves(
+	    const std::string&, const std::string&);
 	void set_logger(void (*)(const char *, void *), void *);
 }
 

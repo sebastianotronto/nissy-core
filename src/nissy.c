@@ -354,6 +354,18 @@ nissy_countmoves(
 }
 
 long long
+nissy_comparemoves(
+	const char *moves1,
+	const char *moves2
+)
+{
+	if (moves1 == NULL || moves2 == NULL)
+		return NISSY_ERROR_NULL_POINTER;
+
+	return comparemoves(moves1, moves2);
+}
+
+long long
 nissy_setlogger(
 	void (*log)(const char *, void *),
 	void *user_data

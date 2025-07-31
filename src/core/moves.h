@@ -3,8 +3,12 @@
 
 STATIC uint8_t readmove(char);
 STATIC int64_t readmoves(const char *,
-    size_t, size_t, uint64_t *, uint64_t *, uint8_t *, uint8_t *);
+    size_t, size_t, size_t *, size_t *, uint8_t *, uint8_t *);
+STATIC int64_t readmoves_struct(const char *, moves_struct_t [static 1]);
 STATIC int64_t countmoves(const char *);
+STATIC bool moves_struct_equal(
+    const moves_struct_t [static 1], const moves_struct_t [static 1]);
+STATIC long long comparemoves(const char *, const char *);
 STATIC uint8_t readmodifier(char);
 STATIC int64_t writemoves(size_t, const uint8_t *, size_t, char *);
 
@@ -124,8 +128,8 @@ readmoves(
 	const char *buf,
 	size_t nsize,
 	size_t invsize,
-	uint64_t *n,
-	uint64_t *i,
+	size_t *n,
+	size_t *i,
 	uint8_t *normal,
 	uint8_t *inverse
 )
@@ -154,6 +158,13 @@ readmoves(
 }
 
 STATIC int64_t
+readmoves_struct(const char *moves, moves_struct_t ret[static 1])
+{
+	return readmoves(moves, MOVES_STRUCT_MAXLEN, MOVES_STRUCT_MAXLEN,
+	    &ret->nnormal, &ret->ninverse, ret->normal, ret->inverse);
+}
+
+STATIC int64_t
 countmoves(const char *buf)
 {
 	uint8_t m;
@@ -166,6 +177,58 @@ countmoves(const char *buf)
 	)
 
 	return count;
+}
+
+STATIC bool
+moves_struct_equal(
+	const moves_struct_t ms1[static 1],
+	const moves_struct_t ms2[static 1]
+)
+{
+	size_t i;
+
+	if (ms1->nnormal != ms2->nnormal || ms1->ninverse != ms2->ninverse)
+		return false;
+
+	for (i = 0; i < ms1->nnormal; i++)
+		if (ms1->normal[i] != ms2->normal[i])
+			return false;
+
+	for (i = 0; i < ms1->ninverse; i++)
+		if (ms1->inverse[i] != ms2->inverse[i])
+			return false;
+
+	return true;
+}
+
+STATIC long long
+comparemoves(const char *moves1, const char *moves2)
+{
+	int64_t err;
+	moves_struct_t ms1, ms2;
+
+	if ((err = readmoves_struct(moves1, &ms1)) < 0)
+		return err;
+	sortparallel_moves(ms1.nnormal, ms1.normal);
+	sortparallel_moves(ms1.ninverse, ms1.inverse);
+
+	if ((err = readmoves_struct(moves2, &ms2)) < 0)
+		return err;
+	sortparallel_moves(ms2.nnormal, ms2.normal);
+	sortparallel_moves(ms2.ninverse, ms2.inverse);
+
+	if (moves_struct_equal(&ms1, &ms2))
+		return NISSY_COMPARE_MOVES_EQUAL;
+
+	/*
+	TODO: more types of move comparison
+	      - up to moving rotations around
+	      - up to rotation
+	      - up transformation (including mirror or not including it)
+	      - ...
+	*/
+
+	return NISSY_COMPARE_MOVES_DIFFERENT;
 }
 
 STATIC int64_t

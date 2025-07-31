@@ -345,6 +345,42 @@ countmoves(PyObject *self, PyObject *args)
 	return long_result(count);
 }
 
+PyDoc_STRVAR(comparemoves_doc,
+"comparemoves(moves1, moves2)\n"
+"--\n\n"
+"Compare the two move sequences\n"
+"\n"
+"Parameters:\n"
+"  - moves1: the first sequence of moves\n"
+"  - moves2: the second sequence of moves\n"
+"\n"
+"Returns: a string describing how the two moves sequences compare. "
+"This can be one of:\n"
+"\"EQUAL\"      - The two sequences are equal up to swapping parallel moves\n"
+"\"DIFFERENT\"  - The two sequences are different\n"
+);
+PyObject *
+comparemoves(PyObject *self, PyObject *args)
+{
+	long long cmp;
+	const char *m1, *m2;
+
+	if (!PyArg_ParseTuple(args, "ss", &m1, &m2))
+		return NULL;
+
+	if ((cmp = nissy_comparemoves(m1, m2)) < 0)
+		return long_result(cmp);
+
+	switch (cmp) {
+	case NISSY_COMPARE_MOVES_EQUAL:
+		return string_result(cmp, "EQUAL");
+	case NISSY_COMPARE_MOVES_DIFFERENT:
+		return string_result(cmp, "DIFFERENT");
+	default:
+		return long_result(cmp);
+	}
+}
+
 static PyMethodDef nissy_methods[] = {
 	{ "inverse", inverse, METH_VARARGS, inverse_doc },
 	{ "applymoves", applymoves, METH_VARARGS, applymoves_doc },
@@ -355,6 +391,7 @@ static PyMethodDef nissy_methods[] = {
 	{ "checkdata", checkdata, METH_VARARGS, checkdata_doc },
 	{ "solve", solve, METH_VARARGS, solve_doc },
 	{ "countmoves", countmoves, METH_VARARGS, countmoves_doc },
+	{ "comparemoves", comparemoves, METH_VARARGS, comparemoves_doc },
 	{ NULL, NULL, 0, NULL }
 };
 

@@ -18,6 +18,7 @@
 #define FLAG_COMMAND      "-command"
 #define FLAG_STR_CUBE     "-cubestr"
 #define FLAG_MOVES        "-moves"
+#define FLAG_MOVES2       "-moves2"
 #define FLAG_TRANS        "-trans"
 #define FLAG_SOLVER       "-solver"
 #define FLAG_NISSTYPE     "-nisstype"
@@ -39,6 +40,7 @@ typedef struct {
 	char *str_command;
 	char *str_cube;
 	char *str_moves;
+	char *str_moves2;
 	char *str_trans;
 	char *str_solver;
 	char *str_nisstype;
@@ -59,6 +61,7 @@ static int64_t gendata_exec(args_t *);
 static int64_t solve_exec(args_t *);
 static int64_t solve_scramble_exec(args_t *);
 static int64_t countmoves_exec(args_t *);
+static int64_t comparemoves_exec(args_t *);
 static int64_t help_exec(args_t *);
 
 static int parse_args(int, char **, args_t *);
@@ -69,6 +72,7 @@ static bool set_cube(int, char **, args_t *);
 static bool set_str_command(int, char **, args_t *);
 static bool set_str_cube(int, char **, args_t *);
 static bool set_str_moves(int, char **, args_t *);
+static bool set_str_moves2(int, char **, args_t *);
 static bool set_str_trans(int, char **, args_t *);
 static bool set_str_solver(int, char **, args_t *);
 static bool set_str_nisstype(int, char **, args_t *);
@@ -91,6 +95,7 @@ struct {
 	OPTION(FLAG_COMMAND, 1, set_str_command),
 	OPTION(FLAG_STR_CUBE, 1, set_str_cube),
 	OPTION(FLAG_MOVES, 1, set_str_moves),
+	OPTION(FLAG_MOVES2, 1, set_str_moves2),
 	OPTION(FLAG_TRANS, 1, set_str_trans),
 	OPTION(FLAG_SOLVER, 1, set_str_solver),
 	OPTION(FLAG_NISSTYPE, 1, set_str_nisstype),
@@ -183,6 +188,13 @@ struct {
 		"Count the given MOVES in HTM. "
 		INFO_MOVESFORMAT,
 		countmoves_exec
+	),
+	COMMAND(
+		"compare",
+		"compare " FLAG_MOVES " MOVES " FLAG_MOVES2 " MOVES2",
+		"Compare the two move sequences."
+		INFO_MOVESFORMAT,
+		comparemoves_exec
 	),
 	COMMAND(
 		"help",
@@ -476,6 +488,29 @@ countmoves_exec(args_t *args)
 }
 
 static int64_t
+comparemoves_exec(args_t *args)
+{
+	long long cmp;
+
+	if ((cmp = nissy_comparemoves(args->str_moves, args->str_moves2)) < 0)
+		return cmp;
+
+	switch (cmp) {
+	case NISSY_COMPARE_MOVES_EQUAL:
+		printf("The two move sequences are equal\n");
+		break;
+	case NISSY_COMPARE_MOVES_DIFFERENT:
+		printf("The two move sequences are different\n");
+		break;
+	default:
+		printf("Error: unknown case\n");
+		return -1;
+	}
+
+	return 0;
+}
+
+static int64_t
 help_exec(args_t *args)
 {
 	int i;
@@ -512,6 +547,7 @@ parse_args(int argc, char **argv, args_t *args)
 		.cube = "",
 		.str_cube = "",
 		.str_moves = "",
+		.str_moves2 = "",
 		.str_trans = "",
 		.str_solver = "",
 		.str_nisstype = "",
@@ -627,6 +663,14 @@ static bool
 set_str_moves(int argc, char **argv, args_t *args)
 {
 	args->str_moves = argv[0];
+
+	return true;
+}
+
+static bool
+set_str_moves2(int argc, char **argv, args_t *args)
+{
+	args->str_moves2 = argv[0];
 
 	return true;
 }

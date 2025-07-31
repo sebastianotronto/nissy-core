@@ -42,6 +42,10 @@ for example 'rotation UF' or 'mirrored BL'.
 #define NISSY_STATUS_STOP   1
 #define NISSY_STATUS_PAUSE  2
 
+/* Possible results of move sequence comparison */
+#define NISSY_COMPARE_MOVES_EQUAL     0
+#define NISSY_COMPARE_MOVES_DIFFERENT 99
+
 /* The solved cube */
 #define NISSY_SOLVED_CUBE "ABCDEFGH=ABCDEFGHIJKL=A"
 
@@ -372,6 +376,24 @@ Return values:
 long long
 nissy_countmoves(
 	const char *moves
+);
+
+/*
+Parameters:
+   moves1 - The first sequence of moves to compare.
+   moves2 - The second sequence of moves to compare.
+
+Return values:
+   NISSY_ERROR_INVALID_MOVES     - One of the given moves sequences is invalid.
+   NISSY_ERROR_NULL_POINTER      - One of the arguments is NULL.
+   NISSY_COMPARE_MOVES_EQUAL     - The two moves sequences are indentical, up
+                                   to swapping parallel moves.
+   NISSY_COMPARE_MOVES_DIFFERENT - The two moves sequences are different.
+*/
+long long
+nissy_comparemoves(
+	const char *moves1,
+	const char *moves2
 );
 
 /*

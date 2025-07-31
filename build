@@ -282,7 +282,8 @@ build_cpp() {
 	fi
 
 	build_nissy || exit 1
-	run $CXX $(odflags) -std=c++20 -o runcpp cpp/nissy.cpp nissy.o $@
+	run $CXX $(odflags) -std=c++20 -o runcpp cpp/nissy.cpp nissy.o $@ \
+		|| exit 1
 	run ./runcpp
 }
 

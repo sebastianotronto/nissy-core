@@ -24,6 +24,7 @@ extern "C" {
 	    const unsigned char *, unsigned, char *, long long *,
 	    int (*)(void *), void *);
 	long long nissy_countmoves(const char *);
+	long long nissy_comparemoves(const char *, const char *);
 	long long nissy_setlogger(void (*)(const char *, void *), void *);
 }
 
@@ -52,6 +53,9 @@ namespace nissy {
 	const status status::RUN{0};
 	const status status::STOP{1};
 	const status status::PAUSE{2};
+
+	const compare_result compare_result::EQUAL{0};
+	const compare_result compare_result::DIFFERENT{99};
 
 	namespace size {
 		constexpr size_t CUBE = 24;
@@ -208,6 +212,16 @@ namespace nissy {
 	{
 		auto err = nissy_countmoves(moves.c_str());
 		return error{err};
+	}
+
+	std::variant<error, compare_result>
+	compare_moves(const std::string& m1, const std::string& m2)
+	{
+		auto cmp = nissy_comparemoves(m1.c_str(), m2.c_str());
+		if (cmp < 0)
+			return error{cmp};
+		else
+			return compare_result{cmp};
 	}
 
 	void set_logger(void (*log)(const char *, void *), void *data)
