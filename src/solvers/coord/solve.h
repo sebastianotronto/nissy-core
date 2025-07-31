@@ -66,47 +66,83 @@ solve_coord_dfs_stop(const dfsarg_solve_coord_t arg[static 1])
 STATIC bool
 coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 {
-	uint8_t f, nn, ni, th;
+	uint8_t flag, nn, ni, swbound_n, swbound_i;
 
-	f = arg->nissflag;
+	flag = arg->nissflag;
 	nn = arg->solution_moves->nmoves;
 	ni = arg->solution_moves->npremoves;
-	th = DIV_ROUND_UP(arg->target_depth, 2);
+	swbound_n = arg->target_depth / 2;
+	swbound_i = DIV_ROUND_UP(arg->target_depth, 2) - 1;
 
+	/* If only inverse moves are allowed */
+	if (flag == NISSY_NISSFLAG_INVERSE)
+		return false;
+	
+	/* It's the first move */
 	if (nn + ni == 0)
-		return f & (NISSY_NISSFLAG_NORMAL | NISSY_NISSFLAG_MIXED);
+		return true;
 
-	/* TODO logic here can probably be simplified */
-	if (arg->lastisnormal)
-		return (f & NISSY_NISSFLAG_NORMAL) ||
-		    ((f & NISSY_NISSFLAG_MIXED) && (ni > 0 || nn <= th));
+	if (arg->lastisnormal) {
+		/* Can continue if we have already switched */
+		if (ni > 0)
+			return true;
 
-	return (f & NISSY_NISSFLAG_MIXED) && nn == 0 && ni < th &&
-	    coord_can_switch(arg->coord, arg->coord_data,
-	        ni, arg->solution_moves->premoves);
+		/* Check that we have enough moves left to switch */
+		return flag & NISSY_NISSFLAG_NORMAL || nn < swbound_n;
+	} else {
+		/* Forbid switching multiple times */
+		if (nn > 0)
+			return false;
+
+		/* Some coordinates are not allowed to switch */
+		if (!coord_can_switch(arg->coord, arg->coord_data,
+		    ni, arg->solution_moves->premoves))
+			return false;
+
+		/* Only switch before half solution is found */
+		return ni <= swbound_i;
+	}
 }
 
 STATIC bool
 coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 {
-	uint8_t f, nn, ni, th;
+	uint8_t flag, nn, ni, swbound_n, swbound_i;
 
-	f = arg->nissflag;
+	flag = arg->nissflag;
 	nn = arg->solution_moves->nmoves;
 	ni = arg->solution_moves->npremoves;
-	th = DIV_ROUND_UP(arg->target_depth, 2);
+	swbound_n = arg->target_depth / 2;
+	swbound_i = DIV_ROUND_UP(arg->target_depth, 2) - 1;
 
+	/* If only normal moves are allowed */
+	if (flag == NISSY_NISSFLAG_NORMAL)
+		return false;
+	
+	/* It's the first move */
 	if (nn + ni == 0)
-		return f & (NISSY_NISSFLAG_INVERSE | NISSY_NISSFLAG_MIXED);
+		return true;
 
-	/* TODO logic here can probably be simplified */
-	if (!arg->lastisnormal)
-		return (f & NISSY_NISSFLAG_INVERSE) ||
-		    ((f & NISSY_NISSFLAG_MIXED) && (nn > 0 || ni < th));
+	if (!arg->lastisnormal) {
+		/* Can continue if we have already switched */
+		if (nn > 0)
+			return true;
 
-	return (f & NISSY_NISSFLAG_MIXED) && ni == 0 && nn <= th &&
-	    coord_can_switch(arg->coord, arg->coord_data,
-	        nn, arg->solution_moves->moves);
+		/* Check that we have enough moves left to switch */
+		return flag & NISSY_NISSFLAG_INVERSE || ni < swbound_i;
+	} else {
+		/* Forbid switching multiple times */
+		if (ni > 0)
+			return false;
+
+		/* Some coordinates are not allowed to switch */
+		if (!coord_can_switch(arg->coord, arg->coord_data,
+		    nn, arg->solution_moves->moves))
+			return false;
+
+		/* Only switch before half solution is found */
+		return nn <= swbound_n;
+	}
 }
 
 STATIC int64_t

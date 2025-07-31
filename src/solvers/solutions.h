@@ -233,7 +233,6 @@ appendsolution(
 		list->shortest_sol = MIN(
 		    list->shortest_sol, tsol[r].nmoves + tsol[r].npremoves);
 		r++;
-
 	}
 
 	list->buf[list->used] = '\0';
