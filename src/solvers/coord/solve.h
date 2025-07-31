@@ -90,6 +90,10 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 		/* Check that we have enough moves left to switch */
 		return flag & NISSY_NISSFLAG_NORMAL || nn < swbound_n;
 	} else {
+		/* Don't switch if not allowed */
+		if (!(flag & NISSY_NISSFLAG_MIXED))
+			return false;
+
 		/* Forbid switching multiple times */
 		if (nn > 0)
 			return false;
@@ -131,6 +135,10 @@ coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 		/* Check that we have enough moves left to switch */
 		return flag & NISSY_NISSFLAG_INVERSE || ni < swbound_i;
 	} else {
+		/* Don't switch if not allowed */
+		if (!(flag & NISSY_NISSFLAG_MIXED))
+			return false;
+
 		/* Forbid switching multiple times */
 		if (ni > 0)
 			return false;
