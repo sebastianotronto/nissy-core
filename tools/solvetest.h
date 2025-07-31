@@ -1,5 +1,4 @@
-#include "../tool.h"
-#include "scrambles.h"
+#include "tool.h"
 
 #define SOL_BUFFER_LEN 100000
 
@@ -50,36 +49,15 @@ void run(void) {
 	for (i = 0; s[i].scramble[0]; i++) {
 		printf("\n%d. %s\n", i, s[i].scramble);
 
-		/* Single solution */
-		if (nissy_applymoves(NISSY_SOLVED_CUBE, s[i].scramble, cube)
-		     == -1) {
-			printf("Invalid scramble\n");
-			continue;
-		}
-		n = nissy_solve(cube, solver, NISSY_NISSFLAG_NORMAL,
-		    0, 20, 1, -1, 0, size, buf, SOL_BUFFER_LEN, sol, stats,
-		    NULL, NULL);
-		if (n == 0) {
-			printf("Error: no solution\n");
-			return;
-		}
-		if (check_one(sol, s[i].solutions)) {
-			printf("Single solution is correct\n");
-		} else {
-			printf("Error!\n");
-			printf("Found solution(s):\n%s", sol);
-			printf("Valid solution(s):\n%s", s[i].solutions);
-			return;
-		}
-
 		/* Multiple solutions */
 		if (nissy_applymoves(NISSY_SOLVED_CUBE, s[i].scramble, cube)
 		     == -1) {
 			printf("Invalid scramble\n");
 			continue;
 		}
-		n = nissy_solve(cube, solver, NISSY_NISSFLAG_NORMAL,
-		    0, 20, 100, 0, 0, size, buf, SOL_BUFFER_LEN, sol, stats,
+		n = nissy_solve(cube, solver,
+		    NISSFLAG, MINMOVES, MAXMOVES, MAXSOLUTIONS, OPTIMAL,
+		    0, size, buf, SOL_BUFFER_LEN, sol, stats,
 		    NULL, NULL);
 		if (check_all(sol, s[i].solutions)) {
 			printf("All solutions are correct\n");
