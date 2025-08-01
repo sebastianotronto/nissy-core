@@ -25,8 +25,8 @@ STATIC coord_t coordinate_drslice = {
 	.moves_mask_solve = MM18_DR_NOD,
 	.axistrans = {
 		[AXIS_UD] = TRANS_UFr,
-		[AXIS_RL] = TRANS_RFr,
-		[AXIS_FB] = TRANS_FDr,
+		[AXIS_RL] = TRANS_LFr,
+		[AXIS_FB] = TRANS_FUr,
 	},
 	.is_admissible = &solution_always_valid,
 	.is_solvable = &is_drslice_solvable,
