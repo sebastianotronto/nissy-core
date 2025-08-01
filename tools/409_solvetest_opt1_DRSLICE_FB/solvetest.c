@@ -1,3 +1,4 @@
+#define SOLVER       "coord_DRSLICE_BU"
 #define NISSFLAG     NISSY_NISSFLAG_NORMAL
 #define MINMOVES     0
 #define MAXMOVES     20

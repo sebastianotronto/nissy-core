@@ -1,3 +1,4 @@
+#define SOLVER       "h48h7k2"
 #define NISSFLAG     NISSY_NISSFLAG_NORMAL
 #define MINMOVES     0
 #define MAXMOVES     20

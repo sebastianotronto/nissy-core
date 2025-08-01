@@ -1,3 +1,4 @@
+#define SOLVER       "coord_DR_FD"
 #define NISSFLAG     NISSY_NISSFLAG_LINEAR
 #define MINMOVES     0
 #define MAXMOVES     20

@@ -122,12 +122,13 @@ int main(int argc, char **argv) {
 	char filename[7+NISSY_SIZE_DATAID], dataid[NISSY_SIZE_DATAID];
 
 	if (argc < 2) {
-		printf("Error: not enough arguments. "
-		    "A solver must be given.\n");
-		return 1;
+		solver = SOLVER;
+		printf("No solver given, using default %s\n", solver);
+	} else {
+		solver = argv[1];
+		printf("Using user-specified solver %s\n", solver);
 	}
 
-	solver = argv[1];
 	srand(time(NULL));
 	nissy_setlogger(log_stderr, NULL);
 
