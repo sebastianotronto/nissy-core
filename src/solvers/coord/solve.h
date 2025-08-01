@@ -201,6 +201,8 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 		arg->solution_moves->nmoves--;
 	}
 
+	arg->cube = backup_cube;
+	arg->inverse = backup_inverse;
 	arg->lastisnormal = lastbackup;
 
 	if (coord_continue_oninverse(arg)) {
