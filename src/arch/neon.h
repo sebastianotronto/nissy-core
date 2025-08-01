@@ -1,6 +1,6 @@
 #define CO2_NEON vdup_n_u8(0x60)
 #define COCW_NEON vdup_n_u8(0x20)
-#define PBITS8_NEON vdup_n_u8(0x07)
+#define PBITS8_NEON vdup_n_u8(PBITS)
 
 STATIC_INLINE uint8x16_t compose_edges_slim(uint8x16_t, uint8x16_t);
 STATIC_INLINE uint8x8_t compose_corners_slim(uint8x8_t, uint8x8_t);
@@ -29,8 +29,9 @@ STATIC_INLINE uint8x8_t compose_corners_slim(uint8x8_t, uint8x8_t);
 const uint8_t SOLVED_L[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 const uint8_t SOLVED_H[8] = {8, 9, 10, 11, 0, 0, 0};
 
-STATIC_INLINE uint64_t permtoindex_8x8(uint8x8_t);
+STATIC_INLINE uint64_t permtoindex_Nx8(uint64_t, uint8x8_t);
 STATIC_INLINE uint8x8_t indextoperm_8x8(uint64_t);
+STATIC_INLINE uint8x8_t indextoperm_4x8(uint64_t);
 
 STATIC_INLINE int
 popcount_u32(uint32_t x)
@@ -364,14 +365,14 @@ invcoord_esep(uint64_t esep)
 }
 
 STATIC_INLINE uint64_t
-permtoindex_8x8(uint8x8_t a)
+permtoindex_Nx8(uint64_t n, uint8x8_t a)
 {
 	uint64_t i, c, ret;
 	uint8x8_t cmp;
 	uint64x1_t anum;
 	uint8_t or[8] = {0, 0, 0, 0, 0, 0, 0, 0x0F};
 
-	for (i = 0, ret = 0; i < 8; i++) {
+	for (i = 0, ret = 0; i < n; i++) {
 		cmp = vdup_lane_u8(a, 0);
 		anum = vreinterpret_u64_u8(a);
 		anum = vshr_n_u64(anum, 8);
@@ -379,7 +380,7 @@ permtoindex_8x8(uint8x8_t a)
 		a = vorr_u8(a, vld1_u8(or));
 		cmp = vcgt_u8(cmp, a);
 		c = vaddv_u8(vshr_n_u8(cmp, 7));
-		ret += c * factorial[7-i];
+		ret += c * factorial[n-1-i];
 	}
 
 	return ret;
@@ -407,10 +408,43 @@ indextoperm_8x8(uint64_t p)
 	return vld1_u8(ret);
 }
 
+STATIC_INLINE uint8x8_t
+indextoperm_4x8(uint64_t p)
+{
+	static const int64_t A[FACT_4] = {
+		[0] = UINT64_C(0x03020100),
+		[1] = UINT64_C(0x02030100),
+		[2] = UINT64_C(0x03010200),
+		[3] = UINT64_C(0x01030200),
+		[4] = UINT64_C(0x02010300),
+		[5] = UINT64_C(0x01020300),
+		[6] = UINT64_C(0x03020001),
+		[7] = UINT64_C(0x02030001),
+		[8] = UINT64_C(0x03000201),
+		[9] = UINT64_C(0x00030201),
+		[10] = UINT64_C(0x02000301),
+		[11] = UINT64_C(0x00020301),
+		[12] = UINT64_C(0x03010002),
+		[13] = UINT64_C(0x01030002),
+		[14] = UINT64_C(0x03000102),
+		[15] = UINT64_C(0x00030102),
+		[16] = UINT64_C(0x01000302),
+		[17] = UINT64_C(0x00010302),
+		[18] = UINT64_C(0x02010003),
+		[19] = UINT64_C(0x01020003),
+		[20] = UINT64_C(0x02000103),
+		[21] = UINT64_C(0x00020103),
+		[22] = UINT64_C(0x01000203),
+		[23] = UINT64_C(0x00010203),
+	};
+
+	return vreinterpret_u8_u64(vdup_n_u64(A[p]));
+}
+
 STATIC_INLINE uint64_t
 coord_cp(cube_t cube)
 {
-	return permtoindex_8x8(vand_u8(cube.corner, PBITS8_NEON));
+	return permtoindex_Nx8(8, vand_u8(cube.corner, PBITS8_NEON));
 }
 
 STATIC_INLINE cube_t
@@ -425,7 +459,12 @@ invcoord_cp(uint64_t i)
 STATIC_INLINE uint64_t
 coord_epud(cube_t cube)
 {
-	return permtoindex_8x8(vand_u8(vget_low_u8(cube.edge), PBITS8_NEON));
+	uint8x8_t a;
+
+	a = vget_low_u8(cube.edge);
+	a = vand_u8(a, PBITS8_NEON);
+
+	return permtoindex_Nx8(8, a);
 }
 
 STATIC_INLINE cube_t
@@ -434,5 +473,31 @@ invcoord_epud(uint64_t i)
 	return (cube_t) {
 		.corner = vld1_u8(SOLVED_L),
 		.edge = vcombine_u8(indextoperm_8x8(i), vld1_u8(SOLVED_H))
+	};
+}
+
+STATIC_INLINE uint64_t
+coord_epe(cube_t cube)
+{
+	uint8x8_t a;
+
+	a = vget_high_u8(cube.edge);
+	a = vand_u8(a, PBITS8_NEON);
+	a = veor_u8(a, vdup_n_u8(8));
+
+	return permtoindex_Nx8(4, a);
+}
+
+STATIC_INLINE cube_t
+invcoord_epe(uint64_t i)
+{
+	uint8x8_t a;
+
+	a = indextoperm_4x8(i);
+	a = vadd_u8(a, vreinterpret_u8_u64(vdup_n_u64(UINT64_C(0x08080808))));
+
+	return (cube_t) {
+		.corner = vld1_u8(SOLVED_L),
+		.edge = vcombine_u8(vld1_u8(SOLVED_L), a)
 	};
 }

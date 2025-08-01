@@ -41,6 +41,8 @@ STATIC_INLINE uint64_t coord_cp(cube_t);
 STATIC_INLINE cube_t invcoord_cp(uint64_t);
 STATIC_INLINE uint64_t coord_epud(cube_t);
 STATIC_INLINE cube_t invcoord_epud(uint64_t);
+STATIC_INLINE uint64_t coord_epe(cube_t);
+STATIC_INLINE cube_t invcoord_epe(uint64_t);
 
 STATIC_INLINE void
 invcoord_esep_array(uint64_t set1, uint64_t set2, uint8_t mem[static 12])

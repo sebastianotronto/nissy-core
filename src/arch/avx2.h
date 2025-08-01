@@ -24,9 +24,9 @@
 #define ZERO_CUBE _mm256_set_epi64x(0, 0, 0, 0)
 #define SOLVED_CUBE _mm256_set_epi64x(SOLVED_H, SOLVED_L, 0, SOLVED_L)
 
-
-STATIC_INLINE uint64_t permtoindex_8x8(int64_t);
+STATIC_INLINE uint64_t permtoindex_Nx8(uint64_t, int64_t);
 STATIC_INLINE int64_t indextoperm_8x8(uint64_t);
+STATIC_INLINE int64_t indextoperm_4x8(uint64_t);
 
 STATIC_INLINE int
 popcount_u32(uint32_t x)
@@ -295,17 +295,17 @@ set_eo(cube_t cube[static 1], uint64_t eo)
 }
 
 STATIC_INLINE uint64_t
-permtoindex_8x8(int64_t a)
+permtoindex_Nx8(uint64_t n, int64_t a)
 {
 	uint64_t i, c, ret;
 	__m64 cmp;
 
-	for (i = 0, ret = 0; i < 8; i++) {
+	for (i = 0, ret = 0; i < n; i++) {
 		cmp = _mm_set1_pi8(a & INT64_C(0xFF));
 		a = (a >> INT64_C(8)) | INT64_C(0x0F00000000000000);
 		cmp = _mm_cmpgt_pi8(cmp, _mm_cvtsi64_m64(a));
 		c = _mm_popcnt_u64(_mm_cvtm64_si64(cmp)) >> UINT64_C(3);
-		ret += c * factorial[7-i];
+		ret += c * factorial[n-1-i];
 	}
 
 	return ret;
@@ -332,6 +332,39 @@ indextoperm_8x8(uint64_t p)
 	return ret;
 }
 
+STATIC_INLINE int64_t
+indextoperm_4x8(uint64_t p)
+{
+	static const int64_t A[FACT_4] = {
+		[0] = INT64_C(0x03020100),
+		[1] = INT64_C(0x02030100),
+		[2] = INT64_C(0x03010200),
+		[3] = INT64_C(0x01030200),
+		[4] = INT64_C(0x02010300),
+		[5] = INT64_C(0x01020300),
+		[6] = INT64_C(0x03020001),
+		[7] = INT64_C(0x02030001),
+		[8] = INT64_C(0x03000201),
+		[9] = INT64_C(0x00030201),
+		[10] = INT64_C(0x02000301),
+		[11] = INT64_C(0x00020301),
+		[12] = INT64_C(0x03010002),
+		[13] = INT64_C(0x01030002),
+		[14] = INT64_C(0x03000102),
+		[15] = INT64_C(0x00030102),
+		[16] = INT64_C(0x01000302),
+		[17] = INT64_C(0x00010302),
+		[18] = INT64_C(0x02010003),
+		[19] = INT64_C(0x01020003),
+		[20] = INT64_C(0x02000103),
+		[21] = INT64_C(0x00020103),
+		[22] = INT64_C(0x01000203),
+		[23] = INT64_C(0x00010203),
+	};
+
+	return A[p];
+}
+
 STATIC_INLINE uint64_t
 coord_cp(cube_t cube)
 {
@@ -341,7 +374,7 @@ coord_cp(cube_t cube)
 	cp = _mm256_and_si256(cube, CP_AVX2);
 	_mm256_storeu_si256((__m256i_u *)aux, cp);
 
-	return permtoindex_8x8(aux[0]);
+	return permtoindex_Nx8(8, aux[0]);
 }
 
 STATIC_INLINE cube_t
@@ -359,11 +392,37 @@ coord_epud(cube_t cube)
 	ep = _mm256_and_si256(cube, EP_AVX2);
 	_mm256_storeu_si256((__m256i_u *)aux, ep);
 
-	return permtoindex_8x8(aux[2]);
+	return permtoindex_Nx8(8, aux[2]);
 }
 
 STATIC_INLINE cube_t
 invcoord_epud(uint64_t i)
 {
 	return _mm256_set_epi64x(SOLVED_H, indextoperm_8x8(i), 0, SOLVED_L);
+}
+
+STATIC_INLINE uint64_t
+coord_epe(cube_t cube)
+{
+	cube_t ep;
+	int64_t aux[4];
+
+	ep = _mm256_and_si256(cube, EP_AVX2);
+	ep = _mm256_xor_si256(ep, _mm256_set1_epi8(8));
+	_mm256_storeu_si256((__m256i_u *)aux, ep);
+
+	return permtoindex_Nx8(4, aux[3]);
+}
+
+STATIC_INLINE cube_t
+invcoord_epe(uint64_t i)
+{
+	int64_t a;
+	__m64 a64;
+
+	a = indextoperm_4x8(i);
+	a64 = _mm_add_pi8(_mm_cvtsi64_m64(a), _mm_set_pi32(0, 0x08080808));
+	a = _mm_cvtm64_si64(a64);
+
+	return _mm256_set_epi64x(a, SOLVED_L, 0, SOLVED_L);
 }

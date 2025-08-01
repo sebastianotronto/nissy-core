@@ -6,6 +6,7 @@
 #define POW_3_7    UINT64_C(2187)
 #define FACT_12    UINT64_C(479001600)
 #define FACT_8     UINT64_C(40320)
+#define FACT_4     UINT64_C(24)
 #define COMB_12_4  UINT64_C(495)
 #define COMB_8_4   UINT64_C(70)
 

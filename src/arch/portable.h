@@ -334,3 +334,25 @@ invcoord_epud(uint64_t i)
 	return STATIC_CUBE(0, 1, 2, 3, 4, 5, 6, 7,
 	    e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], 8, 9, 10, 11);
 }
+
+STATIC_INLINE uint64_t
+coord_epe(cube_t cube)
+{
+        int i;
+
+        for (i = 8; i < 12; i++)
+                cube.edge[i] = (cube.edge[i] & PBITS) - 8;
+
+        return permtoindex(4, cube.edge+8);
+}
+
+STATIC_INLINE cube_t
+invcoord_epe(uint64_t i)
+{
+        uint8_t e[4];
+
+        indextoperm(i, 4, e);
+
+        return STATIC_CUBE(0, 1, 2, 3, 4, 5, 6, 7,
+            0, 1, 2, 3, 4, 5, 6, 7, e[0]+8, e[1]+8, e[2]+8, e[3]+8);
+}
