@@ -426,3 +426,17 @@ invcoord_epe(uint64_t i)
 
 	return _mm256_set_epi64x(a, SOLVED_L, 0, SOLVED_L);
 }
+
+STATIC_INLINE bool
+is_eo_even(cube_t cube)
+{
+	uint8_t count;
+	__m256i e;
+
+	e = _mm256_and_si256(cube, EO_AVX2);
+	e = _mm256_srli_si256(e, EOSHIFT);
+
+	count = _mm256_reduce_add_epi8(e);
+
+	return count % 2 == 0;
+}

@@ -1,5 +1,6 @@
-#define CO2_NEON vdup_n_u8(0x60)
-#define COCW_NEON vdup_n_u8(0x20)
+#define CO2_NEON    vdup_n_u8(0x60)
+#define COCW_NEON   vdup_n_u8(0x20)
+#define EO_NEON     vdupq_n_u8(0x10)
 #define PBITS8_NEON vdup_n_u8(PBITS)
 
 STATIC_INLINE uint8x16_t compose_edges_slim(uint8x16_t, uint8x16_t);
@@ -500,4 +501,17 @@ invcoord_epe(uint64_t i)
 		.corner = vld1_u8(SOLVED_L),
 		.edge = vcombine_u8(vld1_u8(SOLVED_L), a)
 	};
+}
+
+STATIC_INLINE bool
+is_eo_even(cube_t cube)
+{
+	int8_t count;
+	uint8x16_t e;
+
+	e = vandq_u8(cube.edge, EO_NEON);
+	e = vshrq_n_u8(e, EOSHIFT);
+	count = vaddvq_u8(e);
+
+	return count % 2 == 0;
 }

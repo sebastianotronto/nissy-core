@@ -2,7 +2,6 @@ STATIC uint64_t coordinate_eo_coord(cube_t, const unsigned char *);
 STATIC cube_t coordinate_eo_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_eo_isnasty(uint64_t, const unsigned char *);
 STATIC size_t coordinate_eo_gendata(unsigned char *);
-STATIC bool is_eo_even(cube_t);
 
 STATIC coord_t coordinate_eo = {
 	.name = "EO",
@@ -56,17 +55,4 @@ STATIC size_t
 coordinate_eo_gendata(unsigned char *data)
 {
 	return 0;
-}
-
-STATIC bool
-is_eo_even(cube_t cube)
-{
-	uint8_t c[8], e[12], i, count;
-
-	pieces(&cube, c, e);
-
-	for (i = 0, count = 0; i < 12; i++)
-		count += (e[i] & EOBIT) >> EOSHIFT;
-
-	return count % 2 == 0;
 }

@@ -356,3 +356,14 @@ invcoord_epe(uint64_t i)
         return STATIC_CUBE(0, 1, 2, 3, 4, 5, 6, 7,
             0, 1, 2, 3, 4, 5, 6, 7, e[0]+8, e[1]+8, e[2]+8, e[3]+8);
 }
+
+STATIC_INLINE bool
+is_eo_even(cube_t cube)
+{
+	uint8_t i, count;
+
+	for (i = 0, count = 0; i < 12; i++)
+		count += (cube.edge[i] & EOBIT) >> EOSHIFT;
+
+	return count % 2 == 0;
+}
