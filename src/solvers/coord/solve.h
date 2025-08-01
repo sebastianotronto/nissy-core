@@ -240,7 +240,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 STATIC long long
 solve_coord_dispatch(
 	oriented_cube_t oc,
-	const char *coord_and_axis,
+	const char *coord_and_trans,
 	unsigned nissflag,
 	unsigned minmoves,
 	unsigned maxmoves,
@@ -257,22 +257,23 @@ solve_coord_dispatch(
 )
 {
 	coord_t *coord;
-	uint8_t axis;
+	uint8_t trans;
 
-	parse_coord_and_axis(coord_and_axis, &coord, &axis);
+	parse_coord_and_trans(coord_and_trans, &coord, &trans);
 
 	if (coord == NULL) {
 		LOG("Error: could not parse coordinate from '%s'\n",
-		    coord_and_axis);
+		    coord_and_trans);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	if (axis == UINT8_ERROR) {
-		LOG("Error: could not parse axis from '%s'\n", coord_and_axis);
+	if (trans == UINT8_ERROR) {
+		LOG("Error: could not parse transformation from '%s'\n",
+		    coord_and_trans);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	return solve_coord(oc, coord, axis, nissflag, minmoves, maxmoves,
+	return solve_coord(oc, coord, trans, nissflag, minmoves, maxmoves,
 	    maxsolutions, optimal, threads, data_size, data,
 	    solutions_size, sols, poll_status, poll_status_data);
 }
@@ -281,7 +282,7 @@ STATIC int64_t
 solve_coord(
 	oriented_cube_t oc,
 	coord_t coord [static 1],
-	uint8_t axis,
+	uint8_t trans,
 	uint8_t nissflag,
 	uint8_t minmoves,
 	uint8_t maxmoves,
@@ -297,7 +298,6 @@ solve_coord(
 )
 {
 	int8_t d;
-	uint8_t t;
 	uint64_t i;
 	int64_t err;
 	cube_t c;
@@ -309,8 +309,7 @@ solve_coord(
 	solution_settings_t solution_settings;
 	solution_list_t solution_list;
 
-	t = coord->axistrans[axis];
-	c = transform(oc.cube, t);
+	c = transform(oc.cube, trans);
 
 	if (!coord->is_solvable(c))
 		goto solve_coord_error_unsolvable;
@@ -334,7 +333,7 @@ solve_coord(
 	solution_moves_reset(&solution_moves);
 
 	solution_settings = (solution_settings_t) {
-		.tmask = TM_SINGLE(inverse_trans(t)),
+		.tmask = TM_SINGLE(inverse_trans(trans)),
 		.unniss = false,
 		.maxmoves = maxmoves,
 		.maxsolutions = maxsolutions,

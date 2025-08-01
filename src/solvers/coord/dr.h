@@ -22,11 +22,6 @@ STATIC coord_t coordinate_dr = {
 	.trans_mask = TM_UDFIX,
 	.moves_mask_gendata = MM18_ALLMOVES,
 	.moves_mask_solve = MM18_ALLMOVES,
-	.axistrans = {
-		[AXIS_UD] = TRANS_UFr,
-		[AXIS_RL] = TRANS_RFr,
-		[AXIS_FB] = TRANS_FDr,
-	},
 	.is_admissible = &solution_lastqt_cw,
 	.is_solvable = &is_eoco_solvable,
 	.is_solved = NULL,

@@ -23,11 +23,6 @@ STATIC coord_t coordinate_drslice = {
 	.trans_mask = TM_UDFIX,
 	.moves_mask_gendata = MM18_DR,
 	.moves_mask_solve = MM18_DR_NOD,
-	.axistrans = {
-		[AXIS_UD] = TRANS_UFr,
-		[AXIS_RL] = TRANS_LFr,
-		[AXIS_FB] = TRANS_FUr,
-	},
 	.is_admissible = &solution_always_valid,
 	.is_solvable = &is_drslice_solvable,
 	.is_solved = &is_drslice_solved,

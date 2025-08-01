@@ -19,7 +19,7 @@ checkdata_coord(
 		return NISSY_ERROR_DATA;
 	}
 
-	parse_coord_and_axis(solver, &coord, NULL);
+	parse_coord_and_trans(solver, &coord, NULL);
 	if (coord == NULL) {
 		LOG("[cehckdata] Unknown coordinate solver '%s'\n", solver);
 		return NISSY_ERROR_DATA;

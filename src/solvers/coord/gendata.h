@@ -24,7 +24,7 @@ gendata_coord_dispatch(
 {
 	coord_t *coord;
 
-	parse_coord_and_axis(coordstr, &coord, NULL);
+	parse_coord_and_trans(coordstr, &coord, NULL);
 
 	if (coord == NULL) {
 		LOG("Error: could not parse coordinate '%s'\n", coordstr);

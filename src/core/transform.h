@@ -18,6 +18,7 @@
         TRANS_CUBE_ ## T ## _INVERSE))
 
 STATIC uint8_t readtrans(const char [static NISSY_SIZE_TRANSFORMATION]);
+STATIC uint8_t readrotation(const char [static 2]);
 STATIC void writetrans(uint8_t, char [static NISSY_SIZE_TRANSFORMATION]);
 
 STATIC cube_t transform_edges(cube_t, uint8_t);
@@ -37,6 +38,18 @@ readtrans(const char buf[static NISSY_SIZE_TRANSFORMATION])
 			return t;
 
 	return UINT8_ERROR;
+}
+
+STATIC uint8_t
+readrotation(const char buf[static 2])
+{
+	char trans_str[NISSY_SIZE_TRANSFORMATION];
+
+	strcpy(trans_str, "rotation xx");
+	trans_str[9] = buf[0];
+	trans_str[10] = buf[1];
+
+	return readtrans(trans_str);
 }
 
 STATIC void

@@ -14,11 +14,6 @@ STATIC coord_t coordinate_eo = {
 	.trans_mask = TM_SINGLE(TRANS_UFr),
 	.moves_mask_gendata = MM18_ALLMOVES,
 	.moves_mask_solve = MM18_ALLMOVES,
-	.axistrans = {
-		[AXIS_UD] = TRANS_FDr,
-		[AXIS_RL] = TRANS_URr,
-		[AXIS_FB] = TRANS_UFr,
-	},
 	.is_admissible = &solution_lastqt_cw,
 	.is_solvable = &is_eo_even,
 	.is_solved = NULL,

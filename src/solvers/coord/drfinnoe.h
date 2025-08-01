@@ -31,11 +31,6 @@ STATIC coord_t coordinate_drfinnoe = {
 	.trans_mask = TM_UDFIX,
 	.moves_mask_gendata = MM18_DR,
 	.moves_mask_solve = MM18_DR,
-	.axistrans = {
-		[AXIS_UD] = TRANS_UFr,
-		[AXIS_RL] = TRANS_RFr,
-		[AXIS_FB] = TRANS_FDr,
-	},
 	.is_admissible = &solution_always_valid,
 	.is_solvable = &is_drfinnoe_solvable,
 	.is_solved = NULL,

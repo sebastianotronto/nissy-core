@@ -21,11 +21,6 @@ STATIC coord_t coordinate_dreo = {
 	.trans_mask = TM_UDRLFIX,
 	.moves_mask_gendata = MM18_EO,
 	.moves_mask_solve = MM18_EO,
-	.axistrans = {
-		[AXIS_UD] = TRANS_UFr,
-		[AXIS_RL] = TRANS_RFr,
-		[AXIS_FB] = TRANS_FDr,
-	},
 	.is_admissible = &solution_lastqt_cw,
 	.is_solvable = &is_dreo_solvable,
 	.is_solved = NULL,
