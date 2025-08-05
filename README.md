@@ -73,6 +73,8 @@ output, the results compared with the .out files) and test/last.err
 Tests are always run in debug mode: this means that optimizations are
 disabled and some extra logging is enabled.
 
+More comprehensive tests (integration tests) can be performed with *tools*.
+
 ## Running "tools"
 
 In the tools folder there are some small programs that test various
@@ -103,6 +105,18 @@ benchmark.  The output as well as the time of the run are saved to a
 file in the tools/results folder.
 
 To build and run a tool in debug mode, use `./build -d tool`.
+
+### The `solvetest` tools
+
+The tools denoted with `solvetest` can be used to test that the various
+solvers produce the correct solutions. They can be run individually as
+all other tools, or all together with
+
+```
+$ ./build solvetest   # Use -d for debug mode (very slow for some solvers)
+```
+
+If one of the solvetests fails, subsequent tests are going to be skipped.
 
 ## Command-line interface
 

@@ -177,6 +177,7 @@ build_help() {
 	echo "shell       Build a basic nissy shell (./run)"
 	echo "web         Build the WebAssembly / JavaScript module for nissy"
 	echo "cpp FILES   Build and run the given FILES including cpp/nissy.h"
+	echo "solvetest   Build nissy and run the tests for solvers (tools)"
 	echo ""
 	echo "help        Show this help message"
 	echo "config      Show build configuration and exit"
@@ -371,6 +372,39 @@ build_webtest() {
 	rm -f runtest.js runtest.wasm
 }
 
+run_single_tool() {
+	results="tools/results"
+	last="$results/last.out"
+	date="$(date +'%Y-%m-%d-%H-%M-%S')"
+	file="$results/$toolname-$date.txt"
+	failed="tools/failed"
+
+	$CC $CFLAGS $WFLAGS $MFLAGS $(odflags) -o runtool "$t"/*.c nissy.o \
+		|| exit 1
+
+	(
+		date +'%Y-%m-%d %H:%M'
+		echo ""
+		echo "=========== Running tool  ==========="
+		echo "tool name: $toolname"
+		echo ""
+		echo "======== nissy build command ========"
+		echo "$CC $CFLAGS $WFLAGS $MFLAGS $(odflags)"
+		echo ""
+		echo "======== tool build command  ========"
+		echo "$CC $CFLAGS $WFLAGS $MFLAGS $(odflags)"
+		echo ""
+		echo "============ tool output ============"
+		./runtool $@ || touch "$failed"
+	) | tee "$file" "$last"
+
+	rm -f runtool
+	if [ -f "$failed" ]; then
+		rm "$failed"
+		exit 1
+	fi
+}
+
 build_tool() {
 	pattern="$1"
 
@@ -394,31 +428,17 @@ build_tool() {
 	fi
 
 	build_nissy || exit 1
+	run_single_tool
+}
 
-	results="tools/results"
-	last="$results/last.out"
-	date="$(date +'%Y-%m-%d-%H-%M-%S')"
-	file="$results/$toolname-$date.txt"
-
-	$CC $CFLAGS $WFLAGS $MFLAGS $(odflags) -o runtool "$t"/*.c nissy.o \
-		|| exit 1
-
-	(
-		date +'%Y-%m-%d %H:%M'
-		echo ""
-		echo "=========== Running tool  ==========="
-		echo "tool name: $toolname"
-		echo ""
-		echo "======== nissy build command ========"
-		echo "$CC $CFLAGS $WFLAGS $MFLAGS $(odflags)"
-		echo ""
-		echo "======== tool build command  ========"
-		echo "$CC $CFLAGS $WFLAGS $MFLAGS $(odflags)"
-		echo ""
-		echo "============ tool output ============"
-		./runtool $@
-	) | tee "$file" "$last"
-	rm -f runtool
+build_solvetest() {
+	build_nissy || exit 1
+	for t in tools/*; do
+		if [ -d "$t" ] && (echo "$t" | grep -q "solvetest"); then
+			toolname="$(basename "$t" .c)"
+			run_single_tool || exit 1
+		fi
+	done
 }
 
 if [ "$1" = "-d" ]; then
@@ -435,7 +455,7 @@ fi
 
 case "$target" in
 help|config|clean|\
-nissy|lib|sharedlib|shell|python|cpp|web|test|webtest|tool)
+nissy|lib|sharedlib|shell|python|cpp|web|test|webtest|tool|solvetest)
 	mkdir -p tables tools/results
 	(build_"$target" $@) || exit 1
 	exit 0
