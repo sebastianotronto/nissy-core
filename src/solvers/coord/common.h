@@ -6,7 +6,6 @@ STATIC bool coord_isnasty_generic(
     const coord_t [static 1], uint64_t, const unsigned char *);
 STATIC size_t coord_gendata_generic(const coord_t [static 1], unsigned char *);
 
-STATIC void append_coord_name(const coord_t [static 1], char *);
 STATIC bool solution_lastqt_cw(const solution_moves_t [static 1]);
 STATIC bool coord_can_switch(const coord_t [static 1], const unsigned char *,
     size_t, const uint8_t *);
@@ -106,7 +105,7 @@ coord_gendata_generic(
 		.maxvalue = 0,
 		.next = 0
 	};
-	append_coord_name(coord, info.solver);
+	append_name(&info, coord->name);
 
 	for (i = 0, n = 0; i < coord->sym.max; i++) {
 		if (classttrep[i] != 0xFFFFFFFF)
@@ -140,18 +139,6 @@ coord_gendata_generic(
 	    "expected %" PRIu64 "\n", coord->name, n, coord->sym.classes);
 
 	return coord_datasize;
-}
-
-STATIC void
-append_coord_name(const coord_t coord[static 1], char *str)
-{
-	int i, j;
-
-	i = 0;
-	j = strlen(str);
-	while (coord->name[i]) str[j++] = coord->name[i++];
-
-	str[j] = '\0';
 }
 
 STATIC bool

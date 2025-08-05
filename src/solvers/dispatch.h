@@ -26,8 +26,15 @@ solver_dispatch_t solver_dispatchers[] = {
 	.prefix = "coord_",
 	.dataid = dataid_coord,
 	.gendata = gendata_coord_dispatch,
-	.checkdata = checkdata_coord,
+	.checkdata = checkdata_coord_dispatch,
 	.solve = solve_coord_dispatch,
+},
+{
+	.prefix = "mcoord_",
+	.dataid = dataid_coord,
+	.gendata = gendata_coord_dispatch,
+	.checkdata = checkdata_coord_dispatch,
+	.solve = solve_multicoord_dispatch,
 },
 {
 	.prefix = NULL

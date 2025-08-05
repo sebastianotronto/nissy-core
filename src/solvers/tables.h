@@ -8,6 +8,7 @@ STATIC int64_t readtableinfo_n(
     size_t, const unsigned char *, uint8_t, tableinfo_t [static 1]);
 STATIC int64_t writetableinfo(
     const tableinfo_t [static 1], size_t, unsigned char *);
+STATIC void append_name(tableinfo_t [static 1], const char *);
 
 STATIC uint64_t
 read_unaligned_u64(const unsigned char buf[static sizeof(uint64_t)])
@@ -134,4 +135,15 @@ writetableinfo(
 	*OFFSET(buf, INFO_OFFSET_MAXVALUE) = (unsigned char)info->maxvalue;
 
 	return NISSY_OK;
+}
+
+STATIC void
+append_name(tableinfo_t info[static 1], const char *str)
+{
+	int i, j;
+
+	for (i = 0, j = strlen(info->solver); str[i] != '\0'; i++, j++)
+		info->solver[j] = str[i];
+
+	info->solver[j] = '\0';
 }

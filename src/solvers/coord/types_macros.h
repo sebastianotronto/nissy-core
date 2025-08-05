@@ -14,6 +14,8 @@
 #define COORD_ISNASTY_MASK  (UINT32_C(0xFF) << COORD_ISNASTY_SHIFT)
 #define COORD_ISNASTY(d)    (((d) & COORD_ISNASTY_MASK) >> COORD_ISNASTY_SHIFT)
 
+#define MAX_MULTICOORD_NCOORDS 4
+
 typedef struct {
 	const char name[255];
 	uint64_t (*coord)(cube_t, const unsigned char *);
@@ -42,3 +44,10 @@ typedef struct {
 		cube_t (*merge)(cube_t, cube_t);
 	} sym;
 } coord_t;
+
+typedef struct {
+	const char name[255];
+	coord_t *coordinates[MAX_MULTICOORD_NCOORDS];
+	uint64_t moves_mask;
+	bool (*is_solvable)(cube_t);
+} multicoord_t;

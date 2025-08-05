@@ -6,6 +6,7 @@
 
 #define TABLETYPE_PRUNING        UINT64_C(0)
 #define TABLETYPE_SPECIAL        UINT64_C(1)
+#define TABLETYPE_MULTI          UINT64_C(2)
 
 #define INFO_OFFSET_DISTRIBUTION 0
 #define INFO_OFFSET_TYPE         (INFO_DISTRIBUTION_LEN * sizeof(uint64_t))

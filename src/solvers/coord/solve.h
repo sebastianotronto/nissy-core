@@ -52,10 +52,6 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 	/* If only inverse moves are allowed */
 	if (flag == NISSY_NISSFLAG_INVERSE)
 		return false;
-	
-	/* It's the first move */
-	if (nn + ni == 0)
-		return true;
 
 	/* Pruning table check */
 	if (!(flag & NISSY_NISSFLAG_MIXED) || ni != 0) {
@@ -64,6 +60,10 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 		if (nn + ni + pval > arg->target_depth)
 			return false;
 	}
+	
+	/* It's the first move */
+	if (nn + ni == 0)
+		return true;
 
 	if (arg->lastisnormal) {
 		/* Can continue if we have already switched */
@@ -106,10 +106,6 @@ coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 	/* If only normal moves are allowed */
 	if (flag == NISSY_NISSFLAG_NORMAL)
 		return false;
-	
-	/* It's the first move */
-	if (nn + ni == 0)
-		return true;
 
 	/* Pruning table check */
 	if (!(flag & NISSY_NISSFLAG_MIXED) || nn != 0) {
@@ -118,6 +114,10 @@ coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 		if (nn + ni + pval > arg->target_depth)
 			return false;
 	}
+	
+	/* It's the first move */
+	if (nn + ni == 0)
+		return true;
 
 	if (!arg->lastisnormal) {
 		/* Can continue if we have already switched */
@@ -261,7 +261,7 @@ solve_coord_dispatch(
 	coord_t *coord;
 	uint8_t trans;
 
-	parse_coord_and_trans(coord_and_trans, &coord, &trans);
+	parse_coord_and_trans(coord_and_trans, &coord, NULL, &trans);
 
 	if (coord == NULL) {
 		LOG("Error: could not parse coordinate from '%s'\n",

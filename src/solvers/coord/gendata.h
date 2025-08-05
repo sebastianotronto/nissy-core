@@ -1,4 +1,6 @@
 STATIC size_t gendata_coord(const coord_t [static 1], unsigned char *);
+STATIC size_t gendata_multicoord(
+    const multicoord_t [static 1], unsigned char *);
 STATIC long long gendata_coord_dispatch(const char *, unsigned long long,
     unsigned char *);
 STATIC tableinfo_t genptable_coord(
@@ -23,15 +25,18 @@ gendata_coord_dispatch(
 )
 {
 	coord_t *coord;
+	multicoord_t *mcoord;
 
-	parse_coord_and_trans(coordstr, &coord, NULL);
+	parse_coord_and_trans(coordstr, &coord, &mcoord, NULL);
 
-	if (coord == NULL) {
-		LOG("Error: could not parse coordinate '%s'\n", coordstr);
-		return NISSY_ERROR_INVALID_SOLVER;
-	}
+	if (coord != NULL)
+		return gendata_coord(coord, buf);
 
-	return gendata_coord(coord, buf);
+	if (mcoord != NULL)
+		return gendata_multicoord(mcoord, buf);
+
+	LOG("Error: could not parse coordinate '%s'\n", coordstr);
+	return NISSY_ERROR_INVALID_SOLVER;
 }
 
 STATIC size_t
@@ -70,8 +75,7 @@ gendata_coord(const coord_t coord[static 1], unsigned char *buf)
 			.maxvalue = 0,
 		};
 
-		append_coord_name(coord, coord_data_info.solver);
-
+		append_name(&coord_data_info, coord->name);
 		writetableinfo(&coord_data_info, INFOSIZE + coord_dsize, buf);
 
 		pruningbuf = buf + INFOSIZE + coord_dsize;
@@ -89,6 +93,50 @@ gendata_coord_return_size:
 gendata_coord_error:
 	LOG("Unexpected error generating coordinate data\n");
 	return 0;
+}
+
+STATIC size_t
+gendata_multicoord(const multicoord_t mcoord[static 1], unsigned char *buf)
+{
+	unsigned char *b;
+	size_t i, s, ret;
+	tableinfo_t info;
+
+	info = (tableinfo_t) {
+		.solver = "multicoordinate table for ",
+		.type = TABLETYPE_MULTI,
+		.infosize = INFOSIZE,
+		.fullsize = INFOSIZE,
+		.hash = 0,
+		.next = INFOSIZE,
+
+		/* Unknown / non-applicable values */
+		.entries = 0,
+		.classes = 0,
+		.bits = 0,
+		.base = 0,
+		.maxvalue = 0,
+	};
+
+	append_name(&info, mcoord->name);
+	if (buf != NULL)
+		writetableinfo(&info, INFOSIZE, buf);
+	ret = INFOSIZE;
+
+	for (i = 0; mcoord->coordinates[i] != NULL; i++) {
+		b = buf == NULL ? NULL : buf + ret;
+		s = gendata_coord(mcoord->coordinates[i], b);
+		if (s == 0)
+			return 0;
+
+		ret += s;
+
+		/* Pad so that each coordinate's table is 8-byte aligned */
+		while (ret % 8 != 0)
+			buf[ret++] = 0;
+	}
+
+	return ret;
 }
 
 STATIC tableinfo_t
@@ -118,7 +166,7 @@ genptable_coord(
 
 	memset(table, 0xFF, tablesize);
 	memset(info.distribution, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
-	append_coord_name(coord, info.solver);
+	append_name(&info, coord->name);
 
 	tot = info.distribution[0] =
 	    genptable_coord_init_solved(coord, data, table);

@@ -21,7 +21,8 @@ run(void) {
 			sprintf(filename, "tables/%s", dataid);
 			writetable(buf, size, filename);
 		} else {
-			printf("Error: table generated incorrectly!\n");
+			printf("Error: table for %s generated incorrectly!\n",
+			    solver);
 		}
 		break;
 	}
