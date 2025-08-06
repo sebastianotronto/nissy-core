@@ -428,7 +428,7 @@ build_tool() {
 	fi
 
 	build_nissy || exit 1
-	run_single_tool
+	run_single_tool $@
 }
 
 build_solvetest() {
