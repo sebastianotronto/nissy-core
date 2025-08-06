@@ -453,7 +453,7 @@ invcoord_cp(uint64_t i)
 {
 	return (cube_t) {
 		.corner = indextoperm_8x8(i),
-		.edge = vcombine_u8(vld1_u8(SOLVED_L), vld1_u8(SOLVED_H)) 
+		.edge = vcombine_u8(vld1_u8(SOLVED_L), vld1_u8(SOLVED_H))
 	};
 }
 
@@ -514,4 +514,25 @@ is_eo_even(cube_t cube)
 	count = vaddvq_u8(e);
 
 	return count % 2 == 0;
+}
+
+STATIC_INLINE uint64_t
+coord_epudsep(cube_t cube)
+{
+	uint8_t e[8];
+
+	vst1_u8(e, vget_low_u8(cube.edge));
+	return coord_epudsep_array(e);
+}
+
+STATIC_INLINE cube_t
+invcoord_epudsep(uint64_t i)
+{
+	uint8_t e[8];
+
+	invcoord_epudsep_array(i, e);
+	return (cube_t) {
+		.corner = vld1_u8(SOLVED_L),
+		.edge = vcombine_u8(vld1_u8(e), vld1_u8(SOLVED_H))
+	};
 }

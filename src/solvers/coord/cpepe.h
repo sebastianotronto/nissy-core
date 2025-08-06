@@ -1,4 +1,3 @@
-STATIC cube_t coordinate_cpepe_merge(const cube_t, const cube_t);
 STATIC uint64_t coordinate_cpepe_coord(const cube_t, const unsigned char *);
 STATIC cube_t coordinate_cpepe_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_cpepe_isnasty(uint64_t, const unsigned char *);
@@ -15,6 +14,7 @@ STATIC coord_t coordinate_cpepe = {
 	.moves_mask_gendata = MM18_DR,
 	.moves_mask_solve = MM18_DR,
 	.is_admissible = &solution_always_valid,
+	.solution_prune = NULL,
 	.is_solvable = &is_drfinnoe_solvable,
 	.is_solved = NULL,
 	.allow_niss = false,
@@ -44,20 +44,9 @@ STATIC coord_t coordinate_cpepe = {
 		.max2 = FACT_4,
 		.coord2 = &coord_epe,
 		.cube2 = &invcoord_epe,
-		.merge = &coordinate_cpepe_merge,
+		.merge = &coordinate_merge_ce,
 	},
 };
-
-STATIC cube_t
-coordinate_cpepe_merge(const cube_t c1, const cube_t c2)
-{
-	cube_t merged;
-
-	merged = c1;
-	copy_edges(&merged, c2);
-
-	return merged;
-}
 
 STATIC uint64_t
 coordinate_cpepe_coord(const cube_t cube, const unsigned char *data)

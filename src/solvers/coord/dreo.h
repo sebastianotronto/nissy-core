@@ -2,7 +2,6 @@
 
 STATIC uint64_t coord_dresep_nosym(cube_t);
 STATIC cube_t invcoord_dresep_nosym(uint64_t);
-STATIC cube_t coordinate_dreo_merge(cube_t, cube_t);
 
 STATIC uint64_t coordinate_dreo_coord(cube_t, const unsigned char *);
 STATIC cube_t coordinate_dreo_cube(uint64_t, const unsigned char *);
@@ -22,6 +21,7 @@ STATIC coord_t coordinate_dreo = {
 	.moves_mask_gendata = MM18_EO,
 	.moves_mask_solve = MM18_EO,
 	.is_admissible = &solution_lastqt_cw,
+	.solution_prune = NULL,
 	.is_solvable = &is_dreo_solvable,
 	.is_solved = NULL,
 	.allow_niss = true,
@@ -47,7 +47,7 @@ STATIC coord_t coordinate_dreo = {
 		.max2 = POW_3_7,
 		.coord2 = &coord_co,
 		.cube2 = &invcoord_co,
-		.merge = &coordinate_dreo_merge,
+		.merge = &coordinate_merge_ec,
 	},
 };
 
@@ -61,17 +61,6 @@ STATIC cube_t
 invcoord_dresep_nosym(uint64_t coord)
 {
 	return invcoord_esep(coord * COMB_8_4);
-}
-
-STATIC cube_t
-coordinate_dreo_merge(cube_t c1, cube_t c2)
-{
-	cube_t merged;
-
-	merged = c1;
-	copy_corners(&merged, c2);
-
-	return merged;
 }
 
 STATIC uint64_t

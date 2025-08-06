@@ -14,6 +14,7 @@ STATIC coord_t coordinate_eo = {
 	.moves_mask_gendata = MM18_ALLMOVES,
 	.moves_mask_solve = MM18_ALLMOVES,
 	.is_admissible = &solution_lastqt_cw,
+	.solution_prune = NULL,
 	.is_solvable = &is_eo_even,
 	.is_solved = NULL,
 	.allow_niss = true,

@@ -367,3 +367,19 @@ is_eo_even(cube_t cube)
 
 	return count % 2 == 0;
 }
+
+STATIC_INLINE uint64_t
+coord_epudsep(cube_t cube)
+{
+	return coord_epudsep_array(cube.edge);
+}
+
+STATIC_INLINE cube_t
+invcoord_epudsep(uint64_t c)
+{
+	cube_t ret;
+
+	ret = SOLVED_CUBE;
+	invcoord_epudsep_array(c, ret.edge);
+	return ret;
+}

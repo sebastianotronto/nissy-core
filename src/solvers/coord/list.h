@@ -5,6 +5,7 @@ coord_t *all_coordinates[] = {
 	&coordinate_drfinnoe,
 	&coordinate_drslice,
 	&coordinate_cpepe,
+	&coordinate_htr,
 	NULL
 };
 

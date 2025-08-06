@@ -437,5 +437,27 @@ is_eo_even(cube_t cube)
 	e = _mm256_slli_epi16(e, 7-EOSHIFT);
 	mask = _mm256_movemask_epi8(e);
 
-	return popcount_u32(mask) % 2;
+	return popcount_u32(mask) % 2 == 0;
+}
+
+STATIC_INLINE uint64_t
+coord_epudsep(cube_t cube)
+{
+	uint8_t aux[32];
+
+	_mm256_storeu_si256((__m256i_u *)aux, cube);
+	return coord_epudsep_array(aux + 16);
+}
+
+STATIC_INLINE cube_t
+invcoord_epudsep(uint64_t i)
+{
+	cube_t cube, elow;
+	uint8_t e[32];
+
+	invcoord_epudsep_array(i, e+16);
+	elow = _mm256_load_si256((__m256i *)e);
+	cube = _mm256_set_epi64x(SOLVED_H, 0, 0, SOLVED_L);
+
+	return _mm256_or_si256(elow, cube);
 }

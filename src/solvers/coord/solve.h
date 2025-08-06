@@ -155,6 +155,10 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 	int64_t n, ret;
 	cube_t backup_cube, backup_inverse;
 
+	if (arg->coord->solution_prune != NULL &&
+	    arg->coord->solution_prune(arg->solution_moves))
+		return 0;
+
 	coord = arg->coord->coord(arg->cube, arg->coord_data);
 	if (coord_is_solved(arg->coord, coord, arg->coord_data)) {
 		if (!coord_solution_admissible(arg))

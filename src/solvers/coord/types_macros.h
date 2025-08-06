@@ -28,6 +28,7 @@ typedef struct {
 	uint64_t moves_mask_solve;
 	uint64_t trans_mask;
 	bool (*is_admissible)(const solution_moves_t[static 1]);
+	bool (*solution_prune)(const solution_moves_t[static 1]);
 	bool (*is_solvable)(cube_t);
 	bool (*is_solved)(uint64_t, const unsigned char *);
 	uint64_t pruning_distribution[INFO_DISTRIBUTION_LEN];

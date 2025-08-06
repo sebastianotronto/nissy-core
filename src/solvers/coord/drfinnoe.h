@@ -13,7 +13,6 @@ In the worst case, it is a bug to be fixed, but I find it unlikely.
 
 #define CLASSES_CP_16 2768
 
-STATIC cube_t coordinate_drfinnoe_merge(cube_t, cube_t);
 STATIC uint64_t coordinate_drfinnoe_coord(cube_t, const unsigned char *);
 STATIC cube_t coordinate_drfinnoe_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_drfinnoe_isnasty(uint64_t, const unsigned char *);
@@ -32,6 +31,7 @@ STATIC coord_t coordinate_drfinnoe = {
 	.moves_mask_gendata = MM18_DR,
 	.moves_mask_solve = MM18_DR,
 	.is_admissible = &solution_always_valid,
+	.solution_prune = NULL,
 	.is_solvable = &is_drfinnoe_solvable,
 	.is_solved = NULL,
 	.allow_niss = false,
@@ -62,20 +62,9 @@ STATIC coord_t coordinate_drfinnoe = {
 		.max2 = FACT_8,
 		.coord2 = &coord_epud,
 		.cube2 = &invcoord_epud,
-		.merge = &coordinate_drfinnoe_merge,
+		.merge = &coordinate_merge_ce,
 	},
 };
-
-STATIC cube_t
-coordinate_drfinnoe_merge(cube_t c1, cube_t c2)
-{
-	cube_t merged;
-
-	merged = c1;
-	copy_edges(&merged, c2);
-
-	return merged;
-}
 
 STATIC uint64_t
 coordinate_drfinnoe_coord(cube_t cube, const unsigned char *data)

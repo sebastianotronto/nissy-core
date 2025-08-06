@@ -12,6 +12,9 @@ STATIC bool coord_can_switch(const coord_t [static 1], const unsigned char *,
 STATIC bool coord_is_solved(
     const coord_t [static 1], uint64_t, const unsigned char *);
 
+STATIC cube_t coordinate_merge_ce(cube_t, cube_t);
+STATIC cube_t coordinate_merge_ec(cube_t, cube_t);
+
 STATIC uint64_t
 coord_coord_generic(
 	const coord_t coord[static 1],
@@ -19,13 +22,11 @@ coord_coord_generic(
 	const unsigned char *data
 )
 {
-	const unsigned char *datanoinfo;
 	const uint32_t *data32;
 	uint32_t d;
 	cube_t tr;
 
-	datanoinfo = data + INFOSIZE;
-	data32 = (const uint32_t *)datanoinfo;
+	data32 = (const uint32_t *)(data + INFOSIZE);
 	d = data32[coord->sym.coord(c)];
 	tr = transform(c, COORD_TTREP(d));
 
@@ -196,4 +197,21 @@ coord_is_solved(
 )
 {
 	return coord->is_solved == NULL ? i == 0 : coord->is_solved(i, data);
+}
+
+STATIC cube_t
+coordinate_merge_ce(cube_t corners, cube_t edges)
+{
+	cube_t merged;
+
+	merged = corners;
+	copy_edges(&merged, edges);
+
+	return merged;
+}
+
+STATIC cube_t
+coordinate_merge_ec(cube_t edges, cube_t corners)
+{
+	return coordinate_merge_ce(corners, edges);
 }

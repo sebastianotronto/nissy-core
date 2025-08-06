@@ -29,6 +29,8 @@ STATIC_INLINE uint64_t coord_cocsep(cube_t);
 STATIC_INLINE uint64_t coord_eo(cube_t);
 STATIC_INLINE uint64_t coord_esep(cube_t);
 STATIC_INLINE cube_t invcoord_esep(uint64_t);
+STATIC_INLINE uint64_t coord_epudsep(cube_t);
+STATIC_INLINE cube_t invcoord_epudsep(uint64_t);
 
 STATIC_INLINE bool is_eo_even(cube_t);
 
@@ -38,6 +40,8 @@ STATIC_INLINE void set_eo(cube_t [static 1], uint64_t);
 
 STATIC_INLINE void invcoord_esep_array(uint64_t, uint64_t, uint8_t[static 12]);
 STATIC_INLINE cube_t invcoord_eoesep(uint64_t);
+STATIC_INLINE uint64_t coord_epudsep_array(const uint8_t [8]);
+STATIC_INLINE void invcoord_epudsep_array(uint64_t, uint8_t [8]);
 
 STATIC_INLINE uint64_t coord_cp(cube_t);
 STATIC_INLINE cube_t invcoord_cp(uint64_t);
@@ -84,4 +88,39 @@ invcoord_eoesep(uint64_t i)
 	set_eo(&c, eo);
 
 	return c;
+}
+
+STATIC_INLINE uint64_t
+coord_epudsep_array(const uint8_t e[8])
+{
+	uint8_t i, k, is;
+	uint64_t ret;
+
+	ret = 0;
+	k = 4;
+	for (i = 0; i < 8; i++) {
+		is = (e[i] & UINT8_C(4)) >> UINT8_C(2);
+		ret += is * binomial[7-i][k];
+		k -= is;
+	}
+
+	return ret;
+}
+
+STATIC_INLINE void
+invcoord_epudsep_array(uint64_t c, uint8_t ret[8])
+{
+	uint8_t i, k, is, x, y;
+
+	k = 4;
+	x = 0;
+	y = 4;
+	for (i = 0; i < 8; i++) {
+		is = c >= binomial[7-i][k];
+		ret[i] = is*y + (1-is)*x;
+		y += is;
+		x += 1-is;
+		c -= is * binomial[7-i][k];
+		k -= is;
+	}
 }

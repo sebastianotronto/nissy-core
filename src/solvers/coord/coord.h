@@ -7,6 +7,7 @@
 #include "drslice.h"
 #include "cpepe.h"
 #include "drfin.h"
+#include "htr.h"
 #include "list.h"
 #include "utils.h"
 #include "gendata.h"
