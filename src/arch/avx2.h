@@ -430,13 +430,12 @@ invcoord_epe(uint64_t i)
 STATIC_INLINE bool
 is_eo_even(cube_t cube)
 {
-	uint8_t count;
+	uint32_t mask;
 	__m256i e;
 
 	e = _mm256_and_si256(cube, EO_AVX2);
-	e = _mm256_srli_si256(e, EOSHIFT);
+	e = _mm256_slli_epi16(e, 7-EOSHIFT);
+	mask = _mm256_movemask_epi8(e);
 
-	count = _mm256_reduce_add_epi8(e);
-
-	return count % 2 == 0;
+	return popcount_u32(mask) % 2;
 }
