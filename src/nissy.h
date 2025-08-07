@@ -220,7 +220,8 @@ and it always ends in a newline character.
 Parameters:
    moves       - The moves of which to find the variation. Must be at most
                  NISSY_SIZE_MOVES long.
-   variations  - Specify which kind of variations to find, e.g. "lastqt".
+   variations  - Specify which kind of variations to find, for example
+                 "lastqt" or "unniss".
    result_size - The size of the result buffer.
    result      - The result buffer.
 
