@@ -845,3 +845,69 @@ STATIC equivalent_moves_t equivalent_moves_table[] = {
 	[MOVE_z2]  = {{UINT8_MAX}, {2, 2, UINT8_MAX}},
 	[MOVE_z3]  = {{UINT8_MAX}, {2, 2, 2, UINT8_MAX}},
 };
+
+STATIC uint8_t slice_to_basic[] = {
+	[MOVE_M]  = MOVE_L,
+	[MOVE_M2] = MOVE_L2,
+	[MOVE_M3] = MOVE_L3,
+	[MOVE_S]  = MOVE_F,
+	[MOVE_S2] = MOVE_F2,
+	[MOVE_S3] = MOVE_F3,
+	[MOVE_E]  = MOVE_D,
+	[MOVE_E2] = MOVE_D2,
+	[MOVE_E3] = MOVE_D3,
+};
+
+STATIC uint8_t basic_to_slice[] = {
+	[MOVE_U]  = MOVE_E3,
+	[MOVE_U2] = MOVE_E2,
+	[MOVE_U3] = MOVE_E,
+	[MOVE_D]  = MOVE_E,
+	[MOVE_D2] = MOVE_E2,
+	[MOVE_D3] = MOVE_E3,
+	[MOVE_R]  = MOVE_M3,
+	[MOVE_R2] = MOVE_M2,
+	[MOVE_R3] = MOVE_M,
+	[MOVE_L]  = MOVE_M,
+	[MOVE_L2] = MOVE_M2,
+	[MOVE_L3] = MOVE_M3,
+	[MOVE_F]  = MOVE_S,
+	[MOVE_F2] = MOVE_S2,
+	[MOVE_F3] = MOVE_S3,
+	[MOVE_B]  = MOVE_S3,
+	[MOVE_B2] = MOVE_S2,
+	[MOVE_B3] = MOVE_S,
+};
+
+STATIC uint8_t rotation_to_basic[] = {
+	[MOVE_x]  = MOVE_R,
+	[MOVE_x2] = MOVE_R2,
+	[MOVE_x3] = MOVE_R3,
+	[MOVE_y]  = MOVE_U,
+	[MOVE_y2] = MOVE_U2,
+	[MOVE_y3] = MOVE_U3,
+	[MOVE_z]  = MOVE_F,
+	[MOVE_z2] = MOVE_F2,
+	[MOVE_z3] = MOVE_F3,
+};
+
+STATIC uint8_t basic_to_rotation[] = {
+	[MOVE_U]  = MOVE_y,
+	[MOVE_U2] = MOVE_y2,
+	[MOVE_U3] = MOVE_y3,
+	[MOVE_D]  = MOVE_y3,
+	[MOVE_D2] = MOVE_y2,
+	[MOVE_D3] = MOVE_y,
+	[MOVE_R]  = MOVE_x,
+	[MOVE_R2] = MOVE_x2,
+	[MOVE_R3] = MOVE_x3,
+	[MOVE_L]  = MOVE_x3,
+	[MOVE_L2] = MOVE_x2,
+	[MOVE_L3] = MOVE_x,
+	[MOVE_F]  = MOVE_z,
+	[MOVE_F2] = MOVE_z2,
+	[MOVE_F3] = MOVE_z3,
+	[MOVE_B]  = MOVE_z3,
+	[MOVE_B2] = MOVE_z2,
+	[MOVE_B3] = MOVE_z,
+};

@@ -27,6 +27,7 @@ for example 'rotation UF' or 'mirrored BL'.
 #define NISSY_SIZE_TRANSFORMATION 12U
 #define NISSY_SIZE_SOLVE_STATS    10U
 #define NISSY_SIZE_DATAID         255U
+#define NISSY_SIZE_MOVES          1000U
 
 /* Flags for NISS options */
 #define NISSY_NISSFLAG_NORMAL  1U
@@ -97,6 +98,12 @@ The value NISSY_ERROR_INVALID_SOLVER means that the given solver is
 not known.
 */
 #define NISSY_ERROR_INVALID_SOLVER -50LL
+
+/*
+The value NISSY_ERROR_INVALID_VARIATION means that the given method of
+finding variations for a solution is not known.
+*/
+#define NISSY_ERROR_INVALID_VARIATION -51LL
 
 /*
 The value NISSY_ERROR_NULL_POINTER means that one of the provided pointer
@@ -202,6 +209,36 @@ nissy_applytrans(
 	const char cube[static NISSY_SIZE_CUBE],
 	const char transformation[static NISSY_SIZE_TRANSFORMATION],
 	char result[static NISSY_SIZE_CUBE]
+);
+
+/*
+Find variations of a given move sequence, for example by changing
+the direction of the last quarter turn(s), or linearizing a NISS move
+sequence. The result consists of one or more move sequences, one per line,
+and it always ends in a newline character.
+
+Parameters:
+   moves       - The moves of which to find the variation. Must be at most
+                 NISSY_SIZE_MOVES long.
+   variations  - Specify which kind of variations to find, e.g. "lastqt".
+   result_size - The size of the result buffer.
+   result      - The result buffer.
+
+Return values:
+   NISSY_ERROR_NULL_POINTER      - One of the provided pointers is NULL.
+   NISSY_ERROR_INVALID_MOVES     - The given moves are invalid.
+   NISSY_ERROR_INVALID_VARIATION - The given transformer is not known.
+   NISSY_ERROR_BUFFER_SIZE       - Either the result buffer is too small or the
+                                   given move sequence is longer than
+                                   NISSY_SIZE_MOVES.
+   Any value >= 0                - The number of variations found.
+*/
+long long
+nissy_variations(
+	const char *moves,
+	const char *variation,
+	unsigned long long result_size,
+	char *result
 );
 
 /*
@@ -365,6 +402,8 @@ nissy_solve(
 );
 
 /*
+Count the given moves.
+
 Parameters:
    moves  - The moves to be counted.
 
@@ -379,6 +418,8 @@ nissy_countmoves(
 );
 
 /*
+Compare the two moves sequences. Both must be at most NISSY_SIZE_MOVES long.
+
 Parameters:
    moves1 - The first sequence of moves to compare.
    moves2 - The second sequence of moves to compare.

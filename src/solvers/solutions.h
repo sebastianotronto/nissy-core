@@ -55,7 +55,7 @@ solution_list_init(solution_list_t sols[static 1], size_t n, char *buf)
 		return false;
 
 	sols->nsols = 0;
-	sols->shortest_sol = MAXLEN + 1;
+	sols->shortest_sol = SOLUTION_MAXLEN + 1;
 	sols->size = n;
 	sols->used = 0;
 	sols->buf = buf;
@@ -162,7 +162,7 @@ appendsolution(
 	uint8_t t;
 	solution_moves_t tsol[NTRANS];
 
-	if (moves->nmoves + moves->npremoves > MAXLEN)
+	if (moves->nmoves + moves->npremoves > SOLUTION_MAXLEN)
 		goto appendsolution_error_solution_length;
 
 	for (

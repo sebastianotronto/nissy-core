@@ -12,6 +12,7 @@ extern "C" {
 	long long nissy_inverse(const char *, char *);
 	long long nissy_applymoves(const char *, const char *, char *);
 	long long nissy_applytrans(const char *, const char *, char *);
+	long long nissy_variations(const char *, const char *, size_t, char*);
 	long long nissy_getcube(long long, long long, long long, long long,
 	    long long, const char *, char *);
 	long long nissy_solverinfo(const char *, char *);
@@ -44,6 +45,7 @@ namespace nissy {
 	const error error::INVALID_MOVES{-20};
 	const error error::INVALID_TRANS{-30};
 	const error error::INVALID_SOLVER{-50};
+	const error error::INVALID_VARIATION{-51};
 	const error error::NULL_POINTER{-60};
 	const error error::BUFFER_SIZE{-61};
 	const error error::DATA{-70};
@@ -62,9 +64,41 @@ namespace nissy {
 		constexpr size_t TRANSFORMATION = 12;
 		constexpr size_t SOLVE_STATS = 10;
 		constexpr size_t DATAID = 255;
+		constexpr size_t MOVES = 1000;
 	}
 
 	bool error::ok() const { return value >= 0; }
+
+	variation::variation(const std::string& str) : name{str} {}
+
+	variation::variations_result
+	variation::find_variations(const std::string& moves)
+	{
+		variation::variations_result result;
+
+		const size_t len = 3 * size::MOVES * 16;
+		result.solutions.resize(len);
+
+		auto err = nissy_variations(moves.c_str(), name.c_str(), len,
+		    result.solutions.data());
+
+		int size = result.solutions.find_first_of('\0');
+		result.solutions.resize(size);
+		result.err = error{err};
+
+		return result;
+	}
+
+	std::variant<variation, error>
+	variation::get(const std::string& name) {
+		char result[10];
+		variation s(name);
+
+		if (nissy_variations("", name.c_str(), 10, result) < 0)
+			return error::INVALID_VARIATION;
+		else
+			return s;
+	}
 
 	cube::cube() {}
 

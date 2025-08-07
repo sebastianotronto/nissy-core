@@ -1,10 +1,10 @@
-#define MAXLEN 20
+#define SOLUTION_MAXLEN 20
 
 typedef struct {
 	uint8_t nmoves;
-	uint8_t moves[MAXLEN];
+	uint8_t moves[SOLUTION_MAXLEN];
 	uint8_t npremoves;
-	uint8_t premoves[MAXLEN];
+	uint8_t premoves[SOLUTION_MAXLEN];
 } solution_moves_t;
 
 typedef struct {

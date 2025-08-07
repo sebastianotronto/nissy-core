@@ -44,6 +44,29 @@ string_result(long long err, const char *result)
 }
 
 static PyObject *
+stringlist_result(long long err, char *result)
+{
+	int i, j, k;
+	PyObject *list, *item;
+
+	if(!check_error(err)) {
+		return NULL;
+	} else {
+		list = PyList_New(err);
+		for (i = 0, j = 0, k = 0; result[i] != 0; i++) {
+			if (result[i] != '\n')
+				continue;
+			result[i] = 0;
+			item = PyUnicode_FromString(&result[k]);
+			PyList_SetItem(list, j, item);
+			j++;
+			k = i+1;
+		}
+		return list;
+	}
+}
+
+static PyObject *
 string_result_free(long long err, char *result)
 {
 	PyObject *ret;
@@ -287,12 +310,11 @@ solve(PyObject *self, PyObject *args)
 {
 	long long result;
 	unsigned nissflag, minmoves, maxmoves, maxsolutions;
-	int optimal, i, j, k, threads;
+	int optimal, threads;
 	const char *cube, *solver;
 	char solutions[MAX_SOLUTIONS_SIZE];
 	long long stats[NISSY_SIZE_SOLVE_STATS];
 	PyByteArrayObject *data;
-	PyObject *list, *item;
 
 	if (!PyArg_ParseTuple(args, "ssIIIIIIY", &cube, &solver, &nissflag,
 	     &minmoves, &maxmoves, &maxsolutions, &optimal, &threads, &data))
@@ -305,21 +327,7 @@ solve(PyObject *self, PyObject *args)
 	    stats, NULL, NULL);
 	Py_END_ALLOW_THREADS
 
-	if(!check_error(result)) {
-		return NULL;
-	} else {
-		list = PyList_New(result);
-		for (i = 0, j = 0, k = 0; solutions[i] != 0; i++) {
-			if (solutions[i] != '\n')
-				continue;
-			solutions[i] = 0;
-			item = PyUnicode_FromString(&solutions[k]);
-			PyList_SetItem(list, j, item);
-			j++;
-			k = i+1;
-		}
-		return list;
-	}
+	return stringlist_result(result, solutions);
 }
 
 PyDoc_STRVAR(countmoves_doc,
@@ -368,8 +376,9 @@ comparemoves(PyObject *self, PyObject *args)
 	if (!PyArg_ParseTuple(args, "ss", &m1, &m2))
 		return NULL;
 
-	if ((cmp = nissy_comparemoves(m1, m2)) < 0)
-		return long_result(cmp);
+	cmp = nissy_comparemoves(m1, m2);
+	if (!check_error(cmp))
+		return NULL;
 
 	switch (cmp) {
 	case NISSY_COMPARE_MOVES_EQUAL:
@@ -379,6 +388,32 @@ comparemoves(PyObject *self, PyObject *args)
 	default:
 		return long_result(cmp);
 	}
+}
+
+PyDoc_STRVAR(variations_doc,
+"variations(moves, variation)\n"
+"--\n\n"
+"Find variations of a given move sequence\n"
+"\n"
+"Parameters:\n"
+"  - moves: the moves\n"
+"  - variation: the variation to apply, such as 'unniss' or 'lastqt'\n"
+"\n"
+"Returns: a list of move sequences, the variation of the given moves.\n"
+);
+PyObject *
+variations(PyObject *self, PyObject *args)
+{
+	long long err;
+	const char *m, *v;
+	char result[MAX_SOLUTIONS_SIZE];
+
+	if (!PyArg_ParseTuple(args, "ss", &m, &v))
+		return NULL;
+
+	err = nissy_variations(m, v, MAX_SOLUTIONS_SIZE, result);
+
+	return stringlist_result(err, result);
 }
 
 static PyMethodDef nissy_methods[] = {
@@ -392,6 +427,7 @@ static PyMethodDef nissy_methods[] = {
 	{ "solve", solve, METH_VARARGS, solve_doc },
 	{ "countmoves", countmoves, METH_VARARGS, countmoves_doc },
 	{ "comparemoves", comparemoves, METH_VARARGS, comparemoves_doc },
+	{ "variations", variations, METH_VARARGS, variations_doc },
 	{ NULL, NULL, 0, NULL }
 };
 

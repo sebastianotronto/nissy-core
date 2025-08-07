@@ -11,6 +11,8 @@ STATIC bool moves_struct_equal(
 STATIC long long comparemoves(const char *, const char *);
 STATIC uint8_t readmodifier(char);
 STATIC int64_t writemoves(size_t, const uint8_t *, size_t, char *);
+STATIC int64_t writemoves_struct(
+    const moves_struct_t [static 1], size_t, char *);
 
 STATIC_INLINE bool allowednextmove(uint8_t, uint8_t);
 STATIC bool allowedmoves(size_t, const uint8_t *);
@@ -23,6 +25,7 @@ STATIC_INLINE uint8_t moveopposite(uint8_t);
 STATIC_INLINE uint8_t reorient_move(uint8_t, uint8_t);
 STATIC_INLINE uint8_t inverse_reorient_move(uint8_t, uint8_t);
 STATIC_INLINE uint8_t movefollow(uint8_t);
+STATIC uint8_t transform_move_basic(uint8_t, uint8_t);
 STATIC uint8_t transform_move(uint8_t, uint8_t);
 
 STATIC cube_t move(cube_t, uint8_t);
@@ -30,6 +33,12 @@ STATIC cube_t premove(cube_t, uint8_t);
 STATIC uint8_t inverse_move(uint8_t);
 STATIC void sortparallel_moves(size_t, uint8_t*);
 STATIC bool are_lastmoves_singlecw(size_t, const uint8_t*);
+
+STATIC int64_t move_variations(const char *, const char *, size_t, char *);
+STATIC int64_t move_variations_lastqt(
+    const moves_struct_t [static 1], size_t, char *);
+STATIC int64_t move_variations_unniss(
+    const moves_struct_t [static 1], size_t, char *);
 
 #define FOREACH_READMOVE(ARG_BUF, ARG_MOVE, ARG_C, ARG_MAX, \
 	RET_ERROR, ARG_ACTION) \
@@ -160,7 +169,7 @@ readmoves(
 STATIC int64_t
 readmoves_struct(const char *moves, moves_struct_t ret[static 1])
 {
-	return readmoves(moves, MOVES_STRUCT_MAXLEN, MOVES_STRUCT_MAXLEN,
+	return readmoves(moves, NISSY_SIZE_MOVES, NISSY_SIZE_MOVES,
 	    &ret->nnormal, &ret->ninverse, ret->normal, ret->inverse);
 }
 
@@ -267,6 +276,51 @@ writemoves(
 
 writemoves_error:
 	*buf = '\0';
+	return NISSY_ERROR_BUFFER_SIZE;
+}
+
+STATIC int64_t
+writemoves_struct(
+	const moves_struct_t moves[static 1],
+	size_t buf_size,
+	char *buf
+)
+{
+	int64_t w, u;
+
+	w = 0;
+	if (moves->nnormal > 0) {
+		w = writemoves(moves->nnormal, moves->normal, buf_size, buf);
+		if (w < 0)
+			goto writemoves_struct_error;
+	}
+
+	u = 0;
+	if (moves->ninverse > 0) {
+		if (moves->nnormal > 0) {
+			if ((size_t)w >= buf_size)
+				goto writemoves_struct_error;
+			buf[w++] = ' ';
+		}
+		if ((size_t)w >= buf_size)
+			goto writemoves_struct_error;
+		buf[w++] = '(';
+
+		u = writemoves(moves->ninverse, moves->inverse,
+		    buf_size-w, buf+w);
+		if (u < 0)
+			goto writemoves_struct_error;
+
+		if ((size_t)w >= buf_size)
+			goto writemoves_struct_error;
+		buf[w + (u++)] = ')';
+	}
+
+	buf[u+w] = '\0';
+	return u+w;
+
+writemoves_struct_error:
+	buf[w] = '\0';
 	return NISSY_ERROR_BUFFER_SIZE;
 }
 
@@ -408,14 +462,12 @@ move(cube_t c, uint8_t m)
 }
 
 STATIC uint8_t
-transform_move(uint8_t m, uint8_t t)
+transform_move_basic(uint8_t m, uint8_t t)
 {
 	uint8_t a, base, modifier;
 
-	if (m > MOVE_B3) {
-		LOG("transform_move: attempting to transform %s, but "
-		    "transofrmations are only supported for basic moves\n",
-		    movestr[m]);
+	if (t > 47) {
+		LOG("transform_move: invalid trans %" PRIu8 "\n", t);
 		return UINT8_ERROR;
 	}
 
@@ -429,6 +481,27 @@ transform_move(uint8_t m, uint8_t t)
 		modifier = 2 - modifier;
 
 	return base + modifier;
+}
+
+STATIC uint8_t
+transform_move(uint8_t m, uint8_t t)
+{
+	if (m <= MOVE_B3)
+		return transform_move_basic(m, t);
+
+	if (m >= MOVE_Uw && m <= MOVE_Bw3)
+		return 18+transform_move_basic(m-18, t);
+
+	if (m >= MOVE_M && m <= MOVE_E3)
+		return basic_to_slice[
+		    transform_move_basic(slice_to_basic[m], t)];
+
+	if (m >= MOVE_x && m <= MOVE_z3)
+		return basic_to_rotation[
+		    transform_move_basic(rotation_to_basic[m], t)];
+
+	LOG("transform_move: invalid move %" PRIu8 "\n", m);
+	return UINT8_ERROR;
 }
 
 /* Applies the INVERSE of m BEFORE the scramble corresponding to c */
@@ -508,4 +581,141 @@ are_lastmoves_singlecw(size_t n, const uint8_t *moves)
 	two = n > 1 && parallel(moves[n-1], moves[n-2]);
 
 	return isbase(moves[n-1]) && (!two || isbase(moves[n-2]));
+}
+
+STATIC int64_t
+move_variations(
+	const char *moves,
+	const char *variation,
+	size_t result_size,
+	char *result
+)
+{
+	moves_struct_t m;
+	int64_t err;
+
+	err = readmoves_struct(moves, &m);
+	if (err < 0) {
+		LOG("[variations] Error reading moves.\n");
+		return err;
+	}
+
+	if (!strcmp(variation, "lastqt")) {
+		return move_variations_lastqt(&m, result_size, result);
+	} else if (!strcmp(variation, "unniss")) {
+		return move_variations_unniss(&m, result_size, result);
+	} else {
+		LOG("[variations] Error: unknown variation '%s'\n", variation);
+		return NISSY_ERROR_INVALID_VARIATION;
+	}
+}
+
+STATIC int64_t
+move_variations_lastqt(
+	const moves_struct_t s[static 1],
+	size_t result_size,
+	char *result
+)
+{
+	uint8_t n1, n2, i1, i2, swapn1, swapn2, swapi1, swapi2, i, j, k, l;
+	int8_t in1, in2, ii1, ii2;
+	int64_t err, count;
+	size_t u;
+	moves_struct_t ss;
+
+	in1 = s->nnormal-1;
+	in2 = s->nnormal-2;
+	ii1 = s->ninverse-1;
+	ii2 = s->ninverse-2;
+
+	n1 = in1 >= 0 ? s->normal[in1] : UINT8_ERROR;
+	n2 = in2 >= 0 ? s->normal[in2] : UINT8_ERROR;
+	i1 = ii1 >= 0 ? s->inverse[ii1] : UINT8_ERROR;
+	i2 = ii2 >= 0 ? s->inverse[ii2] : UINT8_ERROR;
+
+	swapn1 = in1 >= 0 && n1 % 3 != 1 ? 1 : 0;
+	swapn2 = swapn1 && in2 >= 0 && n2 % 3 != 1 && parallel(n1, n2) ? 1 : 0;
+	swapi1 = ii1 >= 0 && i1 % 3 != 1 ? 1 : 0;
+	swapi2 = swapi1 && ii2 >= 0 && i2 % 3 != 1 && parallel(i1, i2) ? 1 : 0;
+
+	/* Reset ending qt to base so that they are sorted */
+	ss = *s;
+	if (swapn1 == 1) ss.normal[in1] = 3*movebase(n1);
+	if (swapn2 == 1) ss.normal[in2] = 3*movebase(n2);
+	if (swapi1 == 1) ss.inverse[ii1] = 3*movebase(i1);
+	if (swapi2 == 1) ss.inverse[ii2] = 3*movebase(i2);
+
+	u = 0;
+	count = 0;
+	for (i = 0; i <= swapn2; i++) {
+		if (i == 1) ss.normal[in2] += 2;
+		for (j = 0; j <= swapn1; j++) {
+			if (j == 1) ss.normal[in1] += 2;
+			for (k = 0; k <= swapi2; k++) {
+				if (k == 1) ss.inverse[ii2] += 2;
+				for (l = 0; l <= swapi1; l++) {
+					if (l == 1) ss.inverse[ii1] += 2;
+
+					err = writemoves_struct(
+					    &ss, result_size-u, result+u);
+					if (err < 0)
+						goto lastqt_error;
+					u += err;
+					count++;
+
+					if (u >= result_size)
+						goto lastqt_error;
+					result[u++] = '\n';
+					result[u] = '\0';
+
+					if (l == 1) ss.inverse[ii1] -= 2;
+				}
+				if (k == 1) ss.inverse[ii2] -= 2;
+			}
+			if (j == 1) ss.normal[in1] -= 2;
+		}
+		if (i == 1) ss.normal[in2] -= 2;
+	}
+
+	return count;
+
+lastqt_error:
+	LOG("[variations] Error writing result.\n");
+	return NISSY_ERROR_BUFFER_SIZE;
+}
+
+STATIC int64_t
+move_variations_unniss(
+	const moves_struct_t s[static 1],
+	size_t result_size,
+	char *result
+)
+{
+	size_t i, tot;
+	uint8_t res[NISSY_SIZE_MOVES];
+	int64_t err;
+
+	tot = s->nnormal + s->ninverse;
+	if (tot > NISSY_SIZE_MOVES) {
+		LOG("[variations] Error: %zu total moves, more than maximum "
+		    "allowed %zu", tot, NISSY_SIZE_MOVES);
+		return NISSY_ERROR_BUFFER_SIZE;
+	}
+
+	for (i = 0; i < s->nnormal; i++)
+		res[i] = s->normal[i];
+	for (i = 0; i < s->ninverse; i++)
+		res[i+s->nnormal] = inverse_move(s->inverse[s->ninverse-i-1]);
+
+	err = writemoves(tot, res, result_size, result);
+	if (err < 0 || (size_t)err > result_size)
+		goto unniss_error;
+
+	result[err++] = '\n';
+	result[err] = '\0';
+	return 1;
+
+unniss_error:
+	LOG("[variations] Error writing result.\n");
+	return NISSY_ERROR_BUFFER_SIZE;
 }

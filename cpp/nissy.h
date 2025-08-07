@@ -39,6 +39,7 @@ namespace nissy {
 		static const error INVALID_MOVES;
 		static const error INVALID_TRANS;
 		static const error INVALID_SOLVER;
+		static const error INVALID_VARIATION;
 		static const error NULL_POINTER;
 		static const error BUFFER_SIZE;
 		static const error DATA;
@@ -61,6 +62,21 @@ namespace nissy {
 
 		static const compare_result EQUAL;
 		static const compare_result DIFFERENT;
+	};
+
+	class variation {
+	public:
+		struct variations_result {
+			error err;
+			std::string solutions;
+		};
+
+		const std::string name;
+
+		variations_result find_variations(const std::string&);
+		static std::variant<variation, error> get(const std::string&);
+	private:
+		variation(const std::string&);
 	};
 
 	class cube {

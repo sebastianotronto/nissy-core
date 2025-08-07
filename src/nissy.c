@@ -149,6 +149,32 @@ nissy_applytrans_error:
 }
 
 long long
+nissy_variations(
+	const char *moves,
+	const char *variation,
+	unsigned long long result_size,
+	char *result
+)
+{
+	if (moves == NULL) {
+		LOG("[variations] Error: 'moves' argument is NULL\n");
+		return NISSY_ERROR_NULL_POINTER;
+	}
+
+	if (variation == NULL) {
+		LOG("[variations] Error: 'variation' argument is NULL\n");
+		return NISSY_ERROR_NULL_POINTER;
+	}
+
+	if (result == NULL) {
+		LOG("[variations] Error: 'result' argument is NULL\n");
+		return NISSY_ERROR_NULL_POINTER;
+	}
+
+	return move_variations(moves, variation, result_size, result);
+}
+
+long long
 nissy_getcube(
 	long long ep,
 	long long eo,

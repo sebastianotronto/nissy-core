@@ -21,6 +21,7 @@
 #define FLAG_MOVES2       "-moves2"
 #define FLAG_TRANS        "-trans"
 #define FLAG_SOLVER       "-solver"
+#define FLAG_VARIATION    "-variation"
 #define FLAG_NISSTYPE     "-nisstype"
 #define FLAG_MINMOVES     "-m"
 #define FLAG_MAXMOVES     "-M"
@@ -43,6 +44,7 @@ typedef struct {
 	char *str_moves2;
 	char *str_trans;
 	char *str_solver;
+	char *str_variation;
 	char *str_nisstype;
 	unsigned minmoves;
 	unsigned maxmoves;
@@ -62,6 +64,7 @@ static int64_t solve_exec(args_t *);
 static int64_t solve_scramble_exec(args_t *);
 static int64_t countmoves_exec(args_t *);
 static int64_t comparemoves_exec(args_t *);
+static int64_t variation_exec(args_t *);
 static int64_t help_exec(args_t *);
 
 static int parse_args(int, char **, args_t *);
@@ -75,6 +78,7 @@ static bool set_str_moves(int, char **, args_t *);
 static bool set_str_moves2(int, char **, args_t *);
 static bool set_str_trans(int, char **, args_t *);
 static bool set_str_solver(int, char **, args_t *);
+static bool set_str_variation(int, char **, args_t *);
 static bool set_str_nisstype(int, char **, args_t *);
 static bool set_minmoves(int, char **, args_t *);
 static bool set_maxmoves(int, char **, args_t *);
@@ -98,6 +102,7 @@ struct {
 	OPTION(FLAG_MOVES2, 1, set_str_moves2),
 	OPTION(FLAG_TRANS, 1, set_str_trans),
 	OPTION(FLAG_SOLVER, 1, set_str_solver),
+	OPTION(FLAG_VARIATION, 1, set_str_variation),
 	OPTION(FLAG_NISSTYPE, 1, set_str_nisstype),
 	OPTION(FLAG_MINMOVES, 1, set_minmoves),
 	OPTION(FLAG_MAXMOVES, 1, set_maxmoves),
@@ -114,7 +119,6 @@ struct {
 	char *desc;
 	int64_t (*exec)(args_t *);
 } commands[] = {
-/* TODO: add synopsis and description here */
 	COMMAND(
 		"inverse",
 		"inverse " FLAG_CUBE " CUBE ",
@@ -195,6 +199,13 @@ struct {
 		"Compare the two move sequences."
 		INFO_MOVESFORMAT,
 		comparemoves_exec
+	),
+	COMMAND(
+		"variations",
+		"variations " FLAG_MOVES " MOVES " FLAG_VARIATION " VARIATION",
+		"Find variations of a move sequence."
+		INFO_MOVESFORMAT,
+		variation_exec
 	),
 	COMMAND(
 		"help",
@@ -511,6 +522,22 @@ comparemoves_exec(args_t *args)
 }
 
 static int64_t
+variation_exec(args_t *args)
+{
+	long long err;
+	char result[SOLUTIONS_BUFFER_SIZE];
+
+	err = nissy_variations(args->str_moves, args->str_variation,
+	    SOLUTIONS_BUFFER_SIZE, result);
+
+	if (err < 0)
+		return err;
+	printf("%s", result);
+
+	return 0;
+}
+
+static int64_t
 help_exec(args_t *args)
 {
 	int i;
@@ -550,6 +577,7 @@ parse_args(int argc, char **argv, args_t *args)
 		.str_moves2 = "",
 		.str_trans = "",
 		.str_solver = "",
+		.str_variation = "",
 		.str_nisstype = "",
 		.minmoves = 0,
 		.maxmoves = 20,
@@ -687,6 +715,14 @@ static bool
 set_str_solver(int argc, char **argv, args_t *args)
 {
 	args->str_solver = argv[0];
+
+	return true;
+}
+
+static bool
+set_str_variation(int argc, char **argv, args_t *args)
+{
+	args->str_variation = argv[0];
 
 	return true;
 }
