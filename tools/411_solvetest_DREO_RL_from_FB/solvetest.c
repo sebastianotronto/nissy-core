@@ -1,4 +1,4 @@
-#define SOLVER       "coord_DREO_RF"
+#define SOLVER       "drrl-eofb"
 #define NISSFLAG     NISSY_NISSFLAG_LINEAR
 #define MINMOVES     0
 #define MAXMOVES     20

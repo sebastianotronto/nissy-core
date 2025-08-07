@@ -1,4 +1,4 @@
-#define SOLVER       "mcoord_DRFIN_UF"
+#define SOLVER       "drudfin"
 #define NISSFLAG     NISSY_NISSFLAG_NORMAL
 #define MINMOVES     0
 #define MAXMOVES     20

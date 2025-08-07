@@ -1,4 +1,4 @@
-#define SOLVER       "coord_DRSLICE_UF"
+#define SOLVER       "drudslice"
 #define NISSFLAG     NISSY_NISSFLAG_NORMAL
 #define MINMOVES     0
 #define MAXMOVES     20

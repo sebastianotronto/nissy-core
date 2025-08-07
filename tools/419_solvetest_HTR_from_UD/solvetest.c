@@ -1,4 +1,4 @@
-#define SOLVER       "coord_HTR_UF"
+#define SOLVER       "htr-drud"
 #define NISSFLAG     NISSY_NISSFLAG_ALL
 #define MINMOVES     0
 #define MAXMOVES     20

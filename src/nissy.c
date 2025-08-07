@@ -213,15 +213,15 @@ nissy_getcube(
 STATIC long long
 nissy_dataid(const char *solver, char dataid[static NISSY_SIZE_DATAID])
 {
-	solver_dispatch_t *dispatch;
+	solver_dispatch_t dispatch;
 
 	dispatch = match_solver(solver);
-	if (dispatch == NULL) {
+	if (dispatch.prefix == NULL) {
 		LOG("[dataid] Unknown solver %s\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	return dispatch->dataid(solver, dataid);
+	return dispatch.dataid(dispatch.solvername, dataid);
 }
 
 long long
@@ -255,7 +255,7 @@ nissy_gendata_unsafe(
 	unsigned char *data
 )
 {
-	solver_dispatch_t *dispatch;
+	solver_dispatch_t dispatch;
 
 	if (solver == NULL) {
 		LOG("[gendata] Error: 'solver' argument is NULL\n");
@@ -268,12 +268,12 @@ nissy_gendata_unsafe(
 	}
 
 	dispatch = match_solver(solver);
-	if (dispatch == NULL) {
+	if (dispatch.prefix == NULL) {
 		LOG("[gendata] Unknown solver %s\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	return dispatch->gendata(solver, data_size, data);
+	return dispatch.gendata(dispatch.solvername, data_size, data);
 }
 
 long long
@@ -283,15 +283,15 @@ nissy_checkdata(
 	const unsigned char *data
 )
 {
-	solver_dispatch_t *dispatch;
+	solver_dispatch_t dispatch;
 
 	dispatch = match_solver(solver);
-	if (dispatch == NULL) {
+	if (dispatch.prefix == NULL) {
 		LOG("[checkdata] Unknown solver %s\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	return dispatch->checkdata(solver, data_size, data);
+	return dispatch.checkdata(dispatch.solvername, data_size, data);
 }
 
 long long
@@ -315,7 +315,7 @@ nissy_solve(
 {
 	oriented_cube_t oc;
 	int t;
-	solver_dispatch_t *dispatch;
+	solver_dispatch_t dispatch;
 
 	if (solver == NULL) {
 		LOG("[solve] Error: 'solver' argument is NULL\n");
@@ -359,13 +359,13 @@ nissy_solve(
 	}
 
 	dispatch = match_solver(solver);
-	if (dispatch == NULL) {
+	if (dispatch.prefix == NULL) {
 		LOG("[solve] Error: unknown solver '%s'\n", solver);
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
-	return dispatch->solve(oc, solver, nissflag, minmoves, maxmoves,
-	    maxsols, optimal, t, data_size, data, sols_size, sols, stats,
-	    poll_status, poll_status_data);
+	return dispatch.solve(oc, dispatch.solvername, nissflag, minmoves,
+	    maxmoves, maxsols, optimal, t, data_size, data, sols_size, sols,
+	    stats, poll_status, poll_status_data);
 }
 
 long long

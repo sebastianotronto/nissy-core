@@ -1,4 +1,4 @@
-#define SOLVER       "coord_DREO_UF"
+#define SOLVER       "drud-eofb"
 #define NISSFLAG     NISSY_NISSFLAG_LINEAR
 #define MINMOVES     0
 #define MAXMOVES     20

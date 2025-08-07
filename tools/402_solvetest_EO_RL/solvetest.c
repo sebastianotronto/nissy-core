@@ -1,4 +1,4 @@
-#define SOLVER       "coord_EO_UR"
+#define SOLVER       "eorl"
 #define NISSFLAG     NISSY_NISSFLAG_ALL
 #define MINMOVES     0
 #define MAXMOVES     20
