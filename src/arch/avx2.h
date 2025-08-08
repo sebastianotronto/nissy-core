@@ -39,7 +39,7 @@ pieces(cube_t cube[static 1], uint8_t c[static 8], uint8_t e[static 12])
 {
 	uint8_t aux[32];
 
-	_mm256_storeu_si256((__m256i_u *)aux, *cube);
+	_mm256_storeu_si256((__m256i *)aux, *cube);
 	memcpy(c, aux, 8);
 	memcpy(e, aux+16, 12);
 }
@@ -172,7 +172,7 @@ invcoord_co(uint64_t coord)
 		mem[0] |= (uint64_t)(i + (co << COSHIFT)) << (uint64_t)(8 * i);
 	}
 
-	cc = _mm256_loadu_si256((const __m256i *)mem);
+	cc = _mm256_loadu_si256((__m256i *)mem);
 	cube = SOLVED_CUBE;
 	copy_corners(&cube, cc);
 
@@ -251,7 +251,7 @@ invcoord_esep(uint64_t esep)
 	invcoord_esep_array(esep % UINT64_C(70), esep / UINT64_C(70), mem+16);
 
 	ret = SOLVED_CUBE;
-	eee = _mm256_loadu_si256((__m256i_u *)&mem);
+	eee = _mm256_loadu_si256((__m256i *)mem);
 	copy_edges(&ret, eee);
 
 	return ret;
@@ -372,7 +372,7 @@ coord_cp(cube_t cube)
 	int64_t aux[4];
 
 	cp = _mm256_and_si256(cube, CP_AVX2);
-	_mm256_storeu_si256((__m256i_u *)aux, cp);
+	_mm256_storeu_si256((__m256i *)aux, cp);
 
 	return permtoindex_Nx8(8, aux[0]);
 }
@@ -390,7 +390,7 @@ coord_epud(cube_t cube)
 	int64_t aux[4];
 
 	ep = _mm256_and_si256(cube, EP_AVX2);
-	_mm256_storeu_si256((__m256i_u *)aux, ep);
+	_mm256_storeu_si256((__m256i *)aux, ep);
 
 	return permtoindex_Nx8(8, aux[2]);
 }
@@ -409,7 +409,7 @@ coord_epe(cube_t cube)
 
 	ep = _mm256_and_si256(cube, EP_AVX2);
 	ep = _mm256_xor_si256(ep, _mm256_set1_epi8(8));
-	_mm256_storeu_si256((__m256i_u *)aux, ep);
+	_mm256_storeu_si256((__m256i *)aux, ep);
 
 	return permtoindex_Nx8(4, aux[3]);
 }
@@ -445,7 +445,7 @@ coord_epudsep(cube_t cube)
 {
 	uint8_t aux[32];
 
-	_mm256_storeu_si256((__m256i_u *)aux, cube);
+	_mm256_storeu_si256((__m256i *)aux, cube);
 	return coord_epudsep_array(aux + 16);
 }
 
@@ -453,10 +453,10 @@ STATIC_INLINE cube_t
 invcoord_epudsep(uint64_t i)
 {
 	cube_t cube, elow;
-	uint8_t e[32];
+	uint8_t e[32] = {0};
 
 	invcoord_epudsep_array(i, e+16);
-	elow = _mm256_load_si256((__m256i *)e);
+	elow = _mm256_loadu_si256((__m256i *)e);
 	cube = _mm256_set_epi64x(SOLVED_H, 0, 0, SOLVED_L);
 
 	return _mm256_or_si256(elow, cube);
