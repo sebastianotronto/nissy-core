@@ -9,6 +9,7 @@ utils/.DS_Store
 perf.data
 perf.data.old
 run
+run.exe
 debugrun
 shell/lasttest.out
 shell/lasttest.err
@@ -18,7 +19,9 @@ test/.DS_Store
 test/run
 test/run.DSYM
 runtest
+runtest.exe
 runcpp
+runcpp.exe
 runtest.js
 runtest.wasm
 web/http/nissy_web_module.*
@@ -34,3 +37,5 @@ tools/results
 *.o
 *.so
 *.s
+*.pyd
+*.dll

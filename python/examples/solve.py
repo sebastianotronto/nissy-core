@@ -4,8 +4,8 @@
 # folder containing nissy_python_module.so
 
 # Append the main folder to the python path so we can load the module
-from sys import path
-path.append("./")
+import sys, os
+sys.path.append(os.getcwd())
 
 # Import with a nicer name
 import nissy_python_module as nissy
