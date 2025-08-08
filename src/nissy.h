@@ -346,7 +346,7 @@ Solve the given cube using the given solver and options.
 
 Parameters:
    cube             - The cube to solver.
-   solver           - The name of the solver.
+   solver           - The name of the solver. See doc/solvers.md for a list.
    nissflag         - The flags for NISS (linear, inverse, mixed, or
                       combinations; see the constants at the top of this file).
    minmoves         - The minimum number of moves for a solution.
