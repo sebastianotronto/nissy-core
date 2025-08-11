@@ -1,3 +1,9 @@
+#if SIZE_MAX == UINT64_MAX
+#define H48_HMAX UINT8_C(11)
+#else
+#define H48_HMAX UINT8_C(7)
+#endif
+
 long long parse_h48_hk(
     const char *, uint8_t [static 1], uint8_t [static 1]);
 STATIC long long dataid_h48(const char *, char [static NISSY_SIZE_DATAID]);
@@ -18,8 +24,9 @@ parse_h48_hk(const char *buf, uint8_t h[static 1], uint8_t k[static 1])
 	buf++;
 
 	*h = atoi(buf);
-	if (*h > 11) {
-		LOG("[H48] Invalid value %" PRIu8 " for parameter h\n", *h);
+	if (*h > H48_HMAX) {
+		LOG("[H48] Invalid value %" PRIu8 " for parameter h (must be "
+		     "at most %" PRIu8 ")\n", *h, H48_HMAX);
 		goto parse_h48_hk_error;
 	}
 
