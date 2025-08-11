@@ -280,7 +280,7 @@ build_python() {
 	fi
 	build_nissy || exit 1
 	run $CC $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES $OFLAGS -shared \
-		-o nissy_python_module.so nissy.o python/nissy_module.c
+		-o python/nissy.so nissy.o python/nissy_module.c
 }
 
 build_cpp() {

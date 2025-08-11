@@ -1,14 +1,15 @@
-# Small example of nissy_python_module usage
+# Small example of nissy Python module usage
 
-# Compile the python module with "make python", then run this from the main
-# folder containing nissy_python_module.so
+# Run "./build python", then run this from either the top-level directory
+# of the nissy-core repo or from the python subdirectory.
 
-# Append the main folder to the python path so we can load the module
+# Append the directories to the python path so we can load the module
 import sys, os
 sys.path.append(os.getcwd())
+sys.path.append(os.getcwd() + os.path.sep + "python")
 
 # Import with a nicer name
-import nissy_python_module as nissy
+import nissy
 
 # Choose the solver you prefer
 solver = "h48h0k4"

@@ -224,8 +224,8 @@ $ ./build python
 And to import it
 
 ```
-$ python                                  # In the main folder
->>> import nissy_python_module as nissy   # In the python shell
+$ python           # In the main folder or in the python subfolder
+>>> import nissy   # In the python shell
 ```
 
 From here you can call the library functions directly, for example:
