@@ -12,7 +12,8 @@ extern "C" {
 	long long nissy_inverse(const char *, char *);
 	long long nissy_applymoves(const char *, const char *, char *);
 	long long nissy_applytrans(const char *, const char *, char *);
-	long long nissy_variations(const char *, const char *, size_t, char*);
+	long long nissy_variations(const char *, const char *,
+	    unsigned long long, char*);
 	long long nissy_getcube(long long, long long, long long, long long,
 	    long long, const char *, char *);
 	long long nissy_solverinfo(const char *, char *);

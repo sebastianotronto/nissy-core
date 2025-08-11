@@ -1,7 +1,7 @@
 #include "../test.h"
 
 long long nissy_variations(
-    const char *, const char *, long long unsigned, char *);
+    const char *, const char *, unsigned long long, char *);
 
 void run(void) {
 	long long err;
