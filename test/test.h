@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../src/utils/wrapthread.h"
 #include "../src/nissy.h"
 #include "../src/arch/arch.h"
 #include "../src/core/core_types.h"

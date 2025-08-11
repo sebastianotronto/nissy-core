@@ -43,7 +43,7 @@ getdistribution(
 	const tableinfo_t info[static 1]
 ) {
 	getdistribution_data_t targ[THREADS];
-	pthread_t thread[THREADS];
+	wrapthread_define_var_thread_t(thread[THREADS]);
 	uint8_t pval, k;
 	uint64_t local_distr[THREADS][INFO_DISTRIBUTION_LEN];
 	uint64_t i, j, nbytes, sz, epb;
@@ -60,12 +60,12 @@ getdistribution(
 			.distr = local_distr[i],
 			.table = table,
 		};
-		pthread_create(&thread[i], NULL,
+		wrapthread_create(&thread[i], NULL,
 		    getdistribution_runthread, &targ[i]);
 	}
 
 	for (i = 0; i < THREADS; i++)
-		pthread_join(thread[i], NULL);
+		wrapthread_join(thread[i], NULL);
 
 	memset(distr, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
 	for (i = 0; i < THREADS; i++)
