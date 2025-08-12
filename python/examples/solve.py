@@ -14,11 +14,13 @@ import nissy
 # Choose the solver you prefer
 solver = "h48h0k4"
 
-# Load the pruning table from file
-data = bytearray(open("tables/" + solver, "rb").read())
-
-# If you have not generated the table yet, you can do so:
-# data = nissy.gendata("h48h0k4")
+# Load the pruning table from file, generate it if needed
+datapath = "tables" + os.path.sep + solver
+if os.path.exists(datapath):
+	data = bytearray(open(datapath, "rb").read())
+else:
+	data = nissy.gendata("h48h0k4")
+	print("Generated data will NOT be persisted")
 
 # Get a scrambled cube
 cube = nissy.applymoves(nissy.solved_cube, "U F R2");
