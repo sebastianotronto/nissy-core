@@ -21,9 +21,9 @@ STATIC const unsigned char *get_h48data_constptr(const unsigned char *);
 STATIC_INLINE uint8_t get_h48_pval(const unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE void set_h48_pval(unsigned char *, uint64_t, uint8_t, uint8_t);
 STATIC_INLINE uint8_t get_h48_pval_atomic(
-    _Atomic const unsigned char *, uint64_t, uint8_t);
+    wrapthread_atomic const unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE void set_h48_pval_atomic(
-    _Atomic unsigned char *, uint64_t, uint8_t, uint8_t);
+    wrapthread_atomic unsigned char *, uint64_t, uint8_t, uint8_t);
 
 STATIC long long
 gendata_h48_dispatch(
@@ -115,7 +115,7 @@ gendata_h48(gendata_h48_arg_t arg[static 1])
 
 	cocsepdata_offset = arg->buf + INFOSIZE;
 	arg->cocsepdata = (uint32_t *)cocsepdata_offset;
-	arg->h48buf = (_Atomic unsigned char*)arg->buf + cocsepsize;
+	arg->h48buf = (wrapthread_atomic unsigned char*)arg->buf + cocsepsize;
 
 	arg->base = 99;
 
@@ -207,13 +207,13 @@ gendata_h48(gendata_h48_arg_t arg[static 1])
 STATIC void
 gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 {
-	_Atomic unsigned char *table;
+	wrapthread_atomic unsigned char *table;
 	uint8_t val;
 	uint64_t i, sc, done, d, h48max;
 	uint64_t t, tt, isize, cc, bufsize;
 	h48h0k4_bfs_arg_t bfsarg[THREADS];
-	pthread_t thread[THREADS];
-	pthread_mutex_t table_mutex[CHUNKS];
+	wrapthread_define_var_thread_t(thread[THREADS]);
+	wrapthread_define_var_mutex_t(table_mutex[CHUNKS]);
 
 	arg->info = (tableinfo_t) {
 		.solver = "h48 solver h = 0, k = 4",
@@ -241,7 +241,7 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 	isize = h48max / THREADS;
 	isize = (isize / H48_COEFF(arg->k)) * H48_COEFF(arg->k);
 	for (t = 0; t < CHUNKS; t++)
-		pthread_mutex_init(&table_mutex[t], NULL);
+		wrapthread_mutex_init(&table_mutex[t], NULL);
 	for (t = 0; t < THREADS; t++) {
 		bfsarg[t] = (h48h0k4_bfs_arg_t) {
 			.cocsepdata = arg->cocsepdata,
@@ -259,12 +259,12 @@ gendata_h48h0k4(gendata_h48_arg_t arg[static 1])
 
 		for (t = 0; t < THREADS; t++) {
 			bfsarg[t].depth = d;
-			pthread_create(&thread[t], NULL,
+			wrapthread_create(&thread[t], NULL,
 			    gendata_h48h0k4_runthread, &bfsarg[t]);
 		}
 
 		for (t = 0; t < THREADS; t++)
-			pthread_join(thread[t], NULL);
+			wrapthread_join(thread[t], NULL);
 
 		for (i = 0, cc = 0; i < h48max; i++) {
 			val = get_h48_pval_atomic(table, i, 4);
@@ -395,13 +395,14 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 	int sleeptime;
 	unsigned char *table;
 	uint64_t j;
-	_Atomic uint64_t count;
+	wrapthread_atomic uint64_t count;
 	uint64_t i, ii, inext, bufsize, done, nshort, velocity;
 	h48map_t shortcubes;
 	gendata_h48short_arg_t shortarg;
 	h48k2_dfs_arg_t dfsarg[THREADS];
-	pthread_t thread[THREADS];
-	pthread_mutex_t shortcubes_mutex, table_mutex[CHUNKS];
+	wrapthread_define_var_thread_t(thread[THREADS]);
+	wrapthread_define_var_mutex_t(shortcubes_mutex);
+	wrapthread_define_var_mutex_t(table_mutex[CHUNKS]);
 
 	table = (unsigned char *)arg->h48buf + INFOSIZE;
 	memset(table, 0xFF, H48_TABLESIZE(arg->h, arg->k));
@@ -425,9 +426,9 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 
 	inext = 0;
 	count = 0;
-	pthread_mutex_init(&shortcubes_mutex, NULL);
+	wrapthread_mutex_init(&shortcubes_mutex, NULL);
 	for (i = 0; i < CHUNKS; i++)
-		pthread_mutex_init(&table_mutex[i], NULL);
+		wrapthread_mutex_init(&table_mutex[i], NULL);
 	for (i = 0; i < THREADS; i++) {
 		dfsarg[i] = (h48k2_dfs_arg_t){
 			.h = arg->h,
@@ -446,7 +447,7 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 		for (ii = 0; ii < CHUNKS; ii++)
 			dfsarg[i].table_mutex[ii] = &table_mutex[ii];
 
-		pthread_create(
+		wrapthread_create(
 		    &thread[i], NULL, gendata_h48k2_runthread, &dfsarg[i]);
 	}
 
@@ -464,9 +465,9 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 		done = count;
 		while (nshort - done > (velocity * sleeptime) / 1000) {
 			msleep(sleeptime);
-			pthread_mutex_lock(&shortcubes_mutex);
+			wrapthread_mutex_lock(&shortcubes_mutex);
 			done = count;
-			pthread_mutex_unlock(&shortcubes_mutex);
+			wrapthread_mutex_unlock(&shortcubes_mutex);
 			LOG("Processed %" PRIu64 " / %" PRIu64 " cubes\n",
 			    (done / 1000) * 1000, nshort);
 		}
@@ -476,7 +477,7 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 	}
 
 	for (i = 0; i < THREADS; i++)
-		pthread_join(thread[i], NULL);
+		wrapthread_join(thread[i], NULL);
 
 	h48map_destroy(&shortcubes);
 
@@ -492,29 +493,30 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 STATIC void *
 gendata_h48k2_runthread(void *arg)
 {
-	uint64_t coord, mutex;
+	uint64_t coord;
 	kvpair_t kv;
 	h48k2_dfs_arg_t *dfsarg;
+	wrapthread_define_if_threads(uint64_t, mutex);
 
 	dfsarg = (h48k2_dfs_arg_t *)arg;
 
 	while (true) {
-		pthread_mutex_lock(dfsarg->shortcubes_mutex);
+		wrapthread_mutex_lock(dfsarg->shortcubes_mutex);
 
 		kv = h48map_nextkvpair(dfsarg->shortcubes, dfsarg->next);
 		if (*dfsarg->next == dfsarg->shortcubes->capacity) {
-			pthread_mutex_unlock(dfsarg->shortcubes_mutex);
+			wrapthread_mutex_unlock(dfsarg->shortcubes_mutex);
 			break;
 		}
 		(*dfsarg->count)++;
-		pthread_mutex_unlock(dfsarg->shortcubes_mutex);
+		wrapthread_mutex_unlock(dfsarg->shortcubes_mutex);
 
 		if (kv.val < dfsarg->shortdepth) {
 			coord = kv.key >> (uint64_t)(11 - dfsarg->h);
 			mutex = H48_INDEX(coord, dfsarg->k) % CHUNKS;
-			pthread_mutex_lock(dfsarg->table_mutex[mutex]);
+			wrapthread_mutex_lock(dfsarg->table_mutex[mutex]);
 			set_h48_pval(dfsarg->table, coord, dfsarg->k, 0);
-			pthread_mutex_unlock(dfsarg->table_mutex[mutex]);
+			wrapthread_mutex_unlock(dfsarg->table_mutex[mutex]);
 		} else {
 			dfsarg->cube = invcoord_h48(kv.key, dfsarg->crep, 11);
 			gendata_h48k2_dfs(dfsarg);
@@ -607,7 +609,8 @@ STATIC_INLINE void
 gendata_h48_mark_atomic(gendata_h48_mark_t arg[static 1])
 {
 	uint8_t oldval, newval;
-	uint64_t coord, mutex;
+	uint64_t coord;
+	wrapthread_define_if_threads(uint64_t, mutex);
 
 	FOREACH_H48SIM(arg->cube, arg->cocsepdata, arg->selfsim,
 		coord = coord_h48(arg->cube, arg->cocsepdata, arg->h);
@@ -615,10 +618,10 @@ gendata_h48_mark_atomic(gendata_h48_mark_t arg[static 1])
 		newval = (uint8_t)MAX(arg->depth, 0);
 		if (newval < oldval) {
 			mutex = H48_INDEX(coord, arg->k) % CHUNKS;
-			pthread_mutex_lock(arg->table_mutex[mutex]);
+			wrapthread_mutex_lock(arg->table_mutex[mutex]);
 			set_h48_pval_atomic(
 			    arg->table_atomic, coord, arg->k, newval);
-			pthread_mutex_unlock(arg->table_mutex[mutex]);
+			wrapthread_mutex_unlock(arg->table_mutex[mutex]);
 		}
 	)
 }
@@ -627,16 +630,17 @@ STATIC_INLINE void
 gendata_h48_mark(gendata_h48_mark_t arg[static 1])
 {
 	uint8_t oldval, newval;
-	uint64_t coord, mutex;
+	uint64_t coord;
+	wrapthread_define_if_threads(uint64_t, mutex);
 
 	FOREACH_H48SIM(arg->cube, arg->cocsepdata, arg->selfsim,
 		coord = coord_h48(arg->cube, arg->cocsepdata, arg->h);
 		mutex = H48_INDEX(coord, arg->k) % CHUNKS;
-		pthread_mutex_lock(arg->table_mutex[mutex]);
+		wrapthread_mutex_lock(arg->table_mutex[mutex]);
 		oldval = get_h48_pval(arg->table, coord, arg->k);
 		newval = (uint8_t)MAX(arg->depth, 0);
 		set_h48_pval(arg->table, coord, arg->k, MIN(newval, oldval));
-		pthread_mutex_unlock(arg->table_mutex[mutex]);
+		wrapthread_mutex_unlock(arg->table_mutex[mutex]);
 	)
 }
 
@@ -644,7 +648,8 @@ STATIC_INLINE bool
 gendata_h48k2_dfs_stop(cube_t cube, int8_t d, h48k2_dfs_arg_t arg[static 1])
 {
 	uint64_t val;
-	uint64_t coord, mutex;
+	uint64_t coord;
+	wrapthread_define_if_threads(uint64_t, mutex);
 	int8_t oldval;
 
 	if (arg->h == 0 || arg->h == 11) {
@@ -652,9 +657,9 @@ gendata_h48k2_dfs_stop(cube_t cube, int8_t d, h48k2_dfs_arg_t arg[static 1])
 		   if this coordinate has already been visited */
 		coord = coord_h48(cube, arg->cocsepdata, arg->h);
 		mutex = H48_INDEX(coord, arg->k) % CHUNKS;
-		pthread_mutex_lock(arg->table_mutex[mutex]);
+		wrapthread_mutex_lock(arg->table_mutex[mutex]);
 		oldval = get_h48_pval(arg->table, coord, arg->k);
-		pthread_mutex_unlock(arg->table_mutex[mutex]);
+		wrapthread_mutex_unlock(arg->table_mutex[mutex]);
 		return oldval <= d;
 	} else {
 		/* With 0 < k < 11 we do not have a "real coordinate".
@@ -711,7 +716,11 @@ get_h48_pval(const unsigned char *table, uint64_t i, uint8_t k)
 }
 
 STATIC_INLINE uint8_t
-get_h48_pval_atomic(_Atomic const unsigned char *table, uint64_t i, uint8_t k)
+get_h48_pval_atomic(
+	wrapthread_atomic const unsigned char *table,
+	uint64_t i,
+	uint8_t k
+)
 {
 	return (table[H48_INDEX(i, k)] & H48_MASK(i, k)) >> H48_SHIFT(i, k);
 }
@@ -725,7 +734,7 @@ set_h48_pval(unsigned char *table, uint64_t i, uint8_t k, uint8_t val)
 
 STATIC_INLINE void
 set_h48_pval_atomic(
-	_Atomic unsigned char *table,
+	wrapthread_atomic unsigned char *table,
 	uint64_t i,
 	uint8_t k,
 	uint8_t val

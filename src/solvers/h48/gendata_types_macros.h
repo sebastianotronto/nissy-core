@@ -68,7 +68,7 @@ typedef struct {
 	tableinfo_t info;
 	uint64_t buf_size;
 	unsigned char *buf;
-	_Atomic unsigned char *h48buf;
+	wrapthread_atomic unsigned char *h48buf;
 	uint32_t *cocsepdata;
 	uint64_t selfsim[COCSEP_CLASSES];
 	cube_t crep[COCSEP_CLASSES];
@@ -85,12 +85,12 @@ typedef struct {
 typedef struct {
 	uint8_t depth;
 	uint32_t *cocsepdata;
-	_Atomic unsigned char *table;
+	wrapthread_atomic unsigned char *table;
 	uint64_t *selfsim;
 	cube_t *crep;
 	uint64_t start;
 	uint64_t end;
-	pthread_mutex_t *table_mutex[CHUNKS];
+	wrapthread_define_struct_mutex_t(*table_mutex[CHUNKS]);
 } h48h0k4_bfs_arg_t;
 
 typedef struct {
@@ -104,10 +104,10 @@ typedef struct {
 	uint64_t *selfsim;
 	cube_t *crep;
 	h48map_t *shortcubes;
-	pthread_mutex_t *shortcubes_mutex;
-	pthread_mutex_t *table_mutex[CHUNKS];
+	wrapthread_define_struct_mutex_t(*shortcubes_mutex);
+	wrapthread_define_struct_mutex_t(*table_mutex[CHUNKS]);
 	uint64_t *next;
-	_Atomic uint64_t *count;
+	wrapthread_atomic uint64_t *count;
 } h48k2_dfs_arg_t;
 
 typedef struct {
@@ -118,6 +118,6 @@ typedef struct {
 	uint32_t *cocsepdata;
 	uint64_t *selfsim;
 	unsigned char *table;
-	_Atomic unsigned char *table_atomic;
-	pthread_mutex_t **table_mutex;
+	wrapthread_atomic unsigned char *table_atomic;
+	wrapthread_define_struct_mutex_t(**table_mutex);
 } gendata_h48_mark_t;

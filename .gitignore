@@ -36,6 +36,7 @@ tools/results
 *.a
 *.o
 *.so
+*/*.so
 *.s
 *.pyd
 *.dll

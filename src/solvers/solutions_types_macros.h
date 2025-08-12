@@ -17,7 +17,7 @@ typedef struct {
 } solution_settings_t;
 
 typedef struct {
-	_Atomic uint64_t nsols;
+	wrapthread_atomic uint64_t nsols;
 	uint8_t shortest_sol;
 	size_t size;
 	size_t used;

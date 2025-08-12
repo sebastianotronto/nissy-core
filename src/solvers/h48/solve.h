@@ -43,9 +43,9 @@ typedef struct {
 	int ntasks;
 	solve_h48_task_t *tasks;
 	int thread_id;
-	pthread_mutex_t *solutions_mutex;
-	_Atomic int *status;
-	_Atomic bool thread_done;
+	wrapthread_define_struct_mutex_t(*solutions_mutex);
+	wrapthread_atomic int *status;
+	wrapthread_atomic bool thread_done;
 } dfsarg_solve_h48_t;
 
 typedef struct {
@@ -207,10 +207,10 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 		    + arg->solution_moves->npremoves;
 		if (arg->target_depth != nm)
 			return 0;
-		pthread_mutex_lock(arg->solutions_mutex);
+		wrapthread_mutex_lock(arg->solutions_mutex);
 		ret = appendsolution(arg->solution_moves,
 		    arg->solution_settings, arg->solution_list);
-		pthread_mutex_unlock(arg->solutions_mutex);
+		wrapthread_mutex_unlock(arg->solutions_mutex);
 		return ret;
 	}
 
@@ -455,7 +455,7 @@ solve_h48(
 {
 	int i, ntasks, eoesep_table_index;
 	bool td;
-	_Atomic int status, prev_status;
+	wrapthread_atomic int status, prev_status;
 	size_t lastused;
 	int8_t d;
 	dfsarg_solve_h48_t arg[THREADS];
@@ -471,8 +471,8 @@ solve_h48(
 	solution_moves_t solution_moves[THREADS];
 	solution_settings_t settings;
 	solution_list_t sollist;
-	pthread_t thread[THREADS];
-	pthread_mutex_t solutions_mutex;
+	wrapthread_define_var_thread_t(thread[THREADS]);
+	wrapthread_define_var_mutex_t(solutions_mutex);
 
 	if (!solution_list_init(&sollist, solutions_size, solutions))
 		goto solve_h48_error_solutions_buffer;
@@ -541,7 +541,7 @@ solve_h48(
 
 	}
 
-	pthread_mutex_init(&solutions_mutex, NULL);
+	wrapthread_mutex_init(&solutions_mutex, NULL);
 
 	maketasks_arg = (dfsarg_solve_h48_maketasks_t) {
 		.cube = oc.cube,
@@ -591,7 +591,7 @@ solve_h48(
 		for (i = 0; i < threads; i++) {
 			arg[i].target_depth = d;
 			arg[i].thread_done = false;
-			pthread_create(
+			wrapthread_create(
 			    &thread[i], NULL, solve_h48_runthread, &arg[i]);
 		}
 
@@ -601,10 +601,10 @@ solve_h48(
 			while (!td && status != NISSY_STATUS_STOP) {
 				msleep(BASE_SLEEP_TIME);
 
-				pthread_mutex_lock(&solutions_mutex);
+				wrapthread_mutex_lock(&solutions_mutex);
 				solve_h48_log_solutions(&sollist, lastused);
 				lastused = sollist.used;
-				pthread_mutex_unlock(&solutions_mutex);
+				wrapthread_mutex_unlock(&solutions_mutex);
 
 				prev_status = status;
 				status = poll_status(poll_status_data);
@@ -621,7 +621,7 @@ solve_h48(
 		}
 
 		for (i = 0; i < threads; i++)
-			pthread_join(thread[i], NULL);
+			wrapthread_join(thread[i], NULL);
 
 		solve_h48_log_solutions(&sollist, lastused);
 		lastused = sollist.used;

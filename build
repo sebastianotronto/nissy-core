@@ -117,15 +117,23 @@ parsesanitize() {
 	done
 }
 
+maybe_pthread() {
+	if [ "$THREADS" -gt 1 ]; then
+		echo "-pthread"
+	else
+		echo ""
+	fi
+}
+
 # Build flags
-CFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread"
-PYCFLAGS="-std=c11 -fPIC -pthread"
+CFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L $(maybe_pthread)"
+PYCFLAGS="-std=c11 -fPIC $(maybe_pthread)"
 [ "$ARCH" = "AVX2" ] && CFLAGS="$CFLAGS -mavx2"
 WFLAGS="-pedantic -Wall -Wextra -Wno-unused-parameter -Wno-unused-function"
 OFLAGS="$OPTIMIZE"
 DFLAGS="-DDEBUG -g3 $(parsesanitize "$SANITIZE")"
 MFLAGS="-DTHREADS=$THREADS -D$ARCH"
-CPPFLAGS="-std=c++20 -pthread"
+CPPFLAGS="-std=c++20 $(maybe_pthread)"
 
 # TODO:
 # MEMORY64 is supported on Firefox (from version 134) and Chrome (from 133),
@@ -140,9 +148,9 @@ CPPFLAGS="-std=c++20 -pthread"
 # The options below have to be adjusted when native WASM_SIMD is implemented.
 
 # Build flags for emscripten (WASM target)
-WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread
+WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L $(maybe_pthread)
             -mfpu=neon -mrelaxed-simd"
-WASMCPPFLAGS="-std=c++20 -pthread"
+WASMCPPFLAGS="-std=c++20 $(maybe_pthread)"
 WASMDBGFLAGS="-sASSERTIONS"
 WASMMFLAGS="-DTHREADS=$THREADS -DNEON"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE 
@@ -272,7 +280,7 @@ build_python() {
 	fi
 	build_nissy || exit 1
 	run $CC $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES $OFLAGS -shared \
-		-o nissy_python_module.so nissy.o python/nissy_module.c
+		-o python/nissy.so nissy.o python/nissy_module.c
 }
 
 build_cpp() {

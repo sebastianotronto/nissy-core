@@ -431,7 +431,7 @@ static PyMethodDef nissy_methods[] = {
 	{ NULL, NULL, 0, NULL }
 };
 
-static struct PyModuleDef nissy_python_module = {
+static struct PyModuleDef nissy = {
 	.m_base = PyModuleDef_HEAD_INIT,
 	.m_name = "nissy",
 	.m_doc = "python module for libnissy",
@@ -449,11 +449,11 @@ log_stdout(const char *str, void *unused)
 	fprintf(stderr, "%s", str);
 }
 
-PyMODINIT_FUNC PyInit_nissy_python_module(void) {
+PyMODINIT_FUNC PyInit_nissy(void) {
 	PyObject *module;
 
 	nissy_setlogger(log_stdout, NULL);
-	module = PyModule_Create(&nissy_python_module);
+	module = PyModule_Create(&nissy);
 
 	PyModule_AddStringConstant(module, "solved_cube", NISSY_SOLVED_CUBE);
 	PyModule_AddIntConstant(module, "nissflag_normal", NISSY_NISSFLAG_NORMAL);
