@@ -1,18 +1,21 @@
-SET CFLAGS=-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L -pthread -O3 -pedantic -Wall -Wextra -Wno-unused-parameter -Wno-unused-function -DTHREADS=16 -DPORTABLE
+SET COMPILER=clang
 
-:: Build the core library and the shell.
-:: Requires WinLibs - https://winlibs.com/
+SET ARCH=
+SET WARNINGS=-Wno-deprecated-declarations
+SET VARIABLES=-DTHREADS=1 -DPORTABLE
+SET OFLAGS=-O3
+SET DFLAGS=-g -fsanitize=address
+SET CFLAGS=-std=c11 %OFLAGS% %ARCH% %WARNINGS% %VARIABLES%
 
-gcc %CFLAGS% -c src/nissy.c
-gcc %CFLAGS% nissy.o shell/shell.c -o run
+SET STACKSIZE=-Wl,-stack:16777216
+SET LFLAGS=%STACKSIZE%
 
-:: Currently, building the Python module is not supported.
-:: There are probably some issues related to using GCC + MINGW instead
-:: of a more native Windows compiler.
+%COMPILER% %CFLAGS% -c src\nissy.c || exit /b
+%COMPILER% %CFLAGS% %LFLAGS% nissy.o shell\shell.c -o run.exe || exit /b
 
 :: Python libraries - change to mathc your local installation
-::SET PYPATH=%userprofile%\AppData\Local\Programs\Python\Python313
-::SET PYINCLUDE=%PYPATH%\include
-::SET PYDLL=%PYPATH%\python313.dll
+SET PYPATH=%userprofile%\AppData\Local\Programs\Python\Python313
+SET PYINCLUDE=%PYPATH%\include
+SET PYLIBS=%PYPATH%\libs
 
-::gcc %CFLAGS% -I%PYINCLUDE% -shared %PYDLL% python/nissy_module.c nissy.o -o nissy_python_module.pyd
+%COMPILER% %CFLAGS% -I%PYINCLUDE% -L%PYLIBS% -shared -lpython3 python/nissy_module.c nissy.o -o nissy.pyd
