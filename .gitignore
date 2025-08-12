@@ -40,3 +40,6 @@ tools/results
 *.s
 *.pyd
 *.dll
+*.exp
+*.lib
+*.pdb
