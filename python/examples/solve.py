@@ -1,6 +1,6 @@
 # Small example of nissy Python module usage
 
-# Run "./build python", then run this from either the top-level directory
+# Run "./build.sh python", then run this from either the top-level directory
 # of the nissy-core repo or from the python subdirectory.
 
 # Append the directories to the python path so we can load the module

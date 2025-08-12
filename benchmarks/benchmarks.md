@@ -234,7 +234,7 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
   example:
 
 ```
-./build tool solve_file h48h7k2 ./benchmarks/scrambles/scrambles-16.txt
+./build.sh tool solve_file h48h7k2 ./benchmarks/scrambles/scrambles-16.txt
 ```
 
   To find all solutions, add something like `99999 0` at the end of the

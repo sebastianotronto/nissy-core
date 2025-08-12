@@ -1,6 +1,6 @@
-// Run ./build web from the main folder before running this example.
+// Run ./build.sh web from the main folder before running this example.
 // The necessary modules (including worker.mjs) will be built and / or moved
-// to this folder when running ./build web.
+// to this folder when running ./build.sh web.
 
 var solveButton = document.getElementById("solveButton");
 var pauseResumeButton = document.getElementById("pauseResumeButton");

@@ -13,43 +13,55 @@ of pruning tables that were developed independently.
 
 ## Building
 
-This project currently supports only POSIX systems (Linux, MacOS, BSD...).
-If you want to build on Windows you can do so via
-[WSL](https://learn.microsoft.com/en-us/windows/wsl/install). Note that
-the resulting executable will not be a native Windows executable.
-Windows as a build target will be available in the future.
+This project is mainly developed on UNIX systems (Linux, MacOS, BSD...),
+but it is also possible to build it on Windows, with some limitations.
+
+### UNIX (Linux, MaxOS, BSD...)
 
 To build nissy simply run
 
 ```
-$ ./build
+$ ./build.sh
 ```
 
-For a list of options and targets for the build system run `./build help`.
+For a list of options and targets for the build system run `./build.sh help`.
 Some compiler settings can be overridden using environment variables,
 as explained in the comments at the beginning of the build script. For
 example, the command:
 
 ```
 $ export NISSY_BUILD_THREADS=3
-$ CC=gcc ./build
+$ CC=gcc ./build.sh
 ```
 
 is going to configure `nissy` to use at most 3 threads, and build it with
-`gcc`. Se the comments in `./build` for more details.
+`gcc`. Se the comments in `./build.sh` for more details.
+
+### Windows
+
+It is possible to build this project on Windows using `build.bat`. This script
+is going to build:
+
+* The core nissy library
+* The shell `run.exe` (see below)
+* The Python module (see below)
+
+All other options are unavailable. Moreover, Windows build will not
+enable certain optimizations, such as multithreading and advanced CPU
+instructions.  Work is ongoing to improve Windows support.
 
 ## Running tests
 
 This project includes a suite of "unit" test. You can run them with:
 
 ```
-$ ./build test
+$ ./build.sh test
 ```
 
 For running the tests for the WebAssembly build with nodejs you can use:
 
 ```
-$ ./build webtest
+$ ./build.sh webtest
 ```
 
 To run only a subset of the tests, you can pass as argument a regular
@@ -84,7 +96,7 @@ are not run in debug mode by default.
 To run a tool you can use:
 
 ```
-$ ./build tool TOOLNAME PARAMETERS...
+$ ./build.sh tool TOOLNAME PARAMETERS...
 ```
 
 Where `TOOLNAME` is the name of one of the tools, or a regular expression
@@ -94,7 +106,7 @@ parameters.
 For example:
 
 ```
-$ :./build tool gendata h48h2k2
+$ :./build.sh tool gendata h48h2k2
 ```
 
 Will run a tool that generates the data table for the H48 solver with
@@ -104,7 +116,7 @@ Each tool run is automatically timed, so these tools can be used as
 benchmark.  The output as well as the time of the run are saved to a
 file in the tools/results folder.
 
-To build and run a tool in debug mode, use `./build -d tool`.
+To build and run a tool in debug mode, use `./build.sh -d tool`.
 
 ### The `solvetest` tools
 
@@ -113,7 +125,7 @@ solvers produce the correct solutions. They can be run individually as
 all other tools, or all together with
 
 ```
-$ ./build solvetest   # Use -d for debug mode (very slow for some solvers)
+$ ./build.sh solvetest   # Use -d for debug mode (very slow for some solvers)
 ```
 
 If one of the solvetests fails, subsequent tests are going to be skipped.
@@ -127,7 +139,7 @@ as the commands require quite verbose options.
 To build the shell run:
 
 ```
-$ ./build shell
+$ ./build.sh shell
 ```
 
 This will create an executable called `run`.  Then you can for example
@@ -192,7 +204,7 @@ interface. You can build them and run them with the build tool, for
 example:
 
 ```
-./build cpp cpp/examples/solve_h48h3k2.cpp
+./build.sh cpp cpp/examples/solve_h48h3k2.cpp
 ```
 
 NOTE: If you prefer to use a C-style API, you'll have to write
@@ -207,10 +219,10 @@ this module follows the C API quite closely, except its functions
 sometimes return strings instead of writing to `char *` buffers.
 
 To build the Python module you need the Python development headers
-installed. You can check this from the output of `./build config`:
+installed. You can check this from the output of `./build.sh config`:
 
 ```
-$ ./build config
+$ ./build.sh config
 ...
 Python bindings: version 3.13
 ```
@@ -218,7 +230,7 @@ Python bindings: version 3.13
 Then to build the module:
 
 ```
-$ ./build python
+$ ./build.sh python
 ```
 
 And to import it
@@ -255,7 +267,7 @@ Bindings for JavaScript via a WebAssembly build (using
 The JavaScript module can be built with
 
 ```
-$ ./build web
+$ ./build.sh web
 ```
 
 An example web app running nissy can be found in the `web/http` folder.

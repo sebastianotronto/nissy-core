@@ -4,14 +4,14 @@
 # It can be used for testing on platforms different from the host. For example,
 # the command
 # 
-# ./container-run.sh arm ./build test
+# ./container-run.sh arm ./build.sh test
 #
 # builds nissy and runs the unit tests in an ARM container.
 #
 # The containers are based on Alpine Linux and the contain the necessary tools
 # to build the main library and the C++ and Python examples. They DO NOT
 # contain the emscripten compiler, so they cannot be used to build the web
-# version (e.g. ./build web or ./buidl webtest).
+# version (e.g. ./build.sh web or ./build.sh webtest).
 # The images are given a tag starting with 'localhost/nissy/'.
 #
 # See below for a list of options.
@@ -28,7 +28,7 @@ usage() {
 	echo "arm   (equivalent to: arm64)"
 	echo ""
 	echo "Examples:"
-	echo "$0 ram ./build test   # Run unit tests in arm container"
+	echo "$0 ram ./build.sh test   # Run unit tests in arm container"
 	exit 1
 }
 

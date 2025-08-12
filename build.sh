@@ -1,11 +1,11 @@
 #!/bin/sh
 
-# Build system for nissy, run './build help' for info on how to use this.
+# Build system for nissy, run './build.sh help' for info on how to use this.
 
 # The variables below can be used to personalize the build system. For example,
 # to compile with clang instead of the default cc one can use:
 #
-#   CC=clang ./build
+#   CC=clang ./build.sh
 # 
 # Each variable also has a counterpart that starts with NISSY_BUILD_*. These
 # other variables can be set, for example, in your shell configuration file
@@ -20,7 +20,7 @@
 # If later the same user wants to build a debug version without sanitizers,
 # they may use
 #
-#   SANITIZE="" ./build debug
+#   SANITIZE="" ./build.sh debug
 #
 # And the empty string value will take precedence.
 
@@ -193,7 +193,7 @@ build_help() {
 	echo ""
 	echo "The -d option activates debug mode (slower, used for testing)."
 	echo "Tests are automatically built in debug mode even without -d."
-	echo "For more on build configurations, see the comments in ./build"
+	echo "For more on build configurations, see the comments in ./build.sh"
 }
 
 build_config() {
@@ -287,7 +287,7 @@ build_cpp() {
 	validate_command "$CXX"
 	if [ -z "$@" ]; then
 		echo "Please provide one or more valid C++ source files"
-		echo "usage: ./build cpp FILES"
+		echo "usage: ./build.sh cpp FILES"
 	fi
 
 	build_nissy || exit 1
@@ -418,7 +418,7 @@ build_tool() {
 
 	if [ -z "$pattern" ]; then
 		echo "Please provide a valid PATTERN to select a tool"
-		echo "usage: ./build tool PATTERN"
+		echo "usage: ./build.sh tool PATTERN"
 		exit 1
 	fi
 	shift
