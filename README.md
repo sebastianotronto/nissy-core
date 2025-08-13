@@ -39,8 +39,16 @@ is going to configure `nissy` to use at most 3 threads, and build it with
 
 ### Windows
 
-It is possible to build this project on Windows using `build.bat`. This script
-is going to build:
+It is possible to build this project on Windows using `build.bat`. The
+[Clang](https://clang.llvm.org/) compiler must be installed, and the
+command prompt must be correctly configured to run it.
+
+We suggest installing Clang via the Visual Studio Istaller, selecting
+the "C++ development" pack, as well as the "clang" and "Windows SDK 11"
+components. It is advised to use "x64 Native Tools Command Prompt for
+VS 2022" instead of a regular command prompt to run the build script.
+
+The `build.bat` script is going to build:
 
 * The core nissy library
 * The shell `run.exe` (see below)
