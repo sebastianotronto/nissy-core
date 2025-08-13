@@ -48,15 +48,25 @@ the "C++ development" pack, as well as the "clang" and "Windows SDK 11"
 components. It is advised to use "x64 Native Tools Command Prompt for
 VS 2022" instead of a regular command prompt to run the build script.
 
-The `build.bat` script is going to build:
+The `build.bat` script has the same syntax as the `build.sh` script,
+but not all options are available. For example
 
-* The core nissy library
-* The shell `run.exe` (see below)
-* The Python module (see below)
+```
+> build.bat shell
+```
 
-All other options are unavailable. Moreover, Windows build will not
-enable certain optimizations, such as multithreading and advanced CPU
-instructions.  Work is ongoing to improve Windows support.
+can be used to build the basic shell, while
+
+```
+> build.bat test
+```
+
+Builds and runs the unit tests. See `build.bat help` for a list of
+all available options.
+
+Not: At the moment certain optimizations, such as multithreading and
+advanced CPU instructions, are not supported on Windows.
+Work is ongoing to improve Windows support.
 
 ## Running tests
 

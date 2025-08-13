@@ -11,8 +11,6 @@ perf.data.old
 run
 run.exe
 debugrun
-shell/lasttest.out
-shell/lasttest.err
 tables/*
 test/*/runtest
 test/.DS_Store
@@ -43,3 +41,7 @@ tools/results
 *.exp
 *.lib
 *.pdb
+*.ilk
+python/*.pyd
+python/*.exp
+python/*.lib
