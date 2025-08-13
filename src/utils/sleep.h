@@ -2,7 +2,9 @@
 
 STATIC void msleep(int);
 
-#if defined(WIN32)
+#if defined(_WIN32)
+
+#include <windows.h>
 
 #define NISSY_CANSLEEP true
 
