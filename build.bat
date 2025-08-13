@@ -56,6 +56,10 @@ exit /b 1
     echo.
     echo nissy       Build the nissy.o object file.
     echo python      Build the Python module for nissy.
+    echo             NOTE: Python development headers must be installed in
+    echo                   order to build the Python module. The path of these
+    echo                   headers is hardcoded in the PYPATH varible in
+    echo                   build.bat. You may need to edit this file.
     echo shell       Build the basic nissy shell (./run).
     echo cpp FILE    Build and run the given C++ FILE.
     echo test [EXPR] Build and run unit tests. If EXPR is provided, only the
