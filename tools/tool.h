@@ -22,6 +22,40 @@ log_stderr(const char *str, void *unused)
 	fprintf(stderr, "%s", str);
 }
 
+#ifdef _WIN32
+
+#include <windows.h>
+
+static double
+timerun(void (*run)(void))
+{
+	LARGE_INTEGER freq, start, end;
+	double tdiff;
+	
+	fflush(stdout);
+	
+	if (run == NULL) {
+		printf("nothing to run!\n");
+		fflush(stdout);
+		return -1.0;
+	}
+
+	QueryPerformanceFrequency(&freq);
+	QueryPerformanceCounter(&start);
+	run();
+	QueryPerformanceCounter(&end);
+	
+	tdiff = (double)(end.QuadPart - start.QuadPart) / freq.QuadPart;
+
+	printf("---------\n");
+	printf("\nTotal time: %.4fs\n", tdiff);
+	fflush(stdout);
+
+	return tdiff;
+}
+
+#else
+
 static double
 timerun(void (*run)(void))
 {
@@ -50,6 +84,8 @@ timerun(void (*run)(void))
 
 	return tdiff;
 }
+
+#endif
 
 static void
 writetable(const unsigned char *buf, int64_t size, const char *filename)

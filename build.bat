@@ -8,6 +8,7 @@ if [%1]==[/d] (
 )
 
 SET CC=clang
+SET CXX=clang++
 SET ARCH=PORTABLE
 SET THREADS=1
 SET SANITIZE=
@@ -34,9 +35,9 @@ SET PYLIBS=%PYPATH%\libs
 SET TARGET=%1
 if not defined TARGET SET TARGET=nissy
 SET EXPR=%2
-for %%a in (nissy python shell test config help) do (
+for %%a in (nissy python shell test config help clean tool cpp solvetest) do (
     if %TARGET%==%%a (
-        call:build_%TARGET%
+        call:build_%TARGET% %*
         exit /b
     )
 )
@@ -56,11 +57,16 @@ exit /b 1
     echo nissy       Build the nissy.o object file.
     echo python      Build the Python module for nissy.
     echo shell       Build the basic nissy shell (./run).
-    echo help        Show this help message.
-    echo config      Show build configuration and exit.
+    echo cpp FILE    Build and run the given C++ FILE.
     echo test [EXPR] Build and run unit tests. If EXPR is provided, only the
     echo             tests whose name contains EXPR are run. The /d option is
     echo             is always implied.
+    echo tool EXPR   Run the 'tool' matching the given EXPR.
+    echo solvetest   Build nissy and run a collection of tools for testing"
+    echo             various solvers.
+    echo help        Show this help message.
+    echo config      Show build configuration and exit.
+    echo clean       Remove all build files.
     echo.
     echo The /d option activates debug mode (slower, used for testing).
     echo Tests are automatically built in debug mode even without /d.
@@ -115,6 +121,57 @@ exit /b
     )
 exit /b
 
+:build_clean
+    @echo on
+    del *.o *.so *.a *.ilk *.pdb *.exe
+    @echo off
+exit /b
+
+:build_tool
+    if not defined EXPR (
+        @echo Please provide a valid EXPR to select a tool
+        exit /b 1
+    )
+    
+    set toolname=
+    for /d %%d in ( tools\*%EXPR%* ) do (
+        set toolname=%%~nd
+    )
+
+    if [%toolname%]==[] (
+        @echo Expression '%EXPR%' does not match any tool
+        exit /b 1
+    )
+    
+    call:build_nissy || exit /b 1
+    call:build_single_tool %*
+exit /b
+
+:build_cpp
+    if not defined EXPR (
+        @echo Please provide a valid C++ source file.
+        exit /b 1
+    )
+    if not exist %EXPR% (
+        @echo File %EXPR% does not exist.
+        exit /b 1
+    )
+    call:build_nissy || exit /b 1
+    @echo on
+    %CXX% %ODFLAGS% -std=c++20 -o runcpp.exe cpp\nissy.cpp nissy.o %EXPR% ^
+        || exit /b 1
+    runcpp
+    @echo off
+exit /b
+
+:build_solvetest
+    call:build_nissy || exit /b 1
+    for /d %%d in ( tools\*solvetest* ) do (
+        set toolname=%%~nd
+        call:build_single_tool
+    )
+exit /b
+
 :build_single_test
     call:odflags
     %CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o %1\*.c -o runtest.exe || exit /b 1
@@ -136,6 +193,16 @@ exit /b
     )
     if %error%==1 exit /b 1
     del runtest.*
+exit /b
+
+:build_single_tool
+    @echo on
+    %CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o tools\%toolname%\*.c ^
+        -o runtool.exe || exit /b 1
+    @echo off
+    runtool %3 %4 %5 %6 %7 %8 %9 || exit /b 1
+    @echo.
+    @echo (On Windows, the output of a tool is not saved to any file.)
 exit /b
 
 :odflags

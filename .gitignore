@@ -39,6 +39,7 @@ tools/results
 *.pyd
 *.dll
 *.exp
+*.exe
 *.lib
 *.pdb
 *.ilk
