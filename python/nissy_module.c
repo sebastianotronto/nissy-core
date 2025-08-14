@@ -1,3 +1,9 @@
+/*
+This version of the python module includes an attempt to use the callback
+functions for pausing / stopping / resuming a solve. It probably cannot
+work until PEP 703 (freethreading python) is implemented.
+*/
+
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 #include <stdbool.h>
@@ -5,6 +11,11 @@
 #include "../src/nissy.h"
 
 #define MAX_SOLUTIONS_SIZE 250000
+
+typedef struct {
+	PyObject *callback;
+	PyThreadState *thread_state;
+} thread_callback_t;
 
 static bool
 check_error(long long err)
@@ -82,6 +93,32 @@ long_result(long long result)
 {
 	check_error(result);
 	return PyLong_FromLong(result);
+}
+
+static int
+callback_wrapper(void *data)
+{
+	thread_callback_t *arg = data;
+	int r;
+	PyObject *result;
+	PyGILState_STATE gstate;
+
+	if (arg->callback != NULL && PyCallable_Check(arg->callback) == 1) {
+
+PyEval_RestoreThread(arg->thread_state);
+gstate = PyGILState_Ensure();
+		result = PyObject_CallNoArgs(data);
+PyGILState_Release(gstate);
+arg->thread_state = PyEval_SaveThread();
+
+		if (result == NULL)
+			return 0;
+		Py_XDECREF(result);
+		r = PyLong_AsInt(result);
+		return r >= 0 && r <= 2 ? r : 0;
+	} else {
+		return NISSY_STATUS_RUN;
+	}
 }
 
 PyDoc_STRVAR(inverse_doc,
@@ -288,7 +325,7 @@ checkdata(PyObject *self, PyObject *args)
 
 PyDoc_STRVAR(solve_doc,
 "solve(cube, solver, nissflag, minmoves, maxmoves, maxsolutions,"
-" optimal, threads, data)\n"
+" optimal, threads, data, callback)\n"
 "--\n\n"
 "Solves the given 'cube' with the given 'solver' and other parameters."
 "See the documentation for libnissy (in nissy.h) for details.\n"
@@ -302,6 +339,9 @@ PyDoc_STRVAR(solve_doc,
 "  - optimal: the largest number of moves from the shortest solution\n"
 "  - threads: the number of threads to use (0 for default)\n"
 "  - data: a bytearray containing the data for the solver\n"
+"  - callback: a function that returns 0 (run), 1 (stop) or 2 (pause).\n"
+"              Polled by the solver to determine if the user requested the\n"
+"              to pause or stop the solve. Not used by all solvers.\n"
 "\n"
 "Returns: a list with the solutions found\n"
 );
@@ -315,17 +355,29 @@ solve(PyObject *self, PyObject *args)
 	char solutions[MAX_SOLUTIONS_SIZE];
 	long long stats[NISSY_SIZE_SOLVE_STATS];
 	PyByteArrayObject *data;
+	PyObject *callback;
+	thread_callback_t callback_data;
 
-	if (!PyArg_ParseTuple(args, "ssIIIIIIY", &cube, &solver, &nissflag,
-	     &minmoves, &maxmoves, &maxsolutions, &optimal, &threads, &data))
+	if (!PyArg_ParseTuple(args, "ssIIIIIIYO", &cube, &solver, &nissflag,
+	     &minmoves, &maxmoves, &maxsolutions, &optimal, &threads, &data,
+	     &callback))
 		return NULL;
 
-	Py_BEGIN_ALLOW_THREADS
+printf("Checking callback here:\n");
+PyObject *rrr = PyObject_CallNoArgs(callback);
+printf("result: %d\n", PyLong_AsInt(rrr));
+
+	callback_data.callback = callback;
+	callback_data.thread_state = PyEval_SaveThread();
+	//Py_BEGIN_ALLOW_THREADS
+
 	result = nissy_solve(cube, solver, nissflag, minmoves, maxmoves,
 	    maxsolutions, optimal, threads, data->ob_alloc,
 	    (unsigned char *)data->ob_bytes, MAX_SOLUTIONS_SIZE, solutions,
-	    stats, NULL, NULL);
-	Py_END_ALLOW_THREADS
+	    stats, callback_wrapper, &callback_data);
+
+	PyEval_RestoreThread(callback_data.thread_state);
+	//Py_END_ALLOW_THREADS
 
 	return stringlist_result(result, solutions);
 }
@@ -461,6 +513,9 @@ PyMODINIT_FUNC PyInit_nissy(void) {
 	PyModule_AddIntConstant(module, "nissflag_mixed", NISSY_NISSFLAG_MIXED);
 	PyModule_AddIntConstant(module, "nissflag_linear", NISSY_NISSFLAG_LINEAR);
 	PyModule_AddIntConstant(module, "nissflag_all", NISSY_NISSFLAG_ALL);
+	PyModule_AddIntConstant(module, "status_run", NISSY_STATUS_RUN);
+	PyModule_AddIntConstant(module, "status_stop", NISSY_STATUS_STOP);
+	PyModule_AddIntConstant(module, "status_pause", NISSY_STATUS_PAUSE);
 
 	return module;
 }

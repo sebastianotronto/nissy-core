@@ -275,12 +275,17 @@ build_python() {
 		echo "Cannot build python module"
 		exit 1
 	fi
+	# There are some name conflicts between the python module and
+	# the internals of nissy, which are visible in debug mode.
+	# There are also some problems with sanitizers.
 	if [ "$debug" = "yes" ]; then
-		echo "Cannot build Python library in debug mode"
-		exit 1
+		printf "Building Python module in debug mode, "
+		printf "but nissy in release mode.\n"
+		pydflags="-g3"
+		debug="no"
 	fi
 	build_nissy || exit 1
-	run $CC $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES $OFLAGS -shared \
+	run $CC $pydflags $PYCFLAGS $WFLAGS $PYTHON3_INCLUDES -shared \
 		-o python/nissy.so nissy.o python/nissy_module.c
 }
 

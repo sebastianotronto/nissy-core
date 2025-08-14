@@ -3,12 +3,10 @@
 # Run "./build.sh python", then run this from either the top-level directory
 # of the nissy-core repo or from the python subdirectory.
 
-# Append the directories to the python path so we can load the module
+# Append the directories to the python path and import
 import sys, os
 sys.path.append(os.getcwd())
 sys.path.append(os.getcwd() + os.path.sep + "python")
-
-# Import with a nicer name
 import nissy
 
 # Choose the solver you prefer
@@ -26,7 +24,7 @@ else:
 cube = nissy.applymoves(nissy.solved_cube, "U F R2");
 
 # Solve!
-solutions = nissy.solve(cube, solver, nissy.nissflag_normal, 0, 9, 3, 20, 4, data)
+solutions = nissy.solve(cube, solver, nissy.nissflag_normal, 0, 9, 3, 20, 4, data, None)
 
 # Print the solutions, one per line
 print("Found ", len(solutions), " solutions:")
