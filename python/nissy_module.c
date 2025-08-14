@@ -12,10 +12,7 @@ work until PEP 703 (freethreading python) is implemented.
 
 #define MAX_SOLUTIONS_SIZE 250000
 
-typedef struct {
-	PyObject *callback;
-	PyThreadState *thread_state;
-} thread_callback_t;
+PyObject *poll_status_callback = NULL;
 
 static bool
 check_error(long long err)
@@ -96,29 +93,36 @@ long_result(long long result)
 }
 
 static int
-callback_wrapper(void *data)
+callback_wrapper(void *arg)
 {
-	thread_callback_t *arg = data;
 	int r;
 	PyObject *result;
-	PyGILState_STATE gstate;
+	PyThreadState **thread;
 
-	if (arg->callback != NULL && PyCallable_Check(arg->callback) == 1) {
+	thread = (PyThreadState **)arg;
 
-PyEval_RestoreThread(arg->thread_state);
-gstate = PyGILState_Ensure();
-		result = PyObject_CallNoArgs(data);
-PyGILState_Release(gstate);
-arg->thread_state = PyEval_SaveThread();
+printf("About to restore thread\n");
+PyEval_RestoreThread(*thread);
+printf("Restoring\n");
 
-		if (result == NULL)
-			return 0;
-		Py_XDECREF(result);
+	if (poll_status_callback != NULL && poll_status_callback != Py_None &&
+	    PyCallable_Check(poll_status_callback) == 1) {
+		result = PyObject_CallNoArgs(poll_status_callback);
+		if (result == NULL) {
+			r = 0;
+			goto callback_wrapper_end;
+		}
 		r = PyLong_AsInt(result);
-		return r >= 0 && r <= 2 ? r : 0;
+		r = r >= 0 && r <= 2 ? r : 0;
 	} else {
-		return NISSY_STATUS_RUN;
+		r = NISSY_STATUS_RUN;
 	}
+
+callback_wrapper_end:
+printf("Saving\n");
+*thread = PyEval_SaveThread();
+printf("Saved\n");
+return r;
 }
 
 PyDoc_STRVAR(inverse_doc,
@@ -356,28 +360,38 @@ solve(PyObject *self, PyObject *args)
 	long long stats[NISSY_SIZE_SOLVE_STATS];
 	PyByteArrayObject *data;
 	PyObject *callback;
-	thread_callback_t callback_data;
 
 	if (!PyArg_ParseTuple(args, "ssIIIIIIYO", &cube, &solver, &nissflag,
 	     &minmoves, &maxmoves, &maxsolutions, &optimal, &threads, &data,
 	     &callback))
 		return NULL;
 
+if (Py_TYPE(callback) == NULL)
+printf("Type of callback is NULL!\n");
+PyObject_Print(callback, stdout, 0);
 printf("Checking callback here:\n");
 PyObject *rrr = PyObject_CallNoArgs(callback);
 printf("result: %d\n", PyLong_AsInt(rrr));
 
-	callback_data.callback = callback;
-	callback_data.thread_state = PyEval_SaveThread();
-	//Py_BEGIN_ALLOW_THREADS
+poll_status_callback = callback;
 
+	Py_BEGIN_ALLOW_THREADS
+
+#ifdef Py_GIL_DISABLED
 	result = nissy_solve(cube, solver, nissflag, minmoves, maxmoves,
 	    maxsolutions, optimal, threads, data->ob_alloc,
 	    (unsigned char *)data->ob_bytes, MAX_SOLUTIONS_SIZE, solutions,
-	    stats, callback_wrapper, &callback_data);
-
-	PyEval_RestoreThread(callback_data.thread_state);
-	//Py_END_ALLOW_THREADS
+	    stats, callback_wrapper, &_save);
+#else
+	if (callback != NULL && callback != Py_None)
+		printf("Warning: pause / stop / resume not available on "
+		    "versions of Python with GIL enabled.\n");
+	result = nissy_solve(cube, solver, nissflag, minmoves, maxmoves,
+	    maxsolutions, optimal, threads, data->ob_alloc,
+	    (unsigned char *)data->ob_bytes, MAX_SOLUTIONS_SIZE, solutions,
+	    stats, NULL, NULL);
+#endif
+	Py_END_ALLOW_THREADS
 
 	return stringlist_result(result, solutions);
 }
@@ -506,6 +520,9 @@ PyMODINIT_FUNC PyInit_nissy(void) {
 
 	nissy_setlogger(log_stdout, NULL);
 	module = PyModule_Create(&nissy);
+#ifdef Py_GIL_DISABLED
+	PyUnstable_Module_SetGIL(module, Py_MOD_GIL_NOT_USED);
+#endif
 
 	PyModule_AddStringConstant(module, "solved_cube", NISSY_SOLVED_CUBE);
 	PyModule_AddIntConstant(module, "nissflag_normal", NISSY_NISSFLAG_NORMAL);

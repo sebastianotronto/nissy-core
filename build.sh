@@ -159,8 +159,8 @@ WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE
 	-sALLOW_MEMORY_GROWTH -sSTACK_SIZE=5MB -sPTHREAD_POOL_SIZE=$THREADS
 	-sFETCH -sASYNCIFY -sLINKABLE -sEXPORT_ALL"
 
-if (command -v "python3-config" >/dev/null 2>&1) ; then
-	PYTHON3_INCLUDES="$(python3-config --includes)"
+if (command -v "python3.13t-config" >/dev/null 2>&1) ; then
+	PYTHON3_INCLUDES="$(python3.13t-config --includes)"
 	PYTHON3="version $(echo "$PYTHON3_INCLUDES" | sed 's/.*3\./3./')"
 else
 	PYTHON3_INCLUDES=""
