@@ -148,11 +148,10 @@ CPPFLAGS="-std=c++20 $(maybe_pthread)"
 # The options below have to be adjusted when native WASM_SIMD is implemented.
 
 # Build flags for emscripten (WASM target)
-WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L $(maybe_pthread)
-            -mfpu=neon -mrelaxed-simd"
+WASMCFLAGS="-std=c11 -fPIC -D_POSIX_C_SOURCE=199309L $(maybe_pthread)"
 WASMCPPFLAGS="-std=c++20 $(maybe_pthread)"
 WASMDBGFLAGS="-sASSERTIONS"
-WASMMFLAGS="-DTHREADS=$THREADS -DNEON"
+WASMMFLAGS="-DTHREADS=$THREADS -DPORTABLE"
 WASMLINKFLAGS="--no-entry -sEXPORT_NAME='Nissy' -sMODULARIZE 
 	-sEXPORTED_RUNTIME_METHODS=addFunction,UTF8ToString
 	-sALLOW_TABLE_GROWTH

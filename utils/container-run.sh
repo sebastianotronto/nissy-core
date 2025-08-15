@@ -24,8 +24,9 @@ usage() {
 	echo "If COMMAND is unspecified, an interactive shell will be opened."
 	echo ""
 	echo "Available platforms:"
-	echo "x86   (equivalent to: x86_64, amd64)"
-	echo "arm   (equivalent to: arm64)"
+	echo "x86        (equivalent to: x86_64, amd64)"
+	echo "arm        (equivalent to: arm64)"
+	echo "emscripten"
 	echo ""
 	echo "Examples:"
 	echo "$0 ram ./build.sh test   # Run unit tests in arm container"
@@ -36,35 +37,54 @@ if [ -z "$1" ]; then
 	usage "No platform given."
 fi
 
+config_standard() {
+	image="localhost/nissy/alpine-$1"
+	platform="--platform=linux/$1"
+	mount="--mount type=bind,src=./,dst=/nissy-core"
+	flags="--rm --privileged"
+
+	dockerfile="$(mktemp)"
+	cat > "$dockerfile" << EOF
+	FROM alpine:3.22
+	RUN apk update
+	RUN apk add gcc g++ clang python3 python3-dev
+	RUN mkdir /nissy-core
+	WORKDIR /nissy-core
+	USER 1000:1000
+EOF
+}
+
+config_emscripten() {
+	image="localhost/nissy/emscripten"
+	platform="--platform=linux/amd64"
+	mount="--mount type=bind,src=./,dst=/nissy-core"
+	flags="--rm --privileged"
+
+	dockerfile="$(mktemp)"
+	cat > "$dockerfile" << EOF
+	FROM emscripten/emsdk
+	WORKDIR /nissy-core
+	USER 1000:1000
+EOF
+}
+
 case "$1" in
 x86|x86_64|amd64)
-	p=amd64
+	config_standard amd64
 	shift
 	;;
 arm|arm64)
-	p=arm64
+	config_standard arm64
+	shift
+	;;
+emscripten)
+	config_emscripten
 	shift
 	;;
 *)
 	usage "Platform '$1' not available."
 	;;
 esac
-
-image="localhost/nissy/alpine-$p"
-platform="--platform=linux/$p"
-mount="--mount type=bind,src=./,dst=/nissy-core"
-flags="--rm --privileged"
-
-dockerfile="$(mktemp)"
-cat > "$dockerfile" << EOF
-FROM alpine:3.22.1
-RUN apk update
-RUN apk add gcc g++ clang python3 python3-dev
-#COPY . ./nissy-core
-RUN mkdir /nissy-core
-WORKDIR /nissy-core
-USER 1000:1000
-EOF
 
 docker build "$platform" -f "$dockerfile" -t "$image" .
 rm "$dockerfile"
