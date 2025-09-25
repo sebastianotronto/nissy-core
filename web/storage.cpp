@@ -43,7 +43,12 @@ EM_ASYNC_JS(int, download_and_store, (const char *key, const char *url), {
 	    self instanceof WorkerGlobalScope;
 	console.assert(inBrowser || inWorker, "Non-browsers not supported");
 
-	// See comment in callback.js about this workaround
+	// This is a workaround related to usign WASM64
+	// JavaScript's UTF8ToString expects a pointer argument, which for JS is
+	// of type "number", but WASM64 is passing a BigInt. See also:
+	// https://github.com/emscripten-core/emscripten/issues/21541
+	// (but I could not make the suggested solution work in this case).
+	// TODO: check if there is a better workaround.
 	const non64_url = Number(url);
 	const non64_key = Number(key);
 	url = UTF8ToString(non64_url);
