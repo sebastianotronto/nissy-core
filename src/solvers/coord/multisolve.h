@@ -9,6 +9,7 @@ typedef struct {
 	uint8_t target_depth;
 	solution_moves_t *solution_moves;
 	solution_settings_t *solution_settings;
+	uint64_t tmask;
 	solution_list_t *solution_list;
 	multicoord_t *mcoord;
 	const unsigned char *coord_data[MAX_MULTICOORD_NCOORDS];
@@ -87,7 +88,7 @@ solve_multicoord_dfs(dfsarg_solve_multicoord_t arg[static 1])
 	/* All coordinates are solved */
 	if (!multicoord_solution_admissible(arg))
 		return 0;
-	return appendsolution(arg->solution_moves,
+	return appendsolution(arg->solution_moves, 1, &arg->tmask,
 	    arg->solution_settings, arg->solution_list);
 
 solve_multicoord_dfs_notsolved:
@@ -208,7 +209,6 @@ solve_multicoord(
 	solution_moves_reset(&solution_moves);
 
 	solution_settings = (solution_settings_t) {
-		.tmask = TM_SINGLE(inverse_trans(trans)),
 		.unniss = false,
 		.maxmoves = maxmoves,
 		.maxsolutions = maxsolutions,
@@ -222,6 +222,7 @@ solve_multicoord(
 		.mcoord = mcoord,
 		.solution_moves = &solution_moves,
 		.solution_settings = &solution_settings,
+		.tmask = TM_SINGLE(inverse_trans(trans)),
 		.solution_list = &solution_list,
 	};
 
@@ -258,8 +259,8 @@ solve_multicoord(
 	}
 
 	/* All coordinates are solved */
-	if (minmoves == 0 && !appendsolution(&solution_moves,
-	    &solution_settings, &solution_list))
+	if (minmoves == 0 && !appendsolution(&solution_moves, 1,
+	    &arg.tmask, &solution_settings, &solution_list))
 		goto solve_multicoord_error_buffer;
 	goto solve_multicoord_done;
 

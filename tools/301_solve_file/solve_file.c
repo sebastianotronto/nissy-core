@@ -1,6 +1,6 @@
 #include "../tool.h"
 
-#define SOL_BUFFER_LEN   100000
+#define SOL_BUFFER_LEN   1000000
 #define MAX_SCR          10000
 #define MAX_SCR_LEN      250
 
