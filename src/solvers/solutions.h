@@ -1,17 +1,23 @@
 STATIC void solution_moves_reset(solution_moves_t [static 1]);
-STATIC void solution_moves_transform(solution_moves_t [static 1], uint8_t);
+STATIC void solution_moves_transform(solution_moves_t [static 1], size_t,
+    uint8_t);
 STATIC void solution_moves_reorient(solution_moves_t [static 1], uint8_t);
 STATIC bool solution_list_init(solution_list_t [static 1], size_t, char *);
 STATIC bool solution_moves_equal(
     const solution_moves_t [static 1], const solution_moves_t [static 1]);
-STATIC bool solution_moves_is_duplicate(size_t, const solution_moves_t *);
+STATIC bool last_solution_is_duplicate(const solution_list_t [static 1]);
 STATIC bool appendchar(solution_list_t [static 1], char);
 STATIC bool appendnormal(
     const solution_moves_t [static 1], solution_list_t [static 1]);
 STATIC bool appendinverse(
     const solution_moves_t [static 1], solution_list_t [static 1]);
+STATIC void appendsolution_dfs(const solution_moves_t [static 1], size_t,
+    const uint64_t *, size_t, uint8_t *, const solution_settings_t [static 1],
+    solution_list_t [static 1],
+    solution_moves_t [static NTRANS * SOLUTION_MAXLEN], int64_t [static 1]);
 STATIC int64_t appendsolution(const solution_moves_t [static 1],
-    const solution_settings_t [static 1], solution_list_t [static 1]);
+    size_t, const uint64_t *, const solution_settings_t [static 1],
+    solution_list_t [static 1]);
 STATIC bool solutions_done(const solution_list_t [static 1],
     const solution_settings_t [static 1], int8_t depth);
 
@@ -23,11 +29,11 @@ solution_moves_reset(solution_moves_t sol[static 1])
 }
 
 STATIC void
-solution_moves_transform(solution_moves_t moves[static 1], uint8_t t)
+solution_moves_transform(solution_moves_t moves[static 1], size_t z, uint8_t t)
 {
 	uint8_t i;
 
-	for (i = 0; i < moves->nmoves; i++)
+	for (i = z; i < moves->nmoves; i++)
 		moves->moves[i] = transform_move(moves->moves[i], t);
 
 	for (i = 0; i < moves->npremoves; i++)
@@ -87,13 +93,27 @@ solution_moves_equal(
 }
 
 STATIC bool
-solution_moves_is_duplicate(size_t n, const solution_moves_t *s)
+last_solution_is_duplicate(const solution_list_t l[static 1])
 {
-	size_t i;
+	size_t i, j;
 
-	for (i = 0; i < n; i++)
-		if (solution_moves_equal(&s[i], &s[n]))
-			return true;
+	if (l->nsols == 1)
+		return false;
+
+	/* We assume the list is newline-terminated */
+	j = l->used-2;
+	while (true) {
+		for ( ; l->buf[j] != '\n'; j--)
+			if (j == 0) return false;
+		j--;
+		for (i = l->used-2; l->buf[i] == l->buf[j]; i--, j--) {
+			if (l->buf[i-1] == '\n') {
+				if (l->buf[j-1] == '\n' || j == 0)
+					return true;
+				else break;
+			}
+		}
+	}
 
 	return false;
 }
@@ -150,97 +170,157 @@ appendinverse(
 	return appendchar(list, ')');
 }
 
+STATIC void
+appendsolution_dfs(
+	const solution_moves_t moves[static 1],
+	size_t ntmask,
+	const uint64_t *tmask,
+	size_t itm,
+	uint8_t *tt,
+	const solution_settings_t settings[static 1],
+	solution_list_t list[static 1],
+	solution_moves_t tsol[static NTRANS * SOLUTION_MAXLEN],
+	int64_t r[static 1]
+)
+{
+	/*
+	The logic here is quit complex because we have to address H48
+	solutions that may be reduced by symmetry in the first few moves.
+	*/
+
+	size_t i, last_start;
+	uint8_t t;
+	solution_moves_t moves_copy;
+
+	if (list->nsols >= settings->maxsolutions)
+		return;
+
+	if (ntmask == itm) {
+		tsol[*r] = *moves;
+
+		for (i = ntmask; i > 0; i--)
+			solution_moves_transform(&tsol[*r], i-1, tt[i-1]);
+
+		solution_moves_reorient(&tsol[*r], settings->orientation);
+		sortparallel_moves(tsol[*r].nmoves, tsol[*r].moves);
+		sortparallel_moves(tsol[*r].npremoves, tsol[*r].premoves);
+
+		last_start = list->used;
+
+		/* Append first the moves on the side that has more */
+		/* E.g. write (U L F) B instead of B (U L F) */
+		if (tsol[*r].nmoves >= tsol[*r].npremoves) {
+			if (!appendnormal(&tsol[*r], list))
+				goto appendsolution_dfs_error_buffer;
+
+			if (tsol[*r].nmoves > 0 && tsol[*r].npremoves > 0)
+				if (!appendchar(list, ' '))
+					goto appendsolution_dfs_error_buffer;
+
+			if (!appendinverse(&tsol[*r], list))
+				goto appendsolution_dfs_error_buffer;
+		} else {
+			if (!appendinverse(&tsol[*r], list))
+				goto appendsolution_dfs_error_buffer;
+
+			if (tsol[*r].nmoves > 0 && tsol[*r].npremoves > 0)
+				if (!appendchar(list, ' '))
+					goto appendsolution_dfs_error_buffer;
+
+			if (!appendnormal(&tsol[*r], list))
+				goto appendsolution_dfs_error_buffer;
+		}
+
+		if (!appendchar(list, '\n'))
+			goto appendsolution_dfs_error_buffer;
+		++list->nsols;
+
+		/*
+		Normaly, it would be enough to check for duplicates in the
+		current "pack" of transformation-equivalent solutions.
+		However, in rare cases, the H48 solver may produce equivalent
+		"packs" of solutions. It would be more elegant to filter out
+		the corresponding tasks in solve_h48_maketasks(), but doing so
+		is not trivial. In the end, duplicate solutions are never
+		desirable, so we might as well do this clean up here.
+		*/
+		if (last_solution_is_duplicate(list)) {
+			--list->nsols;
+			list->used = last_start;
+			return;
+		}
+
+		list->shortest_sol = MIN(
+		    list->shortest_sol, tsol[*r].nmoves + tsol[*r].npremoves);
+		(*r)++;
+	} else {
+		for (t = 0; t < NTRANS; t++) {
+			if (!(tmask[itm] & TM_SINGLE(t)))
+				continue;
+			moves_copy = *moves;
+			tt[itm] = t;
+			appendsolution_dfs(&moves_copy, ntmask, tmask,
+			    itm+1, tt, settings, list, tsol, r);
+			if (*r < 0)
+				return;
+		}
+	}
+
+	return;
+
+appendsolution_dfs_error_buffer:
+	list->buf[0] = '\0';
+	*r = NISSY_ERROR_BUFFER_SIZE;
+	return;
+}
+
 STATIC int64_t
 appendsolution(
 	const solution_moves_t moves[static 1],
+	size_t ntmask,
+	const uint64_t *tmask,
 	const solution_settings_t settings[static 1],
 	solution_list_t list[static 1]
 )
 {
 	int64_t r;
 	int i;
-	uint8_t t;
-	solution_moves_t tsol[NTRANS];
+	uint8_t tt[SOLUTION_MAXLEN];
+	solution_moves_t moves_copy, tsol[NTRANS * SOLUTION_MAXLEN];
 
 	if (moves->nmoves + moves->npremoves > SOLUTION_MAXLEN)
 		goto appendsolution_error_solution_length;
 
-	for (
-	    t = 0, r = 0;
-	    t < NTRANS && list->nsols < settings->maxsolutions;
-	    t++
-	) {
-		if (!(settings->tmask & TM_SINGLE(t)))
-			continue;
+	moves_copy = *moves;
+	if (settings->unniss) {
+		moves_copy.nmoves += moves->npremoves;
+		moves_copy.npremoves = 0;
+		for (i = moves->npremoves-1; i >= 0; i--)
+			moves_copy.moves[moves_copy.nmoves - i - 1] =
+			    inverse_move(moves->premoves[i]);
 
-		tsol[r] = *moves;
-		if (settings->unniss) {
-			tsol[r].nmoves += moves->npremoves;
-			tsol[r].npremoves = 0;
-			for (i = moves->npremoves-1; i >= 0; i--)
-				tsol[r].moves[tsol[r].nmoves - i - 1] =
-				    inverse_move(moves->premoves[i]);
+		/*
+		This is a bit ugly: we have to sort now and then again
+		later, because the allowedmoves check would fail with
+		improperly sorted parallel moves, but then transforming
+		could swap the pairs the wrong way around.
+		*/
+		sortparallel_moves(moves_copy.nmoves, moves_copy.moves);
 
-			/*
-			This is a bit ugly: we have to sort now and then again
-			later, because the allowedmoves check would fail with
-			improperly sorted parallel moves, but then transforming
-			could swap the pairs the wrong way around.
-			*/
-			sortparallel_moves(tsol[r].nmoves, tsol[r].moves);
-
-			/* Check if unnissed premoves cancel with normal. */
-			if (!allowedmoves(tsol[r].nmoves, tsol[r].moves))
-				continue;
-		}
-		solution_moves_transform(&tsol[r], t);
-		solution_moves_reorient(&tsol[r], settings->orientation);
-		sortparallel_moves(tsol[r].nmoves, tsol[r].moves);
-		sortparallel_moves(tsol[r].npremoves, tsol[r].premoves);
-
-		/* Skip duplicates that may appear after transforming */
-		if (solution_moves_is_duplicate(r, tsol))
-			continue;
-
-		/* Append first the moves on the side that has more */
-		/* E.g. write (U L F) B instead of B (U L F) */
-		if (tsol[r].nmoves >= tsol[r].npremoves) {
-			if (!appendnormal(&tsol[r], list))
-				goto appendsolution_error_buffer;
-
-			if (tsol[r].nmoves > 0 && tsol[r].npremoves > 0)
-				if (!appendchar(list, ' '))
-					return false;
-
-			if (!appendinverse(&tsol[r], list))
-				goto appendsolution_error_buffer;
-		} else {
-			if (!appendinverse(&tsol[r], list))
-				goto appendsolution_error_buffer;
-
-			if (tsol[r].nmoves > 0 && tsol[r].npremoves > 0)
-				if (!appendchar(list, ' '))
-					return false;
-
-			if (!appendnormal(&tsol[r], list))
-				goto appendsolution_error_buffer;
-		}
-
-		if (!appendchar(list, '\n'))
-			goto appendsolution_error_buffer;
-
-		++list->nsols;
-		list->shortest_sol = MIN(
-		    list->shortest_sol, tsol[r].nmoves + tsol[r].npremoves);
-		r++;
+		/* Check if unnissed premoves cancel with normal. */
+		if (!allowedmoves(moves_copy.nmoves, moves_copy.moves))
+			return 0;
 	}
+
+	r = 0;
+	memset(tt, TRANS_UFr, SOLUTION_MAXLEN);
+	appendsolution_dfs(
+	    &moves_copy, ntmask, tmask, 0, tt, settings, list, tsol, &r);
+	if (r < 0)
+		return r;
 
 	list->buf[list->used] = '\0';
 	return r;
-
-appendsolution_error_buffer:
-	list->buf[0] = '\0';
-	return NISSY_ERROR_BUFFER_SIZE;
 
 appendsolution_error_solution_length:
 	list->buf[0] = '\0';

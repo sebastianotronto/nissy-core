@@ -3,6 +3,7 @@ typedef struct {
 	cube_t inverse;
 	uint8_t target_depth;
 	solution_moves_t *solution_moves;
+	uint64_t tmask;
 	solution_settings_t *solution_settings;
 	solution_list_t *solution_list;
 	uint8_t nissflag;
@@ -163,7 +164,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
 	if (coord_is_solved(arg->coord, coord, arg->coord_data)) {
 		if (!coord_solution_admissible(arg))
 			return 0;
-		return appendsolution(arg->solution_moves,
+		return appendsolution(arg->solution_moves, 1, &arg->tmask,
 		    arg->solution_settings, arg->solution_list);
 	}
 
@@ -339,7 +340,6 @@ solve_coord(
 	solution_moves_reset(&solution_moves);
 
 	solution_settings = (solution_settings_t) {
-		.tmask = TM_SINGLE(inverse_trans(trans)),
 		.unniss = false,
 		.maxmoves = maxmoves,
 		.maxsolutions = maxsolutions,
@@ -355,14 +355,15 @@ solve_coord(
 		.ptable = ptable,
 		.solution_moves = &solution_moves,
 		.solution_settings = &solution_settings,
+		.tmask = TM_SINGLE(inverse_trans(trans)),
 		.solution_list = &solution_list,
 		.nissflag = nissflag,
 	};
 
 	i = coord->coord(c, coord_data);
 	if (coord_is_solved(coord, i, coord_data)) {
-		if (minmoves == 0 && !appendsolution(&solution_moves,
-		    &solution_settings, &solution_list))
+		if (minmoves == 0 && !appendsolution(&solution_moves, 1,
+		    &arg.tmask, &solution_settings, &solution_list))
 				goto solve_coord_error_buffer;
 		goto solve_coord_done;
 	}

@@ -46,3 +46,4 @@ tools/results
 python/*.pyd
 python/*.exp
 python/*.lib
+*.sketch

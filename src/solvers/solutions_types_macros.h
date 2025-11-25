@@ -8,7 +8,6 @@ typedef struct {
 } solution_moves_t;
 
 typedef struct {
-	uint64_t tmask;
 	bool unniss;
 	uint8_t maxmoves;
 	uint64_t maxsolutions;
