@@ -68,6 +68,7 @@ dataid_h48(const char *hk, char buf[static NISSY_SIZE_DATAID])
 	if (err < 0)
 		return err;
 
-	sprintf(buf, "h48h%" PRIu8 "k%" PRIu8, h, k);
+	sprintf(buf, "h48h%" PRIu8 "k%" PRIu8 "%s", h, k,
+	    k == 2 ? "i" : "");
 	return NISSY_OK;
 }

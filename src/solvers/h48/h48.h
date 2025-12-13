@@ -6,6 +6,7 @@
 #include "map.h"
 #include "gendata_cocsep.h"
 #include "gendata_eoesep.h"
+#include "distribution_h48.h"
 #include "gendata_h48.h"
 #include "checkdata.h"
 #include "solve.h"

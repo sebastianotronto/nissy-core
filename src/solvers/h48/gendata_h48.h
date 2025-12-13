@@ -20,6 +20,10 @@ STATIC const unsigned char *get_h48data_constptr(const unsigned char *);
 
 STATIC_INLINE uint8_t get_h48_pval(const unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE void set_h48_pval(unsigned char *, uint64_t, uint8_t, uint8_t);
+STATIC_INLINE uint8_t get_h48_pvalmin(
+    const unsigned char *, uint64_t, uint8_t);
+STATIC_INLINE void set_h48_pvalmin(
+    unsigned char *, uint64_t, uint8_t, uint8_t);
 STATIC_INLINE uint8_t get_h48_pval_atomic(
     wrapthread_atomic const unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE void set_h48_pval_atomic(
@@ -300,6 +304,7 @@ gendata_h48h0k4_runthread(void *arg)
 		.depth = bfsarg->depth,
 		.h = 0,
 		.k = 4,
+		.base = 0, /* Unused */
 		.cocsepdata = bfsarg->cocsepdata,
 		.selfsim = bfsarg->selfsim,
 		.table_atomic = bfsarg->table,
@@ -343,10 +348,6 @@ gendata_h48h0k4_runthread(void *arg)
 STATIC void
 gendata_h48k2(gendata_h48_arg_t arg[static 1])
 {
-	static const uint8_t shortdepth = 8;
-	static const uint64_t capacity = 10000019;
-	static const uint64_t randomizer = 10000079;
-
 	/*
 	 * A good base value for the k=2 tables have few positions with value
 	 * 0, because those are treated as lower bound 0 and require a second
@@ -390,6 +391,10 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 		[10] = 10,
 		[11] = 10
 	};
+
+	static const uint8_t shortdepth = 8;
+	static const uint64_t capacity = 10000019;
+	static const uint64_t randomizer = 10000079;
 
 	uint8_t t;
 	int sleeptime;
@@ -481,10 +486,7 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 
 	h48map_destroy(&shortcubes);
 
-	for (j = 0; j < H48_COORDMAX(arg->h); j++) {
-		t = get_h48_pval(table, j, 2);
-		arg->info.distribution[t]++;
-	}
+	getdistribution_h48(table, arg->info.distribution, &arg->info);
 
 	bufsize = arg->buf_size - COCSEP_FULLSIZE;
 	writetableinfo(&arg->info, bufsize, (unsigned char *)arg->h48buf);
@@ -493,7 +495,7 @@ gendata_h48k2(gendata_h48_arg_t arg[static 1])
 STATIC void *
 gendata_h48k2_runthread(void *arg)
 {
-	uint64_t coord;
+	uint64_t coord, coordext, coordmin;
 	kvpair_t kv;
 	h48k2_dfs_arg_t *dfsarg;
 	wrapthread_define_if_threads(uint64_t, mutex);
@@ -513,9 +515,13 @@ gendata_h48k2_runthread(void *arg)
 
 		if (kv.val < dfsarg->shortdepth) {
 			coord = kv.key >> (uint64_t)(11 - dfsarg->h);
-			mutex = H48_INDEX(coord, dfsarg->k) % CHUNKS;
+			coordext = H48_LINE_EXT(coord);
+			coordmin = H48_LINE_MIN(coord);
+
+			mutex = H48_LINE(coord) % CHUNKS;
 			wrapthread_mutex_lock(dfsarg->table_mutex[mutex]);
-			set_h48_pval(dfsarg->table, coord, dfsarg->k, 0);
+			set_h48_pval(dfsarg->table, coordext, dfsarg->k, 0);
+			set_h48_pvalmin(dfsarg->table, coordmin, dfsarg->k, kv.val);
 			wrapthread_mutex_unlock(dfsarg->table_mutex[mutex]);
 		} else {
 			dfsarg->cube = invcoord_h48(kv.key, dfsarg->crep, 11);
@@ -537,6 +543,7 @@ gendata_h48k2_dfs(h48k2_dfs_arg_t arg[static 1])
 	markarg = (gendata_h48_mark_t) {
 		.h = arg->h,
 		.k = arg->k,
+		.base = arg->base,
 		.cocsepdata = arg->cocsepdata,
 		.selfsim = arg->selfsim,
 		.table = arg->table,
@@ -629,17 +636,23 @@ gendata_h48_mark_atomic(gendata_h48_mark_t arg[static 1])
 STATIC_INLINE void
 gendata_h48_mark(gendata_h48_mark_t arg[static 1])
 {
-	uint8_t oldval, newval;
-	uint64_t coord;
+	uint8_t oldval, newval, v;
+	uint64_t coord, coordext, coordmin;
 	wrapthread_define_if_threads(uint64_t, mutex);
 
 	FOREACH_H48SIM(arg->cube, arg->cocsepdata, arg->selfsim,
 		coord = coord_h48(arg->cube, arg->cocsepdata, arg->h);
-		mutex = H48_INDEX(coord, arg->k) % CHUNKS;
+		coordext = H48_LINE_EXT(coord);
+		coordmin = H48_LINE_MIN(coord);
+
+		mutex = H48_LINE(coord) % CHUNKS;
 		wrapthread_mutex_lock(arg->table_mutex[mutex]);
-		oldval = get_h48_pval(arg->table, coord, arg->k);
+		oldval = get_h48_pval(arg->table, coordext, arg->k);
 		newval = (uint8_t)MAX(arg->depth, 0);
-		set_h48_pval(arg->table, coord, arg->k, MIN(newval, oldval));
+		v = MIN(newval, oldval);
+		set_h48_pval(arg->table, coordext, arg->k, v);
+		v = arg->depth + arg->base;
+		set_h48_pvalmin(arg->table, coordmin, arg->k, v);
 		wrapthread_mutex_unlock(arg->table_mutex[mutex]);
 	)
 }
@@ -648,7 +661,7 @@ STATIC_INLINE bool
 gendata_h48k2_dfs_stop(cube_t cube, int8_t d, h48k2_dfs_arg_t arg[static 1])
 {
 	uint64_t val;
-	uint64_t coord;
+	uint64_t coord, coordext;
 	wrapthread_define_if_threads(uint64_t, mutex);
 	int8_t oldval;
 
@@ -656,9 +669,10 @@ gendata_h48k2_dfs_stop(cube_t cube, int8_t d, h48k2_dfs_arg_t arg[static 1])
 		/* We are in the "real coordinate" case, we can stop
 		   if this coordinate has already been visited */
 		coord = coord_h48(cube, arg->cocsepdata, arg->h);
-		mutex = H48_INDEX(coord, arg->k) % CHUNKS;
+		coordext = H48_LINE_EXT(coord);
+		mutex = H48_LINE(coord) % CHUNKS;
 		wrapthread_mutex_lock(arg->table_mutex[mutex]);
-		oldval = get_h48_pval(arg->table, coord, arg->k);
+		oldval = get_h48_pval(arg->table, coordext, arg->k);
 		wrapthread_mutex_unlock(arg->table_mutex[mutex]);
 		return oldval <= d;
 	} else {
@@ -682,7 +696,7 @@ makeinfo_h48k2(gendata_h48_arg_t arg[static 1])
 		.infosize = INFOSIZE,
 		.fullsize = H48_TABLESIZE(arg->h, 2) + INFOSIZE,
 		.hash = 0,
-		.entries = H48_COORDMAX(arg->h),
+		.entries = H48_COORDMAX(arg->h) + 2 * H48_LINES(arg->h),
 		.classes = 0,
 		.h48h = arg->h,
 		.bits = 2,
@@ -716,6 +730,13 @@ get_h48_pval(const unsigned char *table, uint64_t i, uint8_t k)
 }
 
 STATIC_INLINE uint8_t
+get_h48_pvalmin(const unsigned char *table, uint64_t i, uint8_t k)
+{
+	return (get_h48_pval(table, i, k) << UINT8_C(2)) +
+	    get_h48_pval(table, i+UINT64_C(1), k);
+}
+
+STATIC_INLINE uint8_t
 get_h48_pval_atomic(
 	wrapthread_atomic const unsigned char *table,
 	uint64_t i,
@@ -730,6 +751,16 @@ set_h48_pval(unsigned char *table, uint64_t i, uint8_t k, uint8_t val)
 {
 	table[H48_INDEX(i, k)] = (table[H48_INDEX(i, k)] & (~H48_MASK(i, k)))
 	    | (val << H48_SHIFT(i, k));
+}
+
+STATIC_INLINE void
+set_h48_pvalmin(unsigned char *table, uint64_t i, uint8_t k, uint8_t val)
+{
+	uint8_t v;
+
+	v = MIN(val, get_h48_pvalmin(table, i, k));
+	set_h48_pval(table, i, k, v >> UINT8_C(2));
+	set_h48_pval(table, i+UINT64_C(1), k, v % UINT8_C(4));
 }
 
 STATIC_INLINE void

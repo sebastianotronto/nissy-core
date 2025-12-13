@@ -95,12 +95,6 @@ distribution_equal(
 			    ": expected %" PRIu64 ", found %" PRIu64 "\n",
 			    i, expected[i], actual[i]);
 		}
-		/*
-		else {
-			LOG("[checkdata] Value for depth %" PRIu8
-			    " is correct (%" PRIu64 ")\n", i, actual[i]);
-		}
-		*/
 	}
 
 	return wrong == 0;

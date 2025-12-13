@@ -21,14 +21,28 @@
 #define H48_COORDMAX_NOEO   (COCSEP_CLASSES * ESEP_MAX)
 #define H48_COORDMAX(h)     (H48_COORDMAX_NOEO << (uint64_t)(h))
 #define H48_DIV(k)          ((size_t)8 / (size_t)(k))
-#define H48_TABLESIZE(h, k) DIV_ROUND_UP((size_t)H48_COORDMAX((h)), H48_DIV(k))
+#define H48_TABLESIZE_K4(h) DIV_ROUND_UP((size_t)H48_COORDMAX(h), H48_DIV(4))
 
 #define H48_COEFF(k)        (UINT64_C(8) / (uint64_t)(k))
 #define H48_INDEX(i, k)     ((i) / H48_COEFF(k))
 #define H48_SHIFT(i, k)     ((uint8_t)(k) * (uint8_t)((i) % H48_COEFF(k)))
 #define H48_MASK(i, k)      ((UINT8_BIT(k) - UINT8_C(1)) << H48_SHIFT(i, k))
 
-#define CHUNKS COCSEP_CLASSES
+#define H48_LINE_BITS       UINT64_C(512)
+#define H48_LINE_BYTES      (H48_LINE_BITS >> UINT64_C(3))
+#define H48_LINE_ALLCOORDS  (H48_LINE_BITS / UINT64_C(2))
+#define H48_LINE_COORDS     ((H48_LINE_BITS - UINT64_C(4)) / UINT64_C(2))
+#define H48_LINE(i)         ((i) / H48_LINE_COORDS)
+#define H48_LINE_EXT(i)     ((i) + UINT64_C(2) * H48_LINE(i))
+#define H48_LINE_MIN(i)     \
+    ((H48_LINE(i) + UINT64_C(1)) * H48_LINE_ALLCOORDS - UINT64_C(2))
+#define H48_LINES(h)        DIV_ROUND_UP(H48_COORDMAX(h), H48_LINE_COORDS)
+#define H48_TABLESIZE_K2(h) ((size_t)(H48_LINE_BYTES * H48_LINES(h)))
+
+#define H48_TABLESIZE(h, k) \
+    ((k) == 4 ? H48_TABLESIZE_K4(h) : H48_TABLESIZE_K2(h))
+
+#define CHUNKS              2000
 
 /*
 TODO: This loop over similar h48 coordinates can be improved by only
@@ -115,6 +129,7 @@ typedef struct {
 	int8_t depth;
 	uint8_t h;
 	uint8_t k;
+	uint8_t base;
 	uint32_t *cocsepdata;
 	uint64_t *selfsim;
 	unsigned char *table;

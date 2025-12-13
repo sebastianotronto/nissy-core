@@ -110,7 +110,7 @@ STATIC_INLINE bool
 solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 {
 	uint32_t data, data_inv;
-	int64_t coord;
+	int64_t coord, coordext, coordmin;
 	int8_t target, nh, n;
 	uint8_t pval_cocsep, pval_eoesep;
 
@@ -142,17 +142,29 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	if (!arg->use_lb_inverse) {
 		coord = coord_h48_edges(
 		    arg->inverse, COCLASS(data_inv), TTREP(data_inv), arg->h);
-		arg->lb_inverse = get_h48_pval(arg->h48data, coord, arg->k);
+		coordext = H48_LINE_EXT(coord);
+		arg->lb_inverse = get_h48_pval(arg->h48data, coordext, arg->k);
 		arg->table_lookups++;
 
 		if (arg->k == 2 && arg->lb_inverse == 0) {
 			arg->table_fallbacks++;
 
+			/*
 			pval_cocsep = get_h48_pval(
 			    arg->h48data_fallback_h0k4, coord >> arg->h, 4);
+			*/
+#if 1
+			coordmin = H48_LINE_MIN(coord);
+			pval_cocsep = get_h48_pvalmin(
+			    arg->h48data, coordmin, arg->k);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->inverse);
 			arg->lb_inverse = MAX(pval_cocsep, pval_eoesep);
+#else
+			coordmin = H48_LINE_MIN(coord);
+			arg->lb_inverse = get_h48_pvalmin(
+			    arg->h48data, coordmin, arg->k);
+#endif
 		} else {
 			arg->lb_inverse += arg->base;
 		}
@@ -170,17 +182,29 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	if (!arg->use_lb_normal) {
 		coord = coord_h48_edges(
 		    arg->cube, COCLASS(data), TTREP(data), arg->h);
-		arg->lb_normal = get_h48_pval(arg->h48data, coord, arg->k);
+		coordext = H48_LINE_EXT(coord);
+		arg->lb_normal = get_h48_pval(arg->h48data, coordext, arg->k);
 		arg->table_lookups++;
 
 		if (arg->k == 2 && arg->lb_normal == 0) {
 			arg->table_fallbacks++;
 
+			/*
 			pval_cocsep = get_h48_pval(
 			    arg->h48data_fallback_h0k4, coord >> arg->h, 4);
+			*/
+#if 1
+			coordmin = H48_LINE_MIN(coord);
+			pval_cocsep = get_h48_pval(
+			    arg->h48data, coordmin, arg->k);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->cube);
 			arg->lb_normal = MAX(pval_cocsep, pval_eoesep);
+#else
+			coordmin = H48_LINE_MIN(coord);
+			arg->lb_normal = get_h48_pval(
+			    arg->h48data, coordmin, arg->k);
+#endif
 		} else {
 			arg->lb_normal += arg->base;
 		}

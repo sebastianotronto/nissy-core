@@ -219,7 +219,7 @@ checkdata_h48(
 
 		LOG("[checkdata] Checking distribution for '%s' from "
 		    "actual table\n", info.solver);
-		getdistribution(table, actual_distribution, &info);
+		getdistribution_h48(table, actual_distribution, &info);
 		if (!distribution_equal(ed, actual_distribution, em)) {
 			LOG("[checkdata] Distribution from the actual table "
 			    "does not match the expected one\n");
