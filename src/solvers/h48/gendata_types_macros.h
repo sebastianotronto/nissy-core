@@ -97,17 +97,6 @@ typedef struct {
 } gendata_h48short_arg_t;
 
 typedef struct {
-	uint8_t depth;
-	uint32_t *cocsepdata;
-	wrapthread_atomic unsigned char *table;
-	uint64_t *selfsim;
-	cube_t *crep;
-	uint64_t start;
-	uint64_t end;
-	wrapthread_define_struct_mutex_t(*table_mutex[CHUNKS]);
-} h48h0k4_bfs_arg_t;
-
-typedef struct {
 	cube_t cube;
 	uint8_t h;
 	uint8_t k;

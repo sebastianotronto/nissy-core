@@ -44,11 +44,9 @@ getdistribution_h48(
 ) {
 	getdistribution_data_t targ[THREADS];
 	wrapthread_define_var_thread_t(thread[THREADS]);
-	uint8_t pval, k;
 	uint64_t local_distr[THREADS][INFO_DISTRIBUTION_LEN];
-	uint64_t i, j, lines, lines_per_thread, c, cc;
+	uint64_t i, j, lines, lines_per_thread, c;
 
-	k = info->bits;
 	lines = H48_LINES(info->h48h);
 	lines_per_thread = DIV_ROUND_UP(lines, THREADS);
 
@@ -56,7 +54,7 @@ getdistribution_h48(
 		targ[i] = (getdistribution_data_t) {
 			.min = i * lines_per_thread,
 			.max = MIN((i+1) * lines_per_thread, lines),
-			.bits = k,
+			.bits = info->bits,
 			.distr = local_distr[i],
 			.table = table,
 		};

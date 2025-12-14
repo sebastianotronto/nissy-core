@@ -171,6 +171,10 @@ struct {
 	},
 };
 
+/*
+TODO: this function can be simplified, now we support only one h48 table +
+eoesep. The loop can be just two checks.
+*/
 STATIC long long
 checkdata_h48(
 	const char *solver,

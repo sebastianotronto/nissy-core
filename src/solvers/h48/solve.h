@@ -34,7 +34,6 @@ typedef struct {
 	uint8_t base;
 	const uint32_t *cocsepdata;
 	const unsigned char *h48data;
-	const unsigned char *h48data_fallback_h0k4;
 	const unsigned char *h48data_fallback_eoesep;
 	uint64_t movemask_normal;
 	uint64_t movemask_inverse;
@@ -112,7 +111,7 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	uint32_t data, data_inv;
 	int64_t coord, coordext, coordmin;
 	int8_t target, nh, n;
-	uint8_t pval_cocsep, pval_eoesep;
+	uint8_t pval_min, pval_eoesep;
 
 	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	target = arg->target_depth - n;
@@ -149,22 +148,12 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		if (arg->k == 2 && arg->lb_inverse == 0) {
 			arg->table_fallbacks++;
 
-			/*
-			pval_cocsep = get_h48_pval(
-			    arg->h48data_fallback_h0k4, coord >> arg->h, 4);
-			*/
-#if 1
 			coordmin = H48_LINE_MIN(coord);
-			pval_cocsep = get_h48_pvalmin(
+			pval_min = get_h48_pvalmin(
 			    arg->h48data, coordmin, arg->k);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->inverse);
-			arg->lb_inverse = MAX(pval_cocsep, pval_eoesep);
-#else
-			coordmin = H48_LINE_MIN(coord);
-			arg->lb_inverse = get_h48_pvalmin(
-			    arg->h48data, coordmin, arg->k);
-#endif
+			arg->lb_inverse = MAX(pval_min, pval_eoesep);
 		} else {
 			arg->lb_inverse += arg->base;
 		}
@@ -189,22 +178,12 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		if (arg->k == 2 && arg->lb_normal == 0) {
 			arg->table_fallbacks++;
 
-			/*
-			pval_cocsep = get_h48_pval(
-			    arg->h48data_fallback_h0k4, coord >> arg->h, 4);
-			*/
-#if 1
 			coordmin = H48_LINE_MIN(coord);
-			pval_cocsep = get_h48_pval(
+			pval_min = get_h48_pval(
 			    arg->h48data, coordmin, arg->k);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->cube);
-			arg->lb_normal = MAX(pval_cocsep, pval_eoesep);
-#else
-			coordmin = H48_LINE_MIN(coord);
-			arg->lb_normal = get_h48_pval(
-			    arg->h48data, coordmin, arg->k);
-#endif
+			arg->lb_normal = MAX(pval_min, pval_eoesep);
 		} else {
 			arg->lb_normal += arg->base;
 		}
@@ -482,7 +461,7 @@ solve_h48(
 	void *poll_status_data
 )
 {
-	int i, ntasks, eoesep_table_index;
+	int i, ntasks;
 	bool td;
 	wrapthread_atomic int status, prev_status;
 	size_t lastused;
@@ -493,10 +472,10 @@ solve_h48(
 	long double fallback_rate, lookups_per_node;
 	uint64_t offset;
 	uint64_t nodes_visited, table_lookups, table_fallbacks;
-	tableinfo_t info, fbinfo, fbinfo2;
+	tableinfo_t info, fbinfo2;
 	const uint32_t *cocsepdata;
-	const unsigned char *fallback, *h48data;
-	const unsigned char *fallback2;
+	const unsigned char *h48data;
+	const unsigned char *eoesep;
 	solution_moves_t solution_moves[THREADS];
 	solution_settings_t settings;
 	solution_list_t sollist;
@@ -512,29 +491,16 @@ solve_h48(
 	cocsepdata = (uint32_t *)(data + INFOSIZE);
 	h48data = data + COCSEP_FULLSIZE + INFOSIZE;
 
-	/* Read fallback table(s) */
-	fallback = NULL;
-	if (readtableinfo_n(data_size, data, 3, &fbinfo) != NISSY_OK)
-		goto solve_h48_error_data;
+	/* Read additional eoesep table */
 	offset = info.next;
-	eoesep_table_index = 3;
-	if (info.bits == 2) {
-		/* We only support h0k4 as fallback table */
-		if (fbinfo.h48h != 0 || fbinfo.bits != 4)
-			goto solve_h48_error_data;
-		fallback = h48data + offset;
-		offset += fbinfo.next;
-		eoesep_table_index++;
-	}
-
-	if (readtableinfo_n(data_size, data, eoesep_table_index, &fbinfo2)
+	if (readtableinfo_n(data_size, data, 3, &fbinfo2)
 	    != NISSY_OK)
 		goto solve_h48_error_data;
 
 	/* Some heuristic check to see that it is eoesep */
 	if (fbinfo2.bits != 4 || fbinfo2.type != TABLETYPE_SPECIAL)
 		goto solve_h48_error_data;
-	fallback2 = h48data + offset;
+	eoesep = h48data + offset;
 
 	settings = (solution_settings_t) {
 		.unniss = true,
@@ -553,8 +519,7 @@ solve_h48(
 			.base = info.base,
 			.cocsepdata = cocsepdata,
 			.h48data = h48data,
-			.h48data_fallback_h0k4 = fallback,
-			.h48data_fallback_eoesep = fallback2,
+			.h48data_fallback_eoesep = eoesep,
 			.solution_moves = &solution_moves[i],
 			.solution_settings = &settings,
 			.solution_list = &sollist,
