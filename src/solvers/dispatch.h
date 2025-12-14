@@ -43,7 +43,7 @@ solver_dispatch_t solver_dispatchers[] = {
 };
 
 const char *solver_aliases[][2] = {
-	{ "optimal", "h48h7i" },
+	{ "optimal", "h48h7" },
 	{ "eofb", "coord_EO_UF" },
 	{ "eorl", "coord_EO_UR" },
 	{ "eoud", "coord_EO_FD" },

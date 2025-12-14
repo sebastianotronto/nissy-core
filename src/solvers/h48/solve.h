@@ -30,7 +30,6 @@ typedef struct {
 	bool use_lb_normal;
 	bool use_lb_inverse;
 	uint8_t h;
-	uint8_t k;
 	uint8_t base;
 	const uint32_t *cocsepdata;
 	const unsigned char *h48data;
@@ -93,10 +92,10 @@ STATIC long long solve_h48_dispatch(
         void *poll_status_data
 )
 {
-	uint8_t h, k;
+	uint8_t h;
 	long long err;
 
-	err = parse_h48_hk(solver, &h, &k);
+	err = parse_h48h(solver, &h);
 	if (err != NISSY_OK)
 		return err;
 
@@ -142,15 +141,14 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		coord = coord_h48_edges(
 		    arg->inverse, COCLASS(data_inv), TTREP(data_inv), arg->h);
 		coordext = H48_LINE_EXT(coord);
-		arg->lb_inverse = get_h48_pval(arg->h48data, coordext, arg->k);
+		arg->lb_inverse = get_h48_pval(arg->h48data, coordext);
 		arg->table_lookups++;
 
-		if (arg->k == 2 && arg->lb_inverse == 0) {
+		if (arg->lb_inverse == 0) {
 			arg->table_fallbacks++;
 
 			coordmin = H48_LINE_MIN(coord);
-			pval_min = get_h48_pvalmin(
-			    arg->h48data, coordmin, arg->k);
+			pval_min = get_h48_pvalmin(arg->h48data, coordmin);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->inverse);
 			arg->lb_inverse = MAX(pval_min, pval_eoesep);
@@ -172,15 +170,14 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		coord = coord_h48_edges(
 		    arg->cube, COCLASS(data), TTREP(data), arg->h);
 		coordext = H48_LINE_EXT(coord);
-		arg->lb_normal = get_h48_pval(arg->h48data, coordext, arg->k);
+		arg->lb_normal = get_h48_pval(arg->h48data, coordext);
 		arg->table_lookups++;
 
-		if (arg->k == 2 && arg->lb_normal == 0) {
+		if (arg->lb_normal == 0) {
 			arg->table_fallbacks++;
 
 			coordmin = H48_LINE_MIN(coord);
-			pval_min = get_h48_pval(
-			    arg->h48data, coordmin, arg->k);
+			pval_min = get_h48_pval(arg->h48data, coordmin);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->cube);
 			arg->lb_normal = MAX(pval_min, pval_eoesep);
@@ -515,7 +512,6 @@ solve_h48(
 			.start_cube = oc.cube,
 			.cube = oc.cube,
 			.h = info.h48h,
-			.k = info.bits,
 			.base = info.base,
 			.cocsepdata = cocsepdata,
 			.h48data = h48data,

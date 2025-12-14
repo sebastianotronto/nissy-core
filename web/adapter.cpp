@@ -16,12 +16,11 @@ std::map<std::string, nissy::solver> loaded_solvers;
 
 const std::set<std::string> available_solvers
 {
-	"h48h0k4",
-	"h48h1k2",
-	"h48h2k2",
-	"h48h3k2",
-	"h48h4k2",
-	"h48h5k2",
+	"h48h1",
+	"h48h2",
+	"h48h3",
+	"h48h4",
+	"h48h5",
 };
 
 bool is_solver_available(const std::string& name)

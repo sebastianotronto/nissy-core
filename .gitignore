@@ -12,6 +12,7 @@ run
 run.exe
 debugrun
 tables/*
+tables-old/*
 test/*/runtest
 test/.DS_Store
 test/run

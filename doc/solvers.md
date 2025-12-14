@@ -10,12 +10,11 @@ An HTM-optimal solver using fully-symmetric pruning tables. For details
 about how this solver works, see [h48.md](./h48.md). For benchmarks see
 [benchmarks/benchmarks.md](../benchmarks/benchmarks.md).
 
-* Name: of the form `h8hXk2` for `X` from 0 to 11, or `h48h0k4`. The name
-  `optimal` is an alias for `h48h7k2`.
+* Name: of the form `h8hX` for `X` from 0 to 11. The name `optimal` is
+  an alias for `h48h7`.
 * Requisites: none.
 * Moveset: HTM (all 18 basic moves).
-* Data size: 59MB for `h48h0k4`, from 115MB to 59GB for `h48hXk2`
-  (roughly 59MB + 2<sup>X</sup>*56MB).
+* From 115MB to 59GB (roughly 2<sup>X</sup>*56MB).
 
 ## Coordinate solvers
 

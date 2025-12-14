@@ -28,24 +28,24 @@ int main() {
 	std::cin >> maxmoves;
 
 	// Load the solver
-	auto h48h3k2 = std::get<nissy::solver>(nissy::solver::get("h48h3k2"));
+	auto h48h3 = std::get<nissy::solver>(nissy::solver::get("h48h3"));
 	std::filesystem::path tableDir("tables");
 	std::filesystem::create_directories(tableDir); // Ignored if dir exists
-	std::filesystem::path tableFile("tables/" + h48h3k2.id);
+	std::filesystem::path tableFile("tables/" + h48h3.id);
 
 	// If the table is not present, generate it
 	if (!std::filesystem::exists(tableFile)) {
-		std::cout << "Data for h48h3k2 solver was not found, "
+		std::cout << "Data for h48h3 solver was not found, "
 		    << "generating it..." << std::endl;
-		auto err = h48h3k2.generate_data();
+		auto err = h48h3.generate_data();
 		if (!err.ok()) {
 			std::cout << "Unexpected error! Error code: "
 			    << err.value << std::endl;
 			return 1;
 		}
 		std::ofstream ofs(tableFile, std::ios::binary);
-		ofs.write(reinterpret_cast<char *>(h48h3k2.data.data()),
-		    h48h3k2.size);
+		ofs.write(reinterpret_cast<char *>(h48h3.data.data()),
+		    h48h3.size);
 		std::cout << "Table generated and written to "
 		    << tableFile << std::endl;
 		ofs.close();
@@ -54,10 +54,10 @@ int main() {
 	else {
 		std::cout << "Loading data table from file" << std::endl;
 		std::ifstream ifs(tableFile, std::ios::binary);
-		h48h3k2.read_data(ifs);
+		h48h3.read_data(ifs);
 		ifs.close();
 		std::cout << "Data loaded, checking table..." << std::endl;
-		auto err = h48h3k2.check_data();
+		auto err = h48h3.check_data();
 		if (!err.ok()) {
 			std::cout << "Error reading data table from file! "
 			    << "Error code: " << err.value << std::endl;
@@ -67,7 +67,7 @@ int main() {
 	}
 
 	// Solve
-	auto solve_result = h48h3k2.solve(c, nissy::nissflag::NORMAL,
+	auto solve_result = h48h3.solve(c, nissy::nissflag::NORMAL,
 	    0, maxmoves, 1, 20, 8, NULL, NULL);
 
 	// Write the result

@@ -12,14 +12,14 @@ sys.path.append(os.getcwd() + os.path.sep + "python")
 import nissy
 
 # Choose the solver you prefer
-solver = "h48h0k4"
+solver = "h48h3"
 
 # Load the pruning table from file, generate it if needed
 datapath = "tables" + os.path.sep + solver
 if os.path.exists(datapath):
 	data = bytearray(open(datapath, "rb").read())
 else:
-	data = nissy.gendata("h48h0k4")
+	data = nissy.gendata(solver)
 	print("Generated data will NOT be persisted")
 
 # Get a scrambled cube
