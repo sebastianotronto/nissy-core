@@ -172,10 +172,9 @@ gendata_h48_maintable(gendata_h48_arg_t arg[static 1])
 	 *   [2] = 462294676
 	 *   [3] = 14900555
 	 *
-	 * I ended up picking base 8 to have a much lower count of elements
-	 * with value 0, at the cost of a less precise estimate for the higher
-	 * values. But I am not 100% confident this is the optimal choice,
-	 * so I'll leave it here for future considerations.
+	 * Experimentally, the table with base 8 is much faster. Intuitively,
+	 * this is because it has a much lower count of elements  with value 0,
+         * at the cost of a less precise estimate for the higher values.
 	 */
 	 
 	static const uint8_t base[] = {

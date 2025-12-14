@@ -1,7 +1,6 @@
 STATIC long long checkdata_h48(
     const char *, unsigned long long, const unsigned char *);
 
-/* TODO: Currently unused, re-introduce check on cocsep table */
 uint64_t expected_cocsep[21] = {
 	[0] = 1,
 	[1] = 6,
@@ -130,6 +129,10 @@ struct {
 };
 
 /*
+TODO: add check for cocsep table.
+
+TODO: add check for fallback values at the end of each line.
+
 TODO: this function can be simplified, now we support only one h48 table +
 eoesep. The loop can be just two checks.
 */
