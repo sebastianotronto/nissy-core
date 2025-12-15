@@ -507,8 +507,7 @@ get_h48_pval(const unsigned char *table, uint64_t i)
 STATIC_INLINE uint8_t
 get_h48_pvalmin(const unsigned char *table, uint64_t i)
 {
-	return (get_h48_pval(table, i) << UINT8_C(2)) +
-	    get_h48_pval(table, i+UINT64_C(1));
+	return table[H48_INDEX(i)] >> UINT8_C(4);
 }
 
 STATIC_INLINE void
@@ -521,9 +520,9 @@ set_h48_pval(unsigned char *table, uint64_t i, uint8_t val)
 STATIC_INLINE void
 set_h48_pvalmin(unsigned char *table, uint64_t i, uint8_t val)
 {
-	uint8_t v;
+	uint8_t t, v;
 
 	v = MIN(val, get_h48_pvalmin(table, i));
-	set_h48_pval(table, i, v >> UINT8_C(2));
-	set_h48_pval(table, i+UINT64_C(1), v % UINT8_C(4));
+	t = table[H48_INDEX(i)];
+	table[H48_INDEX(i)] = (t & UINT8_C(0xF)) | (v << UINT8_C(4));
 }
