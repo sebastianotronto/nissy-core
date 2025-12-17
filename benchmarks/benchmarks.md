@@ -61,7 +61,7 @@ All benchmark tests were done on the following configuration:
 * Operating system: Debian 13 (Linux kernel 6.12.57)
 * Compiler: GCC 14.2.0 for H48 and Clang 19.1.7 for vcube
 
-## Results
+## Results (click on each item to expand)
 
 <details><summary>Single solution, single thread</summary>
 
