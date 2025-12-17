@@ -68,10 +68,11 @@ print(
 	'<img src="img/17moves1thread.png">\n'
 	'<img src="img/18moves1thread.png">\n'
 	'<img src="img/19moves1thread.png">\n'
-	'<img src="img/20moves1thread.png">\n'
+	'<img src="img/20moves1thread.png">'
 )
 print("</details>")
 
+print()
 print("<details><summary>Single solution, 4 threads</summary>")
 print()
 print("Time per cube (in seconds, lower is better).")
@@ -82,17 +83,18 @@ print("Time per cube adjusted for table size (in seconds \\* GiB, lower is bette
 print()
 print_table(results_h48.h48_4_threads, results_vcube.vcube_4_threads, True, False)
 print()
+print("(a) vcube cannot parallelize on a single scramble, the results for the")
+print("superflip are going to be the same as in the single thread case.")
+print()
 print(
 	'<img src="img/17moves4threads.png">\n'
 	'<img src="img/18moves4threads.png">\n'
 	'<img src="img/19moves4threads.png">\n'
-	'<img src="img/20moves4threads.png">\n'
+	'<img src="img/20moves4threads.png">'
 )
-print()
-print("(a) vcube cannot parallelize on a single scramble, the results for the")
-print("superflip are going to be the same as in the single thread case.")
 print("</details>")
 
+print()
 print("<details><summary>Single solution, 16 threads</summary>")
 print()
 print("Time per cube (in seconds, lower is better).")
@@ -103,17 +105,18 @@ print("Time per cube adjusted for table size (in seconds \\* GiB, lower is bette
 print()
 print_table(results_h48.h48_16_threads, results_vcube.vcube_16_threads, True, False)
 print()
+print("(a) vcube cannot parallelize on a single scramble, the results for the")
+print("superflip are going to be the same as in the single thread case.")
+print()
 print(
 	'<img src="img/17moves16threads.png">\n'
 	'<img src="img/18moves16threads.png">\n'
 	'<img src="img/19moves16threads.png">\n'
-	'<img src="img/20moves16threads.png">\n'
+	'<img src="img/20moves16threads.png">'
 )
-print()
-print("(a) vcube cannot parallelize on a single scramble, the results for the")
-print("superflip are going to be the same as in the single thread case.")
 print("</details>")
 
+print()
 print("<details><summary>All solutions, 16 threads</summary>")
 print()
 print("*Note: vcube does not have an option for finding multiple solutions.*")

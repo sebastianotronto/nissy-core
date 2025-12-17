@@ -101,8 +101,8 @@ Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 <img src="img/18moves1thread.png">
 <img src="img/19moves1thread.png">
 <img src="img/20moves1thread.png">
-
 </details>
+
 <details><summary>Single solution, 4 threads</summary>
 
 Time per cube (in seconds, lower is better).
@@ -137,15 +137,15 @@ Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 |vcube 112 | 2.4 Gib|    0.69|    7.59|   28.97|        |   (a)   |
 |H48 h6    | 1.8 Gib|    1.11|    8.25|   43.60|        |         |
 
+(a) vcube cannot parallelize on a single scramble, the results for the
+superflip are going to be the same as in the single thread case.
+
 <img src="img/17moves4threads.png">
 <img src="img/18moves4threads.png">
 <img src="img/19moves4threads.png">
 <img src="img/20moves4threads.png">
-
-
-(a) vcube cannot parallelize on a single scramble, the results for the
-superflip are going to be the same as in the single thread case.
 </details>
+
 <details><summary>Single solution, 16 threads</summary>
 
 Time per cube (in seconds, lower is better).
@@ -180,15 +180,15 @@ Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 |vcube 112 | 2.4 Gib|    0.35|    3.95|   12.37|        |   (a)   |
 |H48 h6    | 1.8 Gib|    0.37|    2.62|   13.61|        |         |
 
+(a) vcube cannot parallelize on a single scramble, the results for the
+superflip are going to be the same as in the single thread case.
+
 <img src="img/17moves16threads.png">
 <img src="img/18moves16threads.png">
 <img src="img/19moves16threads.png">
 <img src="img/20moves16threads.png">
-
-
-(a) vcube cannot parallelize on a single scramble, the results for the
-superflip are going to be the same as in the single thread case.
 </details>
+
 <details><summary>All solutions, 16 threads</summary>
 
 *Note: vcube does not have an option for finding multiple solutions.*
@@ -214,7 +214,6 @@ Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 |H48 h8    | 7.1 Gib|    1.89|   21.16|  205.79|        |         |
 |H48 h7    | 3.5 Gib|    1.28|   14.79|  165.25|        |         |
 |H48 h6    | 1.8 Gib|    1.23|   14.70|  162.42|        |         |
-
 </details>
 
 ## Comments on the results
