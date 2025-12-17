@@ -112,19 +112,13 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	int8_t target, nh, n;
 	uint8_t pval_min, pval_eoesep;
 
-	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
-	target = arg->target_depth - n;
-	if (target <= 0 ||
-	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions ||
-	    n > arg->solution_list->shortest_sol +
-	        arg->solution_settings->optimal)
-		return true;
-
 	arg->movemask_normal = arg->movemask_inverse = MM18_ALLMOVES;
 	arg->nodes_visited++;
 
 	/* Preliminary probing using last computed bound, if possible */
 
+	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
+	target = arg->target_depth - n;
 	if ((arg->use_lb_normal && arg->lb_normal > target) ||
 	    (arg->use_lb_inverse && arg->lb_inverse > target))
 		return true;
@@ -200,14 +194,13 @@ STATIC int64_t
 solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 {
 	int64_t ret, n;
-	uint8_t m, nm, lbn, lbi;
+	uint8_t m, nm, lbn, lbi, t;
 	uint64_t mm_normal, mm_inverse;
 	bool ulbi, ulbn;
 	cube_t backup_cube, backup_inverse;
 
+	nm = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	if (equal(arg->cube, SOLVED_CUBE)) {
-		nm = arg->solution_moves->nmoves
-		    + arg->solution_moves->npremoves;
 		if (arg->target_depth != nm)
 			return 0;
 		wrapthread_mutex_lock(arg->solutions_mutex);
@@ -218,6 +211,11 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	}
 
 	if (solve_h48_stop(arg))
+		return 0;
+
+	t = arg->solution_list->shortest_sol + arg->solution_settings->optimal;
+	if (nm + 1 > MIN(t, arg->target_depth) ||
+	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
 		return 0;
 
 	backup_cube = arg->cube;
