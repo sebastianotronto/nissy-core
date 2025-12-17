@@ -49,3 +49,4 @@ python/*.lib
 *.sketch
 __pycache__
 */__pycache__
+benchmarks/tables.md

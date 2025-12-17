@@ -58,163 +58,164 @@ All benchmark tests were done on the following configuration:
 * CPU: AMD Ryzen 7 7700 (8 cores, 16 virtual threads)
 * Memory: 2x Corsair Vengeance 32GB 5600MHz
 * Motherboard: Gigabyte B650M K
-* Operating system: Debian 12 (Linux kernel 6.1.0)
-* Compiler: GCC 12.2.0 for H48 and Clang 14.0.6 for vcube
+* Operating system: Debian 13 (Linux kernel 6.12.57)
+* Compiler: GCC 14.2.0 for H48 and Clang 19.1.7 for vcube
 
-## Single solution
+## Results
 
-Average time for finding a single optimal solution.
-
-### Single thread
+<details><summary>Single solution, single thread</summary>
 
 Time per cube (in seconds, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  0.23  |  1.15  |  5.08  | 31.30  |  53.67  |
-|vcube 404 |31.8GiB |  0.30  |  1.25  |  6.87  | 57.49  | 291.31  |
-|H48 h10 k2|28.1GiB |  0.34  |  1.80  |  7.77  |        |  81.89  |
-|vcube 308 |21.2GiB |  0.20  |  1.11  |  6.92  |        |         |
-|H48 h9 k2 |14.1GiB |  0.42  |  2.84  | 12.86  |        |         |
-|vcube 208 | 7.3GiB |  0.57  |  4.41  | 20.75  |        |         |
-|H48 h8 k2 | 7.1GiB |  0.86  |  6.66  | 27.40  |        |         |
-|H48 h7 k2 | 3.6GiB |  1.47  |  8.90  | 42.46  |        |         |
-|vcube 112 | 2.4GiB |  1.01  |  9.39  |        |        |         |
-|H48 h6 k2 | 1.8GiB |  2.28  | 16.89  |        |        |         |
+|vcube 212 |58.2 Gib|    0.11|    0.75|    3.43|   27.28|    19.30|
+|H48 h11   |56.5 Gib|    0.15|    0.91|    4.08|   26.81|    26.90|
+|vcube 404 |31.8 Gib|    0.23|    1.24|    6.10|   59.33|   268.26|
+|H48 h10   |28.3 Gib|    0.27|    1.47|    6.75|   46.65|    60.55|
+|vcube 308 |21.2 Gib|    0.17|    1.02|    6.20|   58.70|   604.35|
+|H48 h9    |14.1 Gib|    0.38|    2.66|   12.21|        |         |
+|vcube 208 | 7.3 Gib|    0.56|    4.36|   20.58|        |         |
+|H48 h8    | 7.1 Gib|    0.87|    6.61|   26.57|        |         |
+|H48 h7    | 3.5 Gib|    1.02|    8.21|   41.25|        |         |
+|vcube 112 | 2.4 Gib|    0.96|    9.29|   40.52|        |         |
+|H48 h6    | 1.8 Gib|    2.11|   15.95|   82.00|        |         |
 
-Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
+Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB | 12.90  | 64.51  | 284.99 |1755.93 | 3010.89 |
-|vcube 404 |31.8GiB |  9.54  | 39.75  | 218.47 |1828.18 | 9263.66 |
-|H48 h10 k2|28.1GiB |  9.55  | 50.58  | 218.34 |        | 2301.11 |
-|vcube 308 |21.2GiB |  4.24  | 23.53  | 146.70 |        |         |
-|H48 h9 k2 |14.1GiB |  5.92  | 40.04  | 181.33 |        |         |
-|vcube 208 | 7.3GiB |  4.16  | 32.19  | 151.48 |        |         |
-|H48 h8 k2 | 7.1GiB |  6.11  | 47.29  | 194.54 |        |         |
-|H48 h7 k2 | 3.6GiB |  5.29  | 32.04  | 152.86 |        |         |
-|vcube 112 | 2.4GiB |  2.42  | 22.53  |        |        |         |
-|H48 h6 k2 | 1.8GiB |  4.10  | 30.40  |        |        |         |
+|vcube 212 |58.2 Gib|    6.43|   43.80|  199.38| 1587.43|  1122.73|
+|H48 h11   |56.5 Gib|    8.73|   51.58|  230.38| 1514.85|  1520.10|
+|vcube 404 |31.8 Gib|    7.40|   39.47|  194.01| 1887.94|  8535.87|
+|H48 h10   |28.3 Gib|    7.70|   41.43|  190.75| 1317.96|  1710.78|
+|vcube 308 |21.2 Gib|    3.51|   21.71|  131.50| 1245.26| 12819.94|
+|H48 h9    |14.1 Gib|    5.31|   37.64|  172.53|        |         |
+|vcube 208 | 7.3 Gib|    4.08|   31.74|  149.68|        |         |
+|H48 h8    | 7.1 Gib|    6.17|   46.72|  187.70|        |         |
+|H48 h7    | 3.5 Gib|    3.62|   29.01|  145.74|        |         |
+|vcube 112 | 2.4 Gib|    2.33|   22.53|   98.23|        |         |
+|H48 h6    | 1.8 Gib|    3.72|   28.19|  144.94|        |         |
 
-<details><summary>Plots</summary>
 <img src="img/17moves1thread.png">
 <img src="img/18moves1thread.png">
 <img src="img/19moves1thread.png">
 <img src="img/20moves1thread.png">
-</details>
 
-### Multithread (4 threads)
+</details>
+<details><summary>Single solution, 4 threads</summary>
 
 Time per cube (in seconds, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  0.06  |  0.31  |  1.31  |  7.96  |  14.01  |
-|vcube 404 |31.8GiB |  0.10  |  0.38  |  1.88  | 16.98  |   (a)   |
-|H48 h10 k2|28.1GiB |  0.10  |  0.47  |  2.00  | 13.54  |  21.96  |
-|vcube 308 |21.2GiB |  0.06  |  0.42  |  1.95  | 17.73  |   (a)   |
-|H48 h9 k2 |14.1GiB |  0.14  |  0.83  |  3.82  | 25.98  |  31.68  |
-|vcube 208 | 7.3GiB |  0.17  |  1.49  |  5.88  |        |   (a)   |
-|H48 h8 k2 | 7.1GiB |  0.27  |  2.02  |  7.94  |        |         |
-|H48 h7 k2 | 3.6GiB |  0.35  |  2.59  | 12.41  |        |         |
-|vcube 112 | 2.4GiB |  0.29  |  3.15  | 12.06  |        |   (a)   |
-|H48 h6 k2 | 1.8GiB |  0.65  |  4.79  | 23.91  |        |         |
+|vcube 212 |58.2 Gib|    0.03|    0.27|    1.04|    7.70|   (a)   |
+|H48 h11   |56.5 Gib|    0.05|    0.26|    1.13|    7.60|     8.44|
+|vcube 404 |31.8 Gib|    0.07|    0.30|    1.65|   16.17|   (a)   |
+|H48 h10   |28.3 Gib|    0.08|    0.39|    1.89|   13.07|    16.63|
+|vcube 308 |21.2 Gib|    0.05|    0.35|    1.78|   16.61|   (a)   |
+|H48 h9    |14.1 Gib|    0.12|    0.77|    3.42|   24.72|    29.31|
+|vcube 208 | 7.3 Gib|    0.16|    1.47|    5.86|        |   (a)   |
+|H48 h8    | 7.1 Gib|    0.26|    1.87|    7.84|        |         |
+|H48 h7    | 3.5 Gib|    0.30|    2.32|   11.74|        |         |
+|vcube 112 | 2.4 Gib|    0.29|    3.13|   11.95|        |   (a)   |
+|H48 h6    | 1.8 Gib|    0.63|    4.67|   24.67|        |         |
 
-Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
+Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  3.37  | 17.39  | 73.49  | 446.56 |  785.96 |
-|vcube 404 |31.8GiB |  3.80  | 12.08  | 59.78  | 539.96 |   (a)   |
-|H48 h10 k2|28.1GiB |  2.81  | 13.21  | 56.20  | 380.47 |  617.08 |
-|vcube 308 |21.2GiB |  1.27  |  8.90  | 41.34  | 375.88 |   (a)   |
-|H48 h9 k2 |14.1GiB |  1.97  | 11.70  | 53.86  | 366.32 |  446.69 |
-|vcube 208 | 7.3GiB |  1.24  | 10.88  | 42.92  |        |   (a)   |
-|H48 h8 k2 | 7.1GiB |  1.92  | 14.34  | 56.37  |        |         |
-|H48 h7 k2 | 3.6GiB |  1.26  |  9.32  | 44.68  |        |         |
-|vcube 112 | 2.4GiB |  0.70  |  7.56  | 28.94  |        |   (a)   |
-|H48 h6 k2 | 1.8GiB |  1.17  |  8.62  | 43.04  |        |         |
+|vcube 212 |58.2 Gib|    2.03|   15.69|   60.25|  447.97|   (a)   |
+|H48 h11   |56.5 Gib|    2.85|   14.76|   63.96|  429.69|   476.80|
+|vcube 404 |31.8 Gib|    2.32|    9.50|   52.46|  514.50|   (a)   |
+|H48 h10   |28.3 Gib|    2.22|   11.01|   53.47|  369.40|   469.92|
+|vcube 308 |21.2 Gib|    1.02|    7.52|   37.82|  352.36|   (a)   |
+|H48 h9    |14.1 Gib|    1.64|   10.83|   48.37|  349.20|   414.10|
+|vcube 208 | 7.3 Gib|    1.18|   10.69|   42.63|        |   (a)   |
+|H48 h8    | 7.1 Gib|    1.81|   13.20|   55.35|        |         |
+|H48 h7    | 3.5 Gib|    1.07|    8.19|   41.47|        |         |
+|vcube 112 | 2.4 Gib|    0.69|    7.59|   28.97|        |   (a)   |
+|H48 h6    | 1.8 Gib|    1.11|    8.25|   43.60|        |         |
 
-<details><summary>Plots</summary>
 <img src="img/17moves4threads.png">
 <img src="img/18moves4threads.png">
 <img src="img/19moves4threads.png">
 <img src="img/20moves4threads.png">
-</details>
+
 
 (a) vcube cannot parallelize on a single scramble, the results for the
-Superflip are going to be the same as in the single thread case.
-
-### Multithread (16 threads)
+superflip are going to be the same as in the single thread case.
+</details>
+<details><summary>Single solution, 16 threads</summary>
 
 Time per cube (in seconds, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  0.02  |  0.10  |  0.43  |  2.48  |   5.67  |
-|vcube 404 |31.8GiB |  0.03  |  0.16  |  0.67  |  6.36  |   (a)   |
-|H48 h10 k2|28.1GiB |  0.03  |  0.16  |  0.74  |  4.43  |   8.81  |
-|vcube 308 |21.2GiB |  0.04  |  0.22  |  0.89  |  9.53  |   (a)   |
-|H48 h9 k2 |14.1GiB |  0.04  |  0.26  |  1.18  |  8.31  |  13.20  |
-|vcube 208 | 7.3GiB |  0.08  |  0.80  |  2.38  |        |   (a)   |
-|H48 h8 k2 | 7.1GiB |  0.08  |  0.60  |  2.48  |        |         |
-|H48 h7 k2 | 3.6GiB |  0.11  |  0.81  |  3.91  |        |         |
-|vcube 112 | 2.4GiB |  0.15  |  1.66  |  5.18  |        |   (a)   |
-|H48 h6 k2 | 1.8GiB |  0.21  |  1.53  |  7.82  |        |         |
+|vcube 212 |58.2 Gib|    0.02|    0.13|    0.45|    2.84|   (a)   |
+|H48 h11   |56.5 Gib|    0.02|    0.10|    0.37|    2.31|     3.47|
+|vcube 404 |31.8 Gib|    0.04|    0.14|    0.65|    6.08|   (a)   |
+|H48 h10   |28.3 Gib|    0.03|    0.14|    0.62|    4.24|     7.07|
+|vcube 308 |21.2 Gib|    0.03|    0.19|    0.78|    6.67|   (a)   |
+|H48 h9    |14.1 Gib|    0.04|    0.26|    1.15|    8.15|    12.18|
+|vcube 208 | 7.3 Gib|    0.08|    0.79|    2.43|        |   (a)   |
+|H48 h8    | 7.1 Gib|    0.09|    0.64|    2.50|        |         |
+|H48 h7    | 3.5 Gib|    0.11|    0.79|    3.88|        |         |
+|vcube 112 | 2.4 Gib|    0.15|    1.63|    5.10|        |   (a)   |
+|H48 h6    | 1.8 Gib|    0.21|    1.48|    7.70|        |         |
 
-Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
+Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  1.12  |  5.61  | 24.12  | 139.13 | 318.09  |
-|vcube 404 |31.8GiB |  1.08  |  5.09  | 21.31  | 202.25 |   (a)   |
-|H48 h10 k2|28.1GiB |  0.84  |  4.50  | 20.79  | 124.48 | 247.56  |
-|vcube 308 |21.2GiB |  0.85  |  4.66  | 18.87  | 202.04 |   (a)   |
-|H48 h9 k2 |14.1GiB |  0.56  |  3.67  | 16.64  | 117.17 | 186.12  |
-|vcube 208 | 7.3GiB |  0.58  |  5.84  | 17.37  |        |   (a)   |
-|H48 h8 k2 | 7.1GiB |  0.57  |  4.26  | 17.60  |        |         |
-|H48 h7 k2 | 3.6GiB |  0.40  |  2.92  | 14.07  |        |         |
-|vcube 112 | 2.4GiB |  0.36  |  3.98  | 12.43  |        |   (a)   |
-|H48 h6 k2 | 1.8GiB |  0.38  |  2.75  | 14.08  |        |         |
+|vcube 212 |58.2 Gib|    0.95|    7.83|   26.04|  165.03|   (a)   |
+|H48 h11   |56.5 Gib|    1.20|    5.39|   21.09|  130.46|   195.92|
+|vcube 404 |31.8 Gib|    1.21|    4.60|   20.76|  193.43|   (a)   |
+|H48 h10   |28.3 Gib|    0.87|    3.99|   17.52|  119.70|   199.79|
+|vcube 308 |21.2 Gib|    0.67|    4.01|   16.48|  141.49|   (a)   |
+|H48 h9    |14.1 Gib|    0.61|    3.71|   16.23|  115.18|   172.04|
+|vcube 208 | 7.3 Gib|    0.56|    5.78|   17.68|        |   (a)   |
+|H48 h8    | 7.1 Gib|    0.65|    4.50|   17.69|        |         |
+|H48 h7    | 3.5 Gib|    0.39|    2.81|   13.73|        |         |
+|vcube 112 | 2.4 Gib|    0.35|    3.95|   12.37|        |   (a)   |
+|H48 h6    | 1.8 Gib|    0.37|    2.62|   13.61|        |         |
 
-<details><summary>Plots</summary>
 <img src="img/17moves16threads.png">
 <img src="img/18moves16threads.png">
 <img src="img/19moves16threads.png">
 <img src="img/20moves16threads.png">
-</details>
+
 
 (a) vcube cannot parallelize on a single scramble, the results for the
-Superflip are going to be the same as in the single thread case.
+superflip are going to be the same as in the single thread case.
+</details>
+<details><summary>All solutions, 16 threads</summary>
 
-## All optimal solutions
-
-Average time for finding all optimal solutions.
-
-### Multithread (16 threads)
+*Note: vcube does not have an option for finding multiple solutions.*
 
 Time per cube (in seconds, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  0.05  |  0.50  |  4.24  | 19.75  |  52.99  |
-|H48 h10 k2|28.1GiB |  0.08  |  0.88  |  6.94  |        |         |
-|H48 h9 k2 |14.1GiB |  0.13  |  1.39  | 13.50  |        |         |
-|H48 h8 k2 | 7.1GiB |  0.25  |  2.85  |        |        |         |
-|H48 h7 k2 | 3.6GiB |  0.36  |  4.24  |        |        |         |
-|H48 h6 k2 | 1.8GiB |  0.69  |  8.20  |        |        |         |
+|H48 h11   |56.5 Gib|    0.05|    0.46|    3.98|   33.27|    31.83|
+|H48 h10   |28.3 Gib|    0.08|    0.78|    7.00|   59.77|    62.45|
+|H48 h9    |14.1 Gib|    0.13|    1.39|   13.35|        |         |
+|H48 h8    | 7.1 Gib|    0.27|    3.00|   29.13|        |         |
+|H48 h7    | 3.5 Gib|    0.36|    4.19|   46.77|        |         |
+|H48 h6    | 1.8 Gib|    0.69|    8.32|   91.89|        |         |
 
-Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
+Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 
 |  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
 |:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11 k2|56.1GiB |  2.81  | 28.05  | 237.86 |1107.98 | 2972.74 |
-|H48 h10 k2|28.1GiB |  2.25  | 24.73  | 195.01 |        |         |
-|H48 h9 k2 |14.1GiB |  1.83  | 19.60  | 190.35 |        |         |
-|H48 h8 k2 | 7.1GiB |  1.77  | 20.24  |        |        |         |
-|H48 h7 k2 | 3.6GiB |  1.30  | 15.26  |        |        |         |
-|H48 h6 k2 | 1.8GiB |  1.24  | 14.76  |        |        |         |
+|H48 h11   |56.5 Gib|    2.84|   26.16|  224.81| 1879.97|  1798.27|
+|H48 h10   |28.3 Gib|    2.19|   22.11|  197.79| 1688.62|  1764.41|
+|H48 h9    |14.1 Gib|    1.80|   19.59|  188.61|        |         |
+|H48 h8    | 7.1 Gib|    1.89|   21.16|  205.79|        |         |
+|H48 h7    | 3.5 Gib|    1.28|   14.79|  165.25|        |         |
+|H48 h6    | 1.8 Gib|    1.23|   14.70|  162.42|        |         |
+
+</details>
 
 ## Comments on the results
 
@@ -226,20 +227,9 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 
 ## Other notes
 
-* Missing values in the table mean that the test is very slow and I did
-  not want to wait for it to finish. I may add these values in the future.
+* To repeat the benchmarks, use `./benchmarks/run-h48-benchmarks.sh`.
 * All the measurements above exclude the time needed to load the pruning
-  tables into memory, which can be quite significant for large tables. To
-  repeat these measurements, one can use the tool `301_solve_file`. For
-  example:
-
-```
-./build.sh tool solve_file h48h7k2 ./benchmarks/scrambles/scrambles-16.txt
-```
-
-  To find all solutions, add something like `99999 0` at the end of the
-  command. This will tell the tool to find up to `99999` solutions that
-  are at most `0` moves longer than optimal.
+  tables into memory, which can be quite significant for large tables.
 * The measurements also excluded the one-off computation of the pruning
   tables which, for reasons related to the cube coordinates used, is
   significantly slower for H48 compared to vcube.
@@ -254,3 +244,6 @@ Time per cube adjusted for tables size (in seconds \* GiB, lower is better).
 * vcube only supports x86 processors (Intel, AMD), while H48 runs on any
   architecture, including e.g. ARM (Macbook M series, android phones)
   and can be compiled to WebAssembly as well.
+* For H48, both GCC and Clang have been tried, with the same options;
+  the resulting executable was about 10% faster with GCC compared to Clang.
+  vcube only supports compiling with Clang.
