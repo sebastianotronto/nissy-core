@@ -124,11 +124,10 @@ parameters.
 For example:
 
 ```
-$ :./build.sh tool gendata h48h2k2
+$ :./build.sh tool gendata h48h2
 ```
 
-Will run a tool that generates the data table for the H48 solver with
-parameters `h=2` and `k=2.
+Will run a tool that generates the data table for the H48 solver with `h=2`.
 
 Each tool run is automatically timed, so these tools can be used as
 benchmark.  The output as well as the time of the run are saved to a
@@ -222,7 +221,7 @@ interface. You can build them and run them with the build tool, for
 example:
 
 ```
-./build.sh cpp cpp/examples/solve_h48h3k2.cpp
+./build.sh cpp cpp/examples/solve.cpp
 ```
 
 NOTE: If you prefer to use a C-style API, you'll have to write

@@ -142,7 +142,7 @@ CPPFLAGS="-std=c++20 $(maybe_pthread)"
 # When it becomes widely available, we can support it by adding -sMEMORY64
 # to the WASMCFLAGS, WASMCPPFLAGS and WASMLINKFLAGS variables below, and
 # -sMAXIMUM_MEMORY=10737418240 to WASMLINKFLAGS. This way we can enable
-# solvers larger than h48h6k2 in the web version.
+# solvers larger than h48h6 in the web version.
 
 # TODO:
 # The options below have to be adjusted when native WASM_SIMD is implemented.

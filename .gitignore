@@ -11,8 +11,7 @@ perf.data.old
 run
 run.exe
 debugrun
-tables/*
-tables-old/*
+tables*/*
 test/*/runtest
 test/.DS_Store
 test/run
@@ -48,3 +47,5 @@ python/*.pyd
 python/*.exp
 python/*.lib
 *.sketch
+__pycache__
+*/__pycache__
