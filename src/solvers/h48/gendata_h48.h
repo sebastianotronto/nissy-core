@@ -18,6 +18,8 @@ STATIC_INLINE uint8_t get_h48_pval(const unsigned char *, uint64_t);
 STATIC_INLINE void set_h48_pval(unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE uint8_t get_h48_pvalmin(const unsigned char *, uint64_t);
 STATIC_INLINE void set_h48_pvalmin(unsigned char *, uint64_t, uint8_t);
+STATIC_INLINE uint8_t get_h48_pval_and_min(
+    const unsigned char *, uint64_t, uint8_t [static 1]);
 
 STATIC long long
 gendata_h48_dispatch(
@@ -525,4 +527,23 @@ set_h48_pvalmin(unsigned char *table, uint64_t i, uint8_t val)
 	v = MIN(val, get_h48_pvalmin(table, i));
 	t = table[H48_INDEX(i)];
 	table[H48_INDEX(i)] = (t & UINT8_C(0xF)) | (v << UINT8_C(4));
+}
+
+STATIC_INLINE uint8_t
+get_h48_pval_and_min(
+	const unsigned char *table,
+	uint64_t coord_noext,
+	uint8_t pval_min[static 1]
+)
+{
+	uint64_t iext, imin;
+	uint8_t t, tmin;
+
+	iext = H48_LINE_EXT(coord_noext);
+	imin = H48_LINE_MIN(coord_noext);
+	t = table[H48_INDEX(iext)];
+	tmin = table[H48_INDEX(imin)];
+
+	*pval_min = tmin >> UINT8_C(4);
+	return (t & H48_MASK(iext)) >> H48_SHIFT(iext);
 }

@@ -108,9 +108,9 @@ STATIC_INLINE bool
 solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 {
 	uint32_t data, data_inv;
-	int64_t coord, coordext, coordmin;
+	int64_t coord;
 	int8_t target, nh, n;
-	uint8_t pval_min, pval_eoesep;
+	uint8_t pval, pval_min, pval_eoesep;
 
 	arg->movemask_normal = arg->movemask_inverse = MM18_ALLMOVES;
 	arg->nodes_visited++;
@@ -132,25 +132,23 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	/* Inverse probing */
 
 	if (!arg->use_lb_inverse) {
+		arg->table_lookups++;
+		arg->use_lb_inverse = true;
 		coord = coord_h48_edges(
 		    arg->inverse, COCLASS(data_inv), TTREP(data_inv), arg->h);
-		coordext = H48_LINE_EXT(coord);
-		arg->lb_inverse = get_h48_pval(arg->h48data, coordext);
-		arg->table_lookups++;
+		pval = get_h48_pval_and_min(arg->h48data, coord, &pval_min);
 
-		if (arg->lb_inverse == 0) {
+		if (pval == 0) {
 			arg->table_fallbacks++;
 
-			coordmin = H48_LINE_MIN(coord);
-			pval_min = get_h48_pvalmin(arg->h48data, coordmin);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->inverse);
-			arg->lb_inverse = MAX(pval_min, pval_eoesep);
+			pval = MAX(pval_min, pval_eoesep);
 		} else {
-			arg->lb_inverse += arg->base;
+			pval += arg->base;
 		}
 
-		arg->use_lb_inverse = true;
+		arg->lb_inverse = pval;
 	}
 
 	if (arg->lb_inverse > target)
@@ -161,25 +159,23 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	/* Normal probing */
 
 	if (!arg->use_lb_normal) {
+		arg->table_lookups++;
+		arg->use_lb_normal = true;
 		coord = coord_h48_edges(
 		    arg->cube, COCLASS(data), TTREP(data), arg->h);
-		coordext = H48_LINE_EXT(coord);
-		arg->lb_normal = get_h48_pval(arg->h48data, coordext);
-		arg->table_lookups++;
+		pval = get_h48_pval_and_min(arg->h48data, coord, &pval_min);
 
-		if (arg->lb_normal == 0) {
+		if (pval == 0) {
 			arg->table_fallbacks++;
 
-			coordmin = H48_LINE_MIN(coord);
-			pval_min = get_h48_pval(arg->h48data, coordmin);
 			pval_eoesep = get_eoesep_pval_cube(
 			    arg->h48data_fallback_eoesep, arg->cube);
-			arg->lb_normal = MAX(pval_min, pval_eoesep);
+			pval = MAX(pval_min, pval_eoesep);
 		} else {
-			arg->lb_normal += arg->base;
+			pval += arg->base;
 		}
 
-		arg->use_lb_normal = true;
+		arg->lb_normal = pval;
 	}
 
 	if (arg->lb_normal > target)
