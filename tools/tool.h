@@ -8,6 +8,13 @@
 
 #include "../src/nissy.h"
 
+#if defined(_WIN32)
+#define wrap_aligned_alloc(align, size) malloc(size)
+#else
+#define wrap_aligned_alloc(align, size) \
+    (((size) % (align) == 0) ? aligned_alloc((align), (size)) : malloc(size))
+#endif
+
 static void log_stderr(const char *, void *);
 static double timerun(void (*)(void));
 static void writetable(const unsigned char *, int64_t, const char *);
@@ -117,7 +124,7 @@ generatetable(
 		return -1;
 	}
 
-	*buf = malloc(size);
+	*buf = wrap_aligned_alloc((size_t)64, size);
 	gensize = nissy_gendata(solver, size, *buf);
 
 	if (gensize != size) {
@@ -156,7 +163,7 @@ getdata(
 	} else {
 		printf("Reading tables from file %s\n", filename);
 		size = nissy_solverinfo(solver, dataid);
-		*buf = malloc(size);
+		*buf = wrap_aligned_alloc((size_t)64, size);
 		sizeread = fread(*buf, size, 1, f);
 		fclose(f);
 		if (sizeread != 1) {

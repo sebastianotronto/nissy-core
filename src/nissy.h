@@ -304,7 +304,8 @@ Parameters:
    data_size - The size of the data buffer. It is advised to use
                nissy_solverinfo to check how much memory is needed.
    data      - The return parameter for the generated data.
-               This buffer must have 8-byte alignment.
+               This buffer must have 8-byte alignment. Some solvers (such as
+               h48) will perform better if the buffer is 64-byte aligned.
 
 Return values:
    NISSY_ERROR_INVALID_SOLVER - The given solver is not known.
@@ -328,7 +329,10 @@ Parameters:
    solver    - The name of the solver.
    data_size - The size of the data buffer.
    data      - The data for the solver. Can be computed with gendata.
-               This buffer must have 8-byte alignment.
+               This buffer must have 8-byte alignment. Some solvers (such as
+               h48) will perform better if the buffer is 64-byte aligned, but
+               this is not relevant for the purpose of checking the integrity
+               of the data.
 
 Return values:
    NISSY_OK         - The data is valid.
@@ -358,7 +362,9 @@ Parameters:
                       to 0, the default value THREADS will be used.
    data_size        - The size of the data buffer.
    data             - The data for the solver. Can be computed with gendata.
-                      This buffer must have 8-byte alignment.
+                      This buffer must have 8-byte alignment. Some solvers
+                      (such as h48) will perform better if the buffer is
+                      64-byte aligned.
    sols_size        - The size of the solutions buffer.
    sols             - The return parameter for the solutions. The solutions are
                       separated by a '\n' (newline) and a '\0' (NULL character)

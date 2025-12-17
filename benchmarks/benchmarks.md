@@ -247,3 +247,8 @@ Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 * For H48, both GCC and Clang have been tried, with the same options;
   the resulting executable was about 10% faster with GCC compared to Clang.
   vcube only supports compiling with Clang.
+* The performance of the H48 solver depends slightly, but measurably, on the
+  alignment of the pruning table in memory. This is not handled by the core
+  library, but by the program that uses it. For these tests, we have used as
+  reference implementation the program in `tools/301_solve_file`, which
+  ensures 64-byte alignment.

@@ -14,6 +14,13 @@
 #define SOLUTIONS_BUFFER_SIZE UINT64_C(500000)
 #define MAX_PATH_LENGTH       UINT64_C(10000)
 
+#if defined(_WIN32)
+#define wrap_aligned_alloc(align, size) malloc(size)
+#else
+#define wrap_aligned_alloc(align, size) \
+    (((size) % (align) == 0) ? aligned_alloc((align), (size)) : malloc(size))
+#endif
+
 #define FLAG_CUBE         "-cube"
 #define FLAG_COMMAND      "-command"
 #define FLAG_STR_CUBE     "-cubestr"
@@ -348,7 +355,7 @@ gendata_exec(args_t *args)
 		return -2;
 	}
 
-	buf = malloc(size);
+	buf = wrap_aligned_alloc((size_t)64, size);
 
 	ret = nissy_gendata(args->str_solver, size, buf);
 	if (ret < 0) {
@@ -448,7 +455,7 @@ solve_exec(args_t *args)
 	if (args->maxsolutions == 0)
 		args->maxsolutions = args->optimal == 20 ? 1 : UINT_MAX;
 
-	buf = malloc(size);
+	buf = wrap_aligned_alloc((size_t)64, size);
 	read = fread(buf, size, 1, file);
 	fclose(file);
 	if (read != 1) {

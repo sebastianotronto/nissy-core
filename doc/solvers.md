@@ -16,6 +16,15 @@ about how this solver works, see [h48.md](./h48.md). For benchmarks see
 * Moveset: HTM (all 18 basic moves).
 * From 115MB to 59GB (roughly 2<sup>X</sup>*56MB).
 
+*Note: for better performance, the solver's data should be 64-byte
+aligned. To achieve this, one can use
+[`aligned_alloc(64, size)`](https://en.cppreference.com/w/c/memory/aligned_alloc)
+in C11 or later,
+[`_aligned_malloc(size, 64)`](https://learn.microsoft.com/en-us/cpp/c-runtime-library/reference/aligned-malloc)
+on Windows platforms, or the
+[aligned `new` operator](https://cppreference.com/w/cpp/memory/new/operator_new.html)
+in C++17 or later.*
+
 ## Coordinate solvers
 
 Various solvers to solve different substeps, commonly used for Fewest
