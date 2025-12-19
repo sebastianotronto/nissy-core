@@ -115,10 +115,15 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	arg->movemask_normal = arg->movemask_inverse = MM18_ALLMOVES;
 	arg->nodes_visited++;
 
-	/* Preliminary probing using last computed bound, if possible */
-
 	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	target = arg->target_depth - n;
+
+	/* We'll never get a bound higher than base + 3 */
+	if (arg->base + 3 <= target)
+		return false;
+
+	/* Preliminary probing using last computed bound, if possible */
+
 	if ((arg->use_lb_normal && arg->lb_normal > target) ||
 	    (arg->use_lb_inverse && arg->lb_inverse > target))
 		return true;
