@@ -3,6 +3,6 @@
 #include "tables_types_macros.h"
 #include "tables.h"
 #include "distribution.h"
-#include "h48/h48.h"
 #include "coord/coord.h"
+#include "h48/h48.h"
 #include "dispatch.h"

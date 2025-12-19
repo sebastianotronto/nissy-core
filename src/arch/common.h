@@ -35,6 +35,7 @@ STATIC_INLINE cube_t invcoord_epudsep(uint64_t);
 STATIC_INLINE bool is_eo_even(cube_t);
 
 STATIC_INLINE void copy_corners(cube_t [static 1], cube_t);
+STATIC_INLINE void copy_co(cube_t [static 1], cube_t);
 STATIC_INLINE void copy_edges(cube_t [static 1], cube_t);
 STATIC_INLINE void set_eo(cube_t [static 1], uint64_t);
 

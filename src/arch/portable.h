@@ -154,6 +154,19 @@ inverse(cube_t cube)
 	return ret;
 }
 
+STATIC_INLINE void
+copy_co(cube_t cube[static 1], cube_t co)
+{
+	uint8_t c;
+	size_t i;
+
+	for (i = 0; i < 8; i++) {
+		c = cube->corner[i] & COBITS;
+		cube->corner[i] ^= c;
+		cube->corner[i] |= co.corner[i] & COBITS;
+	}
+}
+
 STATIC_INLINE uint64_t
 coord_co(cube_t c)
 {

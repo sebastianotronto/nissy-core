@@ -160,6 +160,16 @@ coord_co(cube_t c)
 	return ret;
 }
 
+STATIC_INLINE void
+copy_co(cube_t cube[static 1], cube_t co)
+{
+	cube_t coclean;
+
+	coclean = _mm256_and_si256(co, CO2_AVX2);
+	*cube = _mm256_andnot_si256(CO2_AVX2, *cube);
+	*cube = _mm256_or_si256(*cube, coclean);
+}
+
 STATIC_INLINE cube_t
 invcoord_co(uint64_t coord)
 {
@@ -174,7 +184,7 @@ invcoord_co(uint64_t coord)
 
 	cc = _mm256_loadu_si256((__m256i *)mem);
 	cube = SOLVED_CUBE;
-	copy_corners(&cube, cc);
+	copy_co(&cube, cc);
 
 	return cube;
 }

@@ -14,6 +14,7 @@ STATIC bool coord_is_solved(
 
 STATIC cube_t coordinate_merge_ce(cube_t, cube_t);
 STATIC cube_t coordinate_merge_ec(cube_t, cube_t);
+STATIC cube_t coordinate_merge_cpco(cube_t, cube_t);
 
 STATIC uint64_t
 coord_coord_generic(
@@ -214,4 +215,15 @@ STATIC cube_t
 coordinate_merge_ec(cube_t edges, cube_t corners)
 {
 	return coordinate_merge_ce(corners, edges);
+}
+
+STATIC cube_t
+coordinate_merge_cpco(cube_t cp, cube_t co)
+{
+	cube_t merged;
+
+	merged = cp;
+	copy_co(&merged, co);
+
+	return merged;
 }
