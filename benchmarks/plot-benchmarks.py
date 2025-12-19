@@ -29,7 +29,7 @@ def print_row(solver_name, solver_size, dict, mul_by_size, superflip_star):
 	solver_gib = solver_size / (2**30)
 	m = solver_gib if mul_by_size else 1
 	s = "   (a)   " if superflip_star else "         "
-	cols = [f"{solver_name: <10}", f"{solver_gib:>4.1f} Gib"] + [
+	cols = [f"{solver_name: <10}", f"{solver_gib:>4.1f} GiB"] + [
 		f"{dict[key]*m/25:>8.2f}" if key in dict else "        "
 		for key in [17, 18, 19, 20]
 	] + [
