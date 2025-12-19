@@ -1,3 +1,5 @@
+STATIC bool cube_true(cube_t);
+
 STATIC cube_t cubefromarray(uint8_t [static 8], uint8_t [static 12]);
 STATIC bool isconsistent(oriented_cube_t);
 STATIC bool issolvable(oriented_cube_t);
@@ -18,6 +20,13 @@ STATIC uint8_t b32toedge(char);
 STATIC uint8_t b32tocorner(char);
 STATIC char edgetob32(uint8_t);
 STATIC char cornertob32(uint8_t);
+
+/* Used e.g. by the CORNERS coordinate, when a function pointer is needed */
+STATIC bool
+cube_true(cube_t cube)
+{
+	return true;
+}
 
 STATIC cube_t
 cubefromarray(uint8_t c[static 8], uint8_t e[static 12])

@@ -65,6 +65,7 @@ const char *solver_aliases[][2] = {
 	{ "htr-drud", "coord_HTR_UF" },
 	{ "htr-drrl", "coord_HTR_LF" },
 	{ "htr-drfb", "coord_HTR_BU" },
+	{ "corners", "coord_CORNERS_UF" },
 	{ NULL, NULL }
 };
 

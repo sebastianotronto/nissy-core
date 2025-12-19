@@ -232,6 +232,16 @@ coord_co(cube_t c)
 	return ret;
 }
 
+STATIC_INLINE void
+copy_co(cube_t cube[static 1], cube_t co)
+{
+	uint8x8_t coclean;
+
+	coclean = vand_u8(co.corner, CO2_NEON);
+	cube->corner = vbic_u8(cube->corner, CO2_NEON);
+	cube->corner = vorr_u8(cube->corner, coclean);
+}
+
 STATIC_INLINE cube_t
 invcoord_co(uint64_t coord)
 {
