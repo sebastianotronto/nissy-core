@@ -7,6 +7,7 @@ coord_t *all_coordinates[] = {
 	&coordinate_cpepe,
 	&coordinate_htr,
 	&coordinate_corners,
+	&coordinate_cornersx,
 	NULL
 };
 

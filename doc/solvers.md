@@ -129,15 +129,29 @@ NISS will not be used.
 * Moveset: {U, U', U2, D, D', D2, R2, L2, F2, B2}.
 * Data size: 54MB.
 
-### Solve corners
+### Solve corners (fixed centers)
 
-Solve the corners of the cube. Note: centers are considered fixed,
+Solve the corners of the cube. The centers are considered fixed,
 this is not the same as solving a 2x2x2 cube.
 
-* Name: `coord_DRFIN_UF`. Other rotations in place of `UF` are allowed,
+* Name: `coord_CORNERS_UF`. Other rotations in place of `UF` are allowed,
   but they are irrelevant to the solver. Provided alias: `corners`.
 * Requisites: none.
 * Moveset: HTM (all 18 basic moves).
+* Data size: 1.2MB.
+
+### Solve corners (ignoring centers)
+
+Solve the corners of the cube relative to each other, ignoring centers.
+This is the same as solving a 2x2x2 cube.
+
+* Name: `coord_CORNERSX_UF`. Other rotations in place of `UF` are allowed,
+  but they are irrelevant to the solver. Provided alias: `cornersx`.
+* Requisites: none.
+* Moveset: {U, U', U2, R, R', R2, F, F', F2}. Note: if the given cube
+  has an orientation different from the standard `UF` orientation, the
+  solution will use a different moves. The solution will always only use
+  at most 3 different types of moves (as in U, R, F).
 * Data size: 1.2MB.
 
 ### Undocumented coordinate solvers

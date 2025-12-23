@@ -30,7 +30,7 @@ typedef struct {
 	bool (*is_admissible)(const solution_moves_t[static 1]);
 	bool (*solution_prune)(const solution_moves_t[static 1]);
 	bool (*is_solvable)(cube_t);
-	/* if is_solved is nulle, coord == 0 is used */
+	/* if is_solved is null, coord == 0 is used */
 	bool (*is_solved)(uint64_t, const unsigned char *);
 	uint64_t pruning_distribution[INFO_DISTRIBUTION_LEN];
 	uint8_t pruning_max;

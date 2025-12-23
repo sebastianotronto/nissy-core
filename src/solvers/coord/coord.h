@@ -9,6 +9,7 @@
 #include "drfin.h"
 #include "htr.h"
 #include "corners.h"
+#include "cornersx.h"
 #include "list.h"
 #include "utils.h"
 #include "gendata.h"

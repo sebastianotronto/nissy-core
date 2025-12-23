@@ -366,6 +366,8 @@
     MM_SINGLE(MOVE_F2) | MM_SINGLE(MOVE_B2))
 #define MM18_DR_NOD      (MM18_DR & ~MM18_FACE(MOVE_D))
 #define MM18_HTR         (MM18_ALLMOVES & ~MM18_NOHALFTURNS)
+#define MM18_URF         (\
+    MM18_FACE(MOVE_U) | MM18_FACE(MOVE_R) | MM18_FACE(MOVE_F))
 
 #define TM_SINGLE(t)   (UINT64_C(1) << (uint64_t)(t))
 #define TM_ALLTRANS    UINT64_C(0xFFFFFFFFFFFF)
