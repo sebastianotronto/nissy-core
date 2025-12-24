@@ -217,23 +217,28 @@ solve_h48_prune(solve_h48_prune_arg_t arg)
 	solve_h48_prune_return_t ret = {0};
 	uint64_t c;
 	uint32_t dn, di;
-	uint8_t pmin, pe;
-
-	ret.pi = arg.lb_inverse;
+	uint8_t pmin, pcn, pci, pe;
 
 	/* We'll never get a bound higher than base + 3 */
 	if (arg.h48base + 3 <= arg.target)
 		goto solve_h48_prune_return_false;
 
-	/* Preliminary probing using last computed bound, if possible */
-	if (arg.lb_inverse > arg.target)
+	/* Use prevously computed bound */
+	ret.pi = arg.lb_inverse;
+	if (ret.pi > arg.target)
 		goto solve_h48_prune_return_true;
 
-	/* Get cdata and do preliminary corner probing */
-	if (get_h48_cdata(arg.inverse, arg.cocsepdata, &di) > arg.target ||
-	    get_h48_cdata(arg.cube, arg.cocsepdata, &dn) > arg.target)
+	/* Get corner data and do preliminary corner probing */
+	pci = get_h48_cdata(arg.inverse, arg.cocsepdata, &di);
+	if (pci > arg.target) {
+		ret.pi = pci;
+		goto solve_h48_prune_return_true;
+	}
+	pcn = get_h48_cdata(arg.cube, arg.cocsepdata, &dn);
+	if (pcn > arg.target)
 		goto solve_h48_prune_return_true;
 
+	/* Inverse probing is done only if previous value can't be used */
 	if (arg.lb_inverse == 0) {
 		ret.lookups++;
 		c = coord_h48_edges(
@@ -243,7 +248,7 @@ solve_h48_prune(solve_h48_prune_arg_t arg)
 		if (ret.pi == 0) {
 			ret.fallbacks++;
 			pe = get_eoesep_pval_cube(arg.eoesepdata, arg.inverse);
-			ret.pi = MAX(pmin, pe);
+			ret.pi = MAX(pmin, MAX(pci, pe));
 		} else {
 			ret.pi += arg.h48base;
 		}
@@ -254,6 +259,7 @@ solve_h48_prune(solve_h48_prune_arg_t arg)
 
 	ret.nohalf_normal = ret.pi == arg.target;
 
+	/* Normal probing */
 	ret.lookups++;
 	c = coord_h48_edges(arg.cube, COCLASS(dn), TTREP(dn), arg.h48h);
 	ret.pn = get_h48_pval_and_min(arg.h48data, c, &pmin);
@@ -261,7 +267,7 @@ solve_h48_prune(solve_h48_prune_arg_t arg)
 	if (ret.pn == 0) {
 		ret.fallbacks++;
 		pe = get_eoesep_pval_cube(arg.eoesepdata, arg.cube);
-		ret.pn = MAX(pmin, pe);
+		ret.pn = MAX(pmin, MAX(pcn, pe));
 	} else {
 		ret.pn += arg.h48base;
 	}
@@ -321,7 +327,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	prune_arg = (solve_h48_prune_arg_t){
 		.cocsepdata = arg->cocsepdata,
 		.h48data = arg->h48data,
-		.eoesepdata = arg->h48data_fallback_eoesep, /* TODO rmove? */
+		.eoesepdata = arg->h48data_fallback_eoesep,
 		.target = arg->target_depth - (nm + 1),
 		.h48base = arg->base,
 		.h48h = arg->h,
