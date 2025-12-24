@@ -27,8 +27,8 @@ typedef struct {
 	solution_list_t *solution_list;
 	int8_t lb_normal;
 	int8_t lb_inverse;
-	bool use_lb_normal;
-	bool use_lb_inverse;
+	bool use_lb_normal; /* TODO remove? */
+	bool use_lb_inverse; /* TODO remove? */
 	uint8_t h;
 	uint8_t base;
 	const uint32_t *cocsepdata;
@@ -58,11 +58,34 @@ typedef struct {
 	uint64_t tmask[H48_STARTING_MOVES];
 } dfsarg_solve_h48_maketasks_t;
 
+typedef struct {
+	uint8_t stop;
+	uint8_t pn;
+	uint8_t pi;
+	uint8_t lookups;
+	uint8_t fallbacks;
+	uint8_t nohalf_normal;
+	uint8_t nohalf_inverse;
+} solve_h48_prune_return_t;
+
+typedef struct {
+	cube_t cube;
+	cube_t inverse;
+	const uint32_t *cocsepdata;
+	const unsigned char *h48data;
+	const unsigned char *eoesepdata;
+	uint8_t target;
+	uint8_t h48base;
+	uint8_t h48h;
+	uint8_t lb_inverse;
+} solve_h48_prune_arg_t;
+
 STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
 STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE solve_h48_prune_return_t solve_h48_prune(solve_h48_prune_arg_t);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
     solve_h48_task_t [static H48_STARTING_CUBES], int [static 1]);
@@ -113,7 +136,6 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	uint8_t pval, pval_min, pval_eoesep;
 
 	arg->movemask_normal = arg->movemask_inverse = MM18_ALLMOVES;
-	arg->nodes_visited++;
 
 	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	target = arg->target_depth - n;
@@ -123,13 +145,11 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 		return false;
 
 	/* Preliminary probing using last computed bound, if possible */
-
 	if ((arg->use_lb_normal && arg->lb_normal > target) ||
 	    (arg->use_lb_inverse && arg->lb_inverse > target))
 		return true;
 
-	/* Preliminary corner probing */
-
+	/* Get cdata and do preliminary corner probing */
 	if (get_h48_cdata(arg->cube, arg->cocsepdata, &data) > target ||
 	    get_h48_cdata(arg->inverse, arg->cocsepdata, &data_inv) > target)
 		return true;
@@ -191,14 +211,217 @@ solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
 	return false;
 }
 
+STATIC_INLINE solve_h48_prune_return_t
+solve_h48_prune(solve_h48_prune_arg_t arg)
+{
+	solve_h48_prune_return_t ret = {0};
+	uint64_t c;
+	uint32_t dn, di;
+	uint8_t pmin, pe;
+
+	ret.pi = arg.lb_inverse;
+
+	/* We'll never get a bound higher than base + 3 */
+	if (arg.h48base + 3 <= arg.target)
+		goto solve_h48_prune_return_false;
+
+	/* Preliminary probing using last computed bound, if possible */
+	if (arg.lb_inverse > arg.target)
+		goto solve_h48_prune_return_true;
+
+	/* Get cdata and do preliminary corner probing */
+	if (get_h48_cdata(arg.inverse, arg.cocsepdata, &di) > arg.target ||
+	    get_h48_cdata(arg.cube, arg.cocsepdata, &dn) > arg.target)
+		goto solve_h48_prune_return_true;
+
+	if (arg.lb_inverse == 0) {
+		ret.lookups++;
+		c = coord_h48_edges(
+		    arg.inverse, COCLASS(di), TTREP(di), arg.h48h);
+		ret.pi = get_h48_pval_and_min(arg.h48data, c, &pmin);
+
+		if (ret.pi == 0) {
+			ret.fallbacks++;
+			pe = get_eoesep_pval_cube(arg.eoesepdata, arg.inverse);
+			ret.pi = MAX(pmin, pe);
+		} else {
+			ret.pi += arg.h48base;
+		}
+	}
+
+	if (ret.pi > arg.target)
+		goto solve_h48_prune_return_true;
+
+	ret.nohalf_normal = ret.pi == arg.target;
+
+	ret.lookups++;
+	c = coord_h48_edges(arg.cube, COCLASS(dn), TTREP(dn), arg.h48h);
+	ret.pn = get_h48_pval_and_min(arg.h48data, c, &pmin);
+
+	if (ret.pn == 0) {
+		ret.fallbacks++;
+		pe = get_eoesep_pval_cube(arg.eoesepdata, arg.cube);
+		ret.pn = MAX(pmin, pe);
+	} else {
+		ret.pn += arg.h48base;
+	}
+
+	if (ret.pn > arg.target)
+		goto solve_h48_prune_return_true;
+
+	ret.nohalf_inverse = ret.pn == arg.target;
+
+solve_h48_prune_return_false:
+	ret.stop = false;
+	return ret;
+
+solve_h48_prune_return_true:
+	ret.stop = true;
+	return ret;
+}
+
+#if 1
+
 STATIC int64_t
 solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 {
 	int64_t ret, n;
-	uint8_t m, nm, lbn, lbi, t;
+	uint8_t m, nm, nn, ni, lbn, lbi;
+	uint64_t mm_normal, mm_inverse;
+	cube_t backup_cube, backup_inverse;
+	solve_h48_prune_arg_t prune_arg;
+	solve_h48_prune_return_t prune;
+
+	nn = arg->solution_moves->nmoves;
+	ni = arg->solution_moves->npremoves;
+	nm = nn + ni;
+	if (equal(arg->cube, SOLVED_CUBE)) {
+		if (arg->target_depth != nm)
+			return 0;
+		wrapthread_mutex_lock(arg->solutions_mutex);
+		ret = appendsolution(arg->solution_moves, H48_STARTING_MOVES,
+		    arg->tmask, arg->solution_settings, arg->solution_list);
+		wrapthread_mutex_unlock(arg->solutions_mutex);
+		return ret;
+	}
+
+	if (nm + 1 > arg->target_depth ||
+	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
+		return 0;
+
+	backup_cube = arg->cube;
+	backup_inverse = arg->inverse;
+	lbn = arg->lb_normal;
+	lbi = arg->lb_inverse;
+	mm_normal = arg->movemask_normal;
+	mm_inverse = arg->movemask_inverse;
+
+	ret = 0;
+
+	prune_arg = (solve_h48_prune_arg_t){
+		.cocsepdata = arg->cocsepdata,
+		.h48data = arg->h48data,
+		.eoesepdata = arg->h48data_fallback_eoesep, /* TODO rmove? */
+		.target = arg->target_depth - (nm + 1),
+		.h48base = arg->base,
+		.h48h = arg->h,
+		.lb_inverse = 0,
+	};
+	if (popcount_u32(mm_normal) <= popcount_u32(mm_inverse)) {
+		arg->solution_moves->nmoves++;
+		for (m = 0; m < 18; m++) {
+			if (!(mm_normal & MM_SINGLE(m)))
+				continue;
+
+			prune_arg.cube = move(backup_cube, m);
+			prune_arg.inverse = premove(backup_inverse, m);
+			prune_arg.lb_inverse = m % 3 == 1 ? lbi : 0;
+
+			prune = solve_h48_prune(prune_arg);
+
+			arg->nodes_visited++;
+			arg->table_lookups += prune.lookups;
+			arg->table_fallbacks += prune.fallbacks;
+
+			if (prune.stop)
+				continue;
+
+			arg->solution_moves->moves[nn] = m;
+			arg->cube = prune_arg.cube;
+			arg->inverse = prune_arg.inverse;
+			arg->lb_inverse = prune.pi;
+			arg->lb_normal = prune.pn;
+			arg->movemask_normal = allowedmask[movebase(m)];
+			if (prune.nohalf_normal)
+				arg->movemask_normal &= MM18_NOHALFTURNS;
+			arg->movemask_inverse = mm_inverse;
+			if (prune.nohalf_inverse)
+				arg->movemask_inverse &= MM18_NOHALFTURNS;
+
+			n = solve_h48_dfs(arg);
+
+			if (n < 0)
+				return n;
+			ret += n;
+		}
+		arg->solution_moves->nmoves--;
+	} else {
+		arg->solution_moves->npremoves++;
+		for (m = 0; m < 18; m++) {
+			if(!(mm_inverse & MM_SINGLE(m)))
+				continue;
+
+			prune_arg.cube = move(backup_inverse, m);
+			prune_arg.inverse = premove(backup_cube, m);
+			prune_arg.lb_inverse = m % 3 == 1 ? lbn : 0;
+			prune = solve_h48_prune(prune_arg);
+
+			arg->nodes_visited++;
+			arg->table_lookups += prune.lookups;
+			arg->table_fallbacks += prune.fallbacks;
+
+			if (prune.stop)
+				continue;
+
+			arg->solution_moves->premoves[ni] = m;
+			arg->inverse = prune_arg.cube;
+			arg->cube = prune_arg.inverse;
+			arg->lb_normal = prune.pi;
+			arg->lb_inverse = prune.pn;
+			arg->movemask_normal = mm_normal;
+			if (prune.nohalf_inverse)
+				arg->movemask_normal &= MM18_NOHALFTURNS;
+			arg->movemask_inverse = allowedmask[movebase(m)];
+			if (prune.nohalf_normal)
+				arg->movemask_inverse &= MM18_NOHALFTURNS;
+
+			n = solve_h48_dfs(arg);
+
+			if (n < 0)
+				return n;
+			ret += n;
+		}
+		arg->solution_moves->npremoves--;
+	}
+
+	arg->cube = backup_cube;
+	arg->inverse = backup_inverse;
+
+	return ret;
+}
+
+#else
+
+STATIC int64_t
+solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
+{
+	int64_t ret, n;
+	uint8_t m, nm, lbn, lbi;
 	uint64_t mm_normal, mm_inverse;
 	bool ulbi, ulbn;
 	cube_t backup_cube, backup_inverse;
+
+	arg->nodes_visited++;
 
 	nm = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
 	if (equal(arg->cube, SOLVED_CUBE)) {
@@ -214,8 +437,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	if (solve_h48_stop(arg))
 		return 0;
 
-	t = arg->solution_list->shortest_sol + arg->solution_settings->optimal;
-	if (nm + 1 > MIN(t, arg->target_depth) ||
+	if (nm + 1 > arg->target_depth ||
 	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
 		return 0;
 
@@ -281,6 +503,8 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	return ret;
 }
 
+#endif
+
 STATIC void *
 solve_h48_runthread(void *arg)
 {
@@ -313,7 +537,8 @@ solve_h48_runthread(void *arg)
 		dfsarg->lb_inverse = 0;
 		dfsarg->use_lb_normal = false;
 		dfsarg->use_lb_inverse = false;
-		dfsarg->movemask_normal = MM18_ALLMOVES;
+		dfsarg->movemask_normal = allowedmask[
+		    movebase(dfsarg->tasks[i].moves[H48_STARTING_MOVES-1])];
 		dfsarg->movemask_inverse = MM18_ALLMOVES;
 		dfsarg->tmask = dfsarg->tasks[i].tmask;
 
