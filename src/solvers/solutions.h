@@ -108,7 +108,7 @@ last_solution_is_duplicate(const solution_list_t l[static 1])
 		j--;
 		for (i = l->used-2; l->buf[i] == l->buf[j]; i--, j--) {
 			if (l->buf[i-1] == '\n') {
-				if (l->buf[j-1] == '\n' || j == 0)
+				if (j == 0 || l->buf[j-1] == '\n')
 					return true;
 				else break;
 			}
