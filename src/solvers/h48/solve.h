@@ -1,11 +1,5 @@
 #define H48_STARTING_MOVES 4
-
-#if H48_STARTING_MOVES == 3
-#define H48_STARTING_CUBES 3240 /* Number of 3-move sequences */
-#elif H48_STARTING_MOVES == 4
-#define H48_STARTING_CUBES 43254 /* Number of 4-move sequences */
-#endif
-
+#define H48_STARTING_CUBES 43254
 #define H48_SORT_TASKS_MIN_DEPTH 16
 #define H48_LOG_PROGRESS_MIN_DEPTH 15
 
@@ -32,8 +26,8 @@ typedef struct {
 	const uint32_t *cocsepdata;
 	const unsigned char *h48data;
 	const unsigned char *eoesepdata;
-	uint64_t movemask_normal; // TODO change to uint32_t ?
-	uint64_t movemask_inverse; // TODO change to uint32_t ?
+	uint64_t movemask_normal;
+	uint64_t movemask_inverse;
 	uint64_t nodes_visited;
 	uint64_t table_fallbacks;
 	uint64_t table_lookups;
@@ -70,8 +64,8 @@ STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
-STATIC_INLINE void h48_prune_pipeline(
-    dfsarg_solve_h48_t [static 1], h48_prune_t [static 18], uint8_t, bool);
+STATIC_INLINE void h48_prune_pipeline(dfsarg_solve_h48_t [static 1],
+    h48_prune_t [static NMOVES], uint8_t, bool);
 STATIC_INLINE uint8_t h48_prune_lookup(
     uint64_t, cube_t, dfsarg_solve_h48_t [static 1]);
 STATIC_INLINE void h48_prune_restore(const h48_prune_t [static 1],
@@ -139,7 +133,7 @@ h48_prune_lookup(
 STATIC_INLINE void
 h48_prune_pipeline(
 	dfsarg_solve_h48_t arg[static 1],
-	h48_prune_t prune[static 18],
+	h48_prune_t prune[static NMOVES],
 	uint8_t target,
 	bool normal
 )
@@ -148,9 +142,9 @@ h48_prune_pipeline(
 	uint8_t m, p;
 
 	/* Stage 0: initialize the neighbors array */
-	memset(prune, 0, 18 * sizeof(h48_prune_t));
+	memset(prune, 0, NMOVES * sizeof(h48_prune_t));
 	if (normal) {
-		for (m = 0; m < 18; m++) {
+		for (m = 0; m < NMOVES; m++) {
 			prune[m].pi = m % 3 == 1 ? arg->lb_inverse : 0;
 			if (!(arg->movemask_normal & MM_SINGLE(m)) ||
 			    prune[m].pi > target) {
@@ -163,7 +157,7 @@ h48_prune_pipeline(
 			arg->nodes_visited++;
 		}
 	} else {
-		for (m = 0; m < 18; m++) {
+		for (m = 0; m < NMOVES; m++) {
 			prune[m].pi = m % 3 == 1 ? arg->lb_normal : 0;
 			if (!(arg->movemask_inverse & MM_SINGLE(m)) ||
 			    prune[m].pi > target) {
@@ -178,7 +172,7 @@ h48_prune_pipeline(
 	}
 
 	/* Stage 1: cdata and prefetch inverse */
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (prune[m].stop)
 			continue;
 
@@ -195,7 +189,7 @@ h48_prune_pipeline(
 	}
 
 	/* Stage 2: get pval from inverse, prefetch normal */
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (prune[m].stop)
 			continue;
 
@@ -220,7 +214,7 @@ h48_prune_pipeline(
 	}
 
 	/* Stage 3: get pval from normal */
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (prune[m].stop)
 			continue;
 
@@ -275,7 +269,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	uint64_t mm_normal, mm_inverse;
 	bool normal;
 	cube_t backup_cube, backup_inverse;
-	h48_prune_t prune[18];
+	h48_prune_t prune[NMOVES];
 
 	nn = arg->solution_moves->nmoves;
 	ni = arg->solution_moves->npremoves;
@@ -309,7 +303,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	else
 		arg->solution_moves->npremoves++;
 
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (prune[m].stop)
 			continue;
 		arg->movemask_normal = mm_normal;
@@ -446,7 +440,7 @@ solve_h48_maketasks(
 
 	mtarg->nmoves++;
 	backup_cube = mtarg->cube;
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (!(mm & MM_SINGLE(m)))
 			continue;
 
