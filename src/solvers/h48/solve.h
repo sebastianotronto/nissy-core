@@ -138,6 +138,7 @@ h48_prune_pipeline(
 	bool normal
 )
 {
+	uint64_t i;
 	uint32_t cdata;
 	uint8_t m, p;
 
@@ -184,7 +185,8 @@ h48_prune_pipeline(
 		if (prune[m].pi == 0) {
 			prune[m].coord = coord_h48_edges(prune[m].inverse,
 			    COCLASS(cdata), TTREP(cdata), arg->h);
-			// TODO prefetch
+			i = H48_INDEX(H48_LINE_EXT(prune[m].coord));
+			prefetch(arg->h48data, i);
 		}
 	}
 
@@ -210,7 +212,8 @@ h48_prune_pipeline(
 		}
 		prune[m].coord = coord_h48_edges(
 		    prune[m].cube, COCLASS(cdata), TTREP(cdata), arg->h);
-		// TODO prefetch
+		i = H48_INDEX(H48_LINE_EXT(prune[m].coord));
+		prefetch(arg->h48data, i);
 	}
 
 	/* Stage 3: get pval from normal */
