@@ -174,6 +174,10 @@ h48_prune_pipeline(
 		}
 	}
 
+	/* We'll never get a bound higher than base + 3 */
+	if (target > arg->base + 3)
+		return;
+
 	/* Stage 1: cdata and prefetch inverse */
 	for (m = 0; m < NMOVES; m++) {
 		if (prune[m].stop)
