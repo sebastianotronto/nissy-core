@@ -68,8 +68,10 @@ STATIC_INLINE void h48_prune_pipeline(dfsarg_solve_h48_t [static 1],
     h48_prune_t [static NMOVES], uint8_t, bool);
 STATIC_INLINE uint8_t h48_prune_lookup(
     uint64_t, cube_t, dfsarg_solve_h48_t [static 1]);
-STATIC_INLINE void h48_prune_restore(const h48_prune_t [static 1],
-    dfsarg_solve_h48_t [static 1], uint8_t, bool);
+STATIC_INLINE void h48_prune_restore_normal(const h48_prune_t [static 1],
+    dfsarg_solve_h48_t [static 1], uint8_t);
+STATIC_INLINE void h48_prune_restore_inverse(const h48_prune_t [static 1],
+    dfsarg_solve_h48_t [static 1], uint8_t);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
     solve_h48_task_t [static H48_STARTING_CUBES], int [static 1]);
@@ -229,34 +231,46 @@ h48_prune_pipeline(
 }
 
 STATIC_INLINE void
-h48_prune_restore(
+h48_prune_restore_normal(
 	const h48_prune_t prune[static 1],
 	dfsarg_solve_h48_t arg[static 1],
-	uint8_t target,
-	bool normal
+	uint8_t target
 )
 {
 	uint8_t nm;
 
-	if (normal) {
-		arg->cube = prune->cube;
-		arg->inverse = prune->inverse;
-		arg->lb_inverse = prune->pi;
-		arg->lb_normal = prune->pn;
+	arg->cube = prune->cube;
+	arg->inverse = prune->inverse;
+	arg->lb_inverse = prune->pi;
+	arg->lb_normal = prune->pn;
 
-		nm = arg->solution_moves->nmoves;
-		arg->solution_moves->moves[nm-1] = prune->m;
-		arg->movemask_normal = allowedmask[movebase(prune->m)];
-	} else {
-		arg->cube = prune->inverse;
-		arg->inverse = prune->cube;
-		arg->lb_inverse = prune->pn;
-		arg->lb_normal = prune->pi;
+	nm = arg->solution_moves->nmoves;
+	arg->solution_moves->moves[nm-1] = prune->m;
+	arg->movemask_normal = allowedmask[movebase(prune->m)];
 
-		nm = arg->solution_moves->npremoves;
-		arg->solution_moves->premoves[nm-1] = prune->m;
-		arg->movemask_inverse = allowedmask[movebase(prune->m)];
-	}
+	if (arg->lb_inverse == target)
+		arg->movemask_normal &= MM18_NOHALFTURNS;
+	if (arg->lb_normal == target)
+		arg->movemask_inverse &= MM18_NOHALFTURNS;
+}
+
+STATIC_INLINE void
+h48_prune_restore_inverse(
+	const h48_prune_t prune[static 1],
+	dfsarg_solve_h48_t arg[static 1],
+	uint8_t target
+)
+{
+	uint8_t nm;
+
+	arg->cube = prune->inverse;
+	arg->inverse = prune->cube;
+	arg->lb_inverse = prune->pn;
+	arg->lb_normal = prune->pi;
+
+	nm = arg->solution_moves->npremoves;
+	arg->solution_moves->premoves[nm-1] = prune->m;
+	arg->movemask_inverse = allowedmask[movebase(prune->m)];
 
 	if (arg->lb_inverse == target)
 		arg->movemask_normal &= MM18_NOHALFTURNS;
@@ -301,27 +315,35 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 
 	h48_prune_pipeline(arg, prune, target, normal);
 
-	if (normal)
+	if (normal) {
 		arg->solution_moves->nmoves++;
-	else
-		arg->solution_moves->npremoves++;
-
-	for (m = 0; m < NMOVES; m++) {
-		if (prune[m].stop)
-			continue;
-		arg->movemask_normal = mm_normal;
-		arg->movemask_inverse = mm_inverse;
-		h48_prune_restore(&prune[m], arg, target, normal);
-		n = solve_h48_dfs(arg);
-		if (n < 0)
-			return n;
-		ret += n;
-	}
-
-	if (normal)
+		for (m = 0; m < NMOVES; m++) {
+			if (prune[m].stop)
+				continue;
+			arg->movemask_normal = mm_normal;
+			arg->movemask_inverse = mm_inverse;
+			h48_prune_restore_normal(&prune[m], arg, target);
+			n = solve_h48_dfs(arg);
+			if (n < 0)
+				return n;
+			ret += n;
+		}
 		arg->solution_moves->nmoves--;
-	else
+	} else {
+		arg->solution_moves->npremoves++;
+		for (m = 0; m < NMOVES; m++) {
+			if (prune[m].stop)
+				continue;
+			arg->movemask_normal = mm_normal;
+			arg->movemask_inverse = mm_inverse;
+			h48_prune_restore_inverse(&prune[m], arg, target);
+			n = solve_h48_dfs(arg);
+			if (n < 0)
+				return n;
+			ret += n;
+		}
 		arg->solution_moves->npremoves--;
+	}
 
 	arg->cube = backup_cube;
 	arg->inverse = backup_inverse;
