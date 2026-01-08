@@ -285,36 +285,48 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	uint8_t m, nm, nn, ni, target;
 	uint64_t mm_normal, mm_inverse;
 	bool normal;
-	cube_t backup_cube, backup_inverse;
+	cube_t cube, backup_cube, backup_inverse;
 	h48_prune_t prune[NMOVES];
 
 	nn = arg->solution_moves->nmoves;
 	ni = arg->solution_moves->npremoves;
 	nm = nn + ni;
-	if (equal(arg->cube, SOLVED_CUBE)) {
-		if (arg->target_depth != nm)
-			return 0;
-		wrapthread_mutex_lock(arg->solutions_mutex);
-		ret = appendsolution(arg->solution_moves, H48_STARTING_MOVES,
-		    arg->tmask, arg->solution_settings, arg->solution_list);
-		wrapthread_mutex_unlock(arg->solutions_mutex);
-		return ret;
-	}
 
-	if (nm + 1 > arg->target_depth ||
+	if (equal(arg->cube, SOLVED_CUBE) || /* Solved before target depth */
 	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
 		return 0;
 
-	ret = 0;
 	target = arg->target_depth - (nm + 1);
-	backup_cube = arg->cube;
-	backup_inverse = arg->inverse;
 	mm_normal = arg->movemask_normal;
 	mm_inverse = arg->movemask_inverse;
+	if (target == 0) { /* Last move */
+		arg->solution_moves->nmoves++;
+		for (m = 0; m < NMOVES; m++) {
+			if (!(mm_normal & mm_inverse & MM_SINGLE(m)))
+				continue;
+			cube = move(arg->cube, m);
+			arg->solution_moves->moves[nn] = m;
+			if (!equal(cube, SOLVED_CUBE))
+				continue;
+			wrapthread_mutex_lock(arg->solutions_mutex);
+			ret = appendsolution(arg->solution_moves,
+			    H48_STARTING_MOVES, arg->tmask,
+			    arg->solution_settings, arg->solution_list);
+			wrapthread_mutex_unlock(arg->solutions_mutex);
+			arg->solution_moves->nmoves--;
+			return ret;
+		}
+		arg->solution_moves->nmoves--;
+		return 0;
+	}
+
+	backup_cube = arg->cube;
+	backup_inverse = arg->inverse;
 	normal = popcount_u32(mm_normal) <= popcount_u32(mm_inverse);
 
 	h48_prune_pipeline(arg, prune, target, normal);
 
+	ret = 0;
 	if (normal) {
 		arg->solution_moves->nmoves++;
 		for (m = 0; m < NMOVES; m++) {
