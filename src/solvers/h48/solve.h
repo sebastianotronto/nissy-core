@@ -8,6 +8,7 @@ typedef struct {
 	uint8_t moves[H48_STARTING_MOVES];
 	int64_t rank;
 	uint64_t tmask[H48_STARTING_MOVES];
+	uint8_t pval;
 } solve_h48_task_t;
 
 typedef struct {
@@ -124,6 +125,7 @@ h48_prune_lookup(
 {
 	uint8_t p, pmin, pe;
 
+	arg->table_lookups++;
 	p = get_h48_pval_and_min(arg->h48data, coord, &pmin);
 	if (p == 0) {
 		arg->table_fallbacks++;
@@ -218,7 +220,6 @@ h48_prune_pipeline(
 			continue;
 
 		if (prune[m].pi == 0) {
-			arg->table_lookups++;
 			prune[m].pi = h48_prune_lookup(
 			    prune[m].coord, prune[m].inverse, arg);
 			if (prune[m].pi > target) {
@@ -243,7 +244,6 @@ h48_prune_pipeline(
 		if (prune[m].stop)
 			continue;
 
-		arg->table_lookups++;
 		prune[m].pn = h48_prune_lookup(
 		    prune[m].coord, prune[m].cube, arg);
 		prune[m].stop = prune[m].pn > target;
@@ -387,7 +387,7 @@ STATIC void *
 solve_h48_runthread(void *arg)
 {
 	int i, j;
-	uint8_t lastmove, p;
+	uint8_t lastmove;
 	int64_t d, f, nprev;
 	dfsarg_solve_h48_t *dfsarg;
 
@@ -412,9 +412,8 @@ solve_h48_runthread(void *arg)
 		dfsarg->inverse = inverse(dfsarg->cube);
 
 		dfsarg->nodes_visited++;
-		dfsarg->table_lookups++;
-		p = h48_prune_lookup_nocoord(dfsarg->cube, dfsarg);
-		if (p + H48_STARTING_MOVES > dfsarg->target_depth)
+		if (dfsarg->tasks[i].pval + H48_STARTING_MOVES
+		    > dfsarg->target_depth)
 			continue;
 
 		dfsarg->lb_normal = 0;
@@ -482,6 +481,8 @@ solve_h48_maketasks(
 
 	if (mtarg->nmoves == H48_STARTING_MOVES) {
 		tasks[*ntasks].cube = mtarg->cube;
+		tasks[*ntasks].pval =
+		    h48_prune_lookup_nocoord(mtarg->cube, solve_arg);
 		memcpy(tasks[*ntasks].moves, mtarg->moves,
 		    H48_STARTING_MOVES * sizeof(uint8_t));
 		memcpy(tasks[*ntasks].tmask, mtarg->tmask,
