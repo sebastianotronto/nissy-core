@@ -288,18 +288,16 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	int64_t ret, n;
 	uint8_t m, nm, nn, ni, target;
 	uint64_t mm_normal, mm_inverse;
-	bool normal;
 	cube_t cube, backup_cube, backup_inverse;
 	h48_prune_t prune[NMOVES];
-
-	nn = arg->solution_moves->nmoves;
-	ni = arg->solution_moves->npremoves;
-	nm = nn + ni;
 
 	if (equal(arg->cube, SOLVED_CUBE) || /* Solved before target depth */
 	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
 		return 0;
 
+	nn = arg->solution_moves->nmoves;
+	ni = arg->solution_moves->npremoves;
+	nm = nn + ni;
 	target = arg->target_depth - (nm + 1);
 	mm_normal = arg->movemask_normal;
 	mm_inverse = arg->movemask_inverse;
@@ -310,6 +308,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 				continue;
 			cube = move(arg->cube, m);
 			arg->solution_moves->moves[nn] = m;
+			arg->nodes_visited++;
 			if (!equal(cube, SOLVED_CUBE))
 				continue;
 			wrapthread_mutex_lock(arg->solutions_mutex);
@@ -326,12 +325,10 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 
 	backup_cube = arg->cube;
 	backup_inverse = arg->inverse;
-	normal = popcount_u32(mm_normal) <= popcount_u32(mm_inverse);
-
-	h48_prune_pipeline(arg, prune, target, normal);
 
 	ret = 0;
-	if (normal) {
+	if (popcount_u32(mm_normal) <= popcount_u32(mm_inverse)) {
+		h48_prune_pipeline(arg, prune, target, true);
 		arg->solution_moves->nmoves++;
 		for (m = 0; m < NMOVES; m++) {
 			if (prune[m].stop)
@@ -346,6 +343,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 		}
 		arg->solution_moves->nmoves--;
 	} else {
+		h48_prune_pipeline(arg, prune, target, false);
 		arg->solution_moves->npremoves++;
 		for (m = 0; m < NMOVES; m++) {
 			if (prune[m].stop)
