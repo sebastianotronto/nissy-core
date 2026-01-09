@@ -68,6 +68,8 @@ STATIC_INLINE void h48_prune_pipeline(dfsarg_solve_h48_t [static 1],
     h48_prune_t [static NMOVES], uint8_t, bool);
 STATIC_INLINE uint8_t h48_prune_lookup(
     uint64_t, cube_t, dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE uint8_t h48_prune_lookup_nocoord(
+    cube_t, dfsarg_solve_h48_t [static 1]);
 STATIC_INLINE void h48_prune_restore_normal(const h48_prune_t [static 1],
     dfsarg_solve_h48_t [static 1], uint8_t);
 STATIC_INLINE void h48_prune_restore_inverse(const h48_prune_t [static 1],
@@ -130,6 +132,20 @@ h48_prune_lookup(
 	} else {
 		return p + arg->base;
 	}
+}
+
+STATIC_INLINE uint8_t
+h48_prune_lookup_nocoord(
+	cube_t cube,
+	dfsarg_solve_h48_t arg[static 1]
+)
+{
+	uint32_t cdata;
+	uint64_t coord;
+
+	get_h48_cdata(cube, arg->cocsepdata, &cdata);
+	coord = coord_h48_edges(cube, COCLASS(cdata), TTREP(cdata), arg->h);
+	return h48_prune_lookup(coord, cube, arg);
 }
 
 STATIC_INLINE void
@@ -371,7 +387,7 @@ STATIC void *
 solve_h48_runthread(void *arg)
 {
 	int i, j;
-	uint8_t lastmove;
+	uint8_t lastmove, p;
 	int64_t d, f, nprev;
 	dfsarg_solve_h48_t *dfsarg;
 
@@ -394,6 +410,12 @@ solve_h48_runthread(void *arg)
 			dfsarg->cube =
 			   move(dfsarg->cube, dfsarg->tasks[i].moves[j]);
 		dfsarg->inverse = inverse(dfsarg->cube);
+
+		dfsarg->nodes_visited++;
+		dfsarg->table_lookups++;
+		p = h48_prune_lookup_nocoord(dfsarg->cube, dfsarg);
+		if (p + H48_STARTING_MOVES > dfsarg->target_depth)
+			continue;
 
 		dfsarg->lb_normal = 0;
 		dfsarg->lb_inverse = 0;
