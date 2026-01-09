@@ -291,14 +291,13 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	cube_t cube, backup_cube, backup_inverse;
 	h48_prune_t prune[NMOVES];
 
-	nn = arg->solution_moves->nmoves;
-	ni = arg->solution_moves->npremoves;
-	nm = nn + ni;
-
 	if (equal(arg->cube, SOLVED_CUBE) || /* Solved before target depth */
 	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
 		return 0;
 
+	nn = arg->solution_moves->nmoves;
+	ni = arg->solution_moves->npremoves;
+	nm = nn + ni;
 	target = arg->target_depth - (nm + 1);
 	mm_normal = arg->movemask_normal;
 	mm_inverse = arg->movemask_inverse;
@@ -309,6 +308,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 				continue;
 			cube = move(arg->cube, m);
 			arg->solution_moves->moves[nn] = m;
+			arg->nodes_visited++;
 			if (!equal(cube, SOLVED_CUBE))
 				continue;
 			wrapthread_mutex_lock(arg->solutions_mutex);
