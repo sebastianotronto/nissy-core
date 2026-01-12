@@ -43,10 +43,23 @@ NODE=${NODE-${NISSY_BUILD_NODE:-"node"}}
 # The default value is 16.
 THREADS=${THREADS-${NISSY_BUILD_THREADS}}
 
+portable_nproc() {
+	OS="$(uname -s)"
+	case "$OS" in
+	"Linux")
+		nproc
+		;;
+	"Darwin" | "*BSD")
+		sysctl -n hw.ncpu
+		;;
+	*)
+		echo "32" # A safe, large default
+		;;
+	esac
+}
+
 detectthreads() {
-	# TODO: detect based on system
-	# Is 'getconf NPROCESSORD_ONLN' portable? Is it threads or cores?
-	echo "16"
+	echo "$(portable_nproc)"
 }
 
 [ -z "$THREADS" ] && THREADS="$(detectthreads)"
