@@ -1,11 +1,5 @@
 #define H48_STARTING_MOVES 4
-
-#if H48_STARTING_MOVES == 3
-#define H48_STARTING_CUBES 3240 /* Number of 3-move sequences */
-#elif H48_STARTING_MOVES == 4
-#define H48_STARTING_CUBES 43254 /* Number of 4-move sequences */
-#endif
-
+#define H48_STARTING_CUBES 43254
 #define H48_SORT_TASKS_MIN_DEPTH 16
 #define H48_LOG_PROGRESS_MIN_DEPTH 15
 
@@ -14,6 +8,7 @@ typedef struct {
 	uint8_t moves[H48_STARTING_MOVES];
 	int64_t rank;
 	uint64_t tmask[H48_STARTING_MOVES];
+	uint8_t pval;
 } solve_h48_task_t;
 
 typedef struct {
@@ -25,15 +20,13 @@ typedef struct {
 	solution_settings_t *solution_settings;
 	const uint64_t *tmask;
 	solution_list_t *solution_list;
-	int8_t lb_normal;
-	int8_t lb_inverse;
-	bool use_lb_normal;
-	bool use_lb_inverse;
+	uint8_t lb_normal;
+	uint8_t lb_inverse;
 	uint8_t h;
 	uint8_t base;
 	const uint32_t *cocsepdata;
 	const unsigned char *h48data;
-	const unsigned char *h48data_fallback_eoesep;
+	const unsigned char *eoesepdata;
 	uint64_t movemask_normal;
 	uint64_t movemask_inverse;
 	uint64_t nodes_visited;
@@ -58,11 +51,30 @@ typedef struct {
 	uint64_t tmask[H48_STARTING_MOVES];
 } dfsarg_solve_h48_maketasks_t;
 
+typedef struct {
+	cube_t cube;
+	cube_t inverse;
+	uint64_t coord;
+	uint8_t m;
+	uint8_t pn;
+	uint8_t pi;
+	uint8_t stop;
+} h48_prune_t;
+
 STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
     long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
-STATIC_INLINE bool solve_h48_stop(dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE void h48_prune_pipeline(dfsarg_solve_h48_t [static 1],
+    h48_prune_t [static NMOVES], uint8_t, bool);
+STATIC_INLINE uint8_t h48_prune_lookup(
+    uint64_t, cube_t, dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE uint8_t h48_prune_lookup_nocoord(
+    cube_t, dfsarg_solve_h48_t [static 1]);
+STATIC_INLINE void h48_prune_restore_normal(const h48_prune_t [static 1],
+    dfsarg_solve_h48_t [static 1], uint8_t);
+STATIC_INLINE void h48_prune_restore_inverse(const h48_prune_t [static 1],
+    dfsarg_solve_h48_t [static 1], uint8_t);
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
     solve_h48_task_t [static H48_STARTING_CUBES], int [static 1]);
@@ -104,151 +116,242 @@ STATIC long long solve_h48_dispatch(
 	    poll_status, poll_status_data);
 }
 
-STATIC_INLINE bool
-solve_h48_stop(dfsarg_solve_h48_t arg[static 1])
+STATIC_INLINE uint8_t
+h48_prune_lookup(
+	uint64_t coord,
+	cube_t cube,
+	dfsarg_solve_h48_t arg[static 1]
+)
 {
-	uint32_t data, data_inv;
-	int64_t coord;
-	int8_t target, nh, n;
-	uint8_t pval, pval_min, pval_eoesep;
+	uint8_t p, pmin, pe;
 
-	arg->movemask_normal = arg->movemask_inverse = MM18_ALLMOVES;
-	arg->nodes_visited++;
+	arg->table_lookups++;
+	p = get_h48_pval_and_min(arg->h48data, coord, &pmin);
+	if (p == 0) {
+		arg->table_fallbacks++;
+		pe = get_eoesep_pval_cube(arg->eoesepdata, cube);
+		return MAX(pmin, pe);
+	} else {
+		return p + arg->base;
+	}
+}
 
-	n = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
-	target = arg->target_depth - n;
+STATIC_INLINE uint8_t
+h48_prune_lookup_nocoord(
+	cube_t cube,
+	dfsarg_solve_h48_t arg[static 1]
+)
+{
+	uint32_t cdata;
+	uint64_t coord;
+
+	get_h48_cdata(cube, arg->cocsepdata, &cdata);
+	coord = coord_h48_edges(cube, COCLASS(cdata), TTREP(cdata), arg->h);
+	return h48_prune_lookup(coord, cube, arg);
+}
+
+STATIC_INLINE void
+h48_prune_pipeline(
+	dfsarg_solve_h48_t arg[static 1],
+	h48_prune_t prune[static NMOVES],
+	uint8_t target,
+	bool normal
+)
+{
+	uint64_t i;
+	uint32_t cdata;
+	uint8_t m, p;
+
+	/* Stage 0: initialize the neighbors array */
+	memset(prune, 0, NMOVES * sizeof(h48_prune_t));
+	if (normal) {
+		for (m = 0; m < NMOVES; m++) {
+			prune[m].pi = m % 3 == 1 ? arg->lb_inverse : 0;
+			if (!(arg->movemask_normal & MM_SINGLE(m)) ||
+			    prune[m].pi > target) {
+				prune[m].stop = 1;
+				continue;
+			}
+			prune[m].cube = move(arg->cube, m);
+			prune[m].inverse = premove(arg->inverse, m);
+			prune[m].m = m;
+			arg->nodes_visited++;
+		}
+	} else {
+		for (m = 0; m < NMOVES; m++) {
+			prune[m].pi = m % 3 == 1 ? arg->lb_normal : 0;
+			if (!(arg->movemask_inverse & MM_SINGLE(m)) ||
+			    prune[m].pi > target) {
+				prune[m].stop = 1;
+				continue;
+			}
+			prune[m].cube = move(arg->inverse, m);
+			prune[m].inverse = premove(arg->cube, m);
+			prune[m].m = m;
+			arg->nodes_visited++;
+		}
+	}
 
 	/* We'll never get a bound higher than base + 3 */
-	if (arg->base + 3 <= target)
-		return false;
+	if (target > arg->base + 3)
+		return;
 
-	/* Preliminary probing using last computed bound, if possible */
+	/* Stage 1: cdata and prefetch inverse */
+	for (m = 0; m < NMOVES; m++) {
+		if (prune[m].stop)
+			continue;
 
-	if ((arg->use_lb_normal && arg->lb_normal > target) ||
-	    (arg->use_lb_inverse && arg->lb_inverse > target))
-		return true;
-
-	/* Preliminary corner probing */
-
-	if (get_h48_cdata(arg->cube, arg->cocsepdata, &data) > target ||
-	    get_h48_cdata(arg->inverse, arg->cocsepdata, &data_inv) > target)
-		return true;
-
-	/* Inverse probing */
-
-	if (!arg->use_lb_inverse) {
-		arg->table_lookups++;
-		arg->use_lb_inverse = true;
-		coord = coord_h48_edges(
-		    arg->inverse, COCLASS(data_inv), TTREP(data_inv), arg->h);
-		pval = get_h48_pval_and_min(arg->h48data, coord, &pval_min);
-
-		if (pval == 0) {
-			arg->table_fallbacks++;
-
-			pval_eoesep = get_eoesep_pval_cube(
-			    arg->h48data_fallback_eoesep, arg->inverse);
-			pval = MAX(pval_min, pval_eoesep);
-		} else {
-			pval += arg->base;
+		p = get_h48_cdata(prune[m].inverse, arg->cocsepdata, &cdata);
+		if (p > target) {
+			prune[m].stop = 1;
+			continue;
 		}
-
-		arg->lb_inverse = pval;
+		if (prune[m].pi == 0) {
+			prune[m].coord = coord_h48_edges(prune[m].inverse,
+			    COCLASS(cdata), TTREP(cdata), arg->h);
+			i = H48_INDEX(H48_LINE_EXT(prune[m].coord));
+			prefetch(arg->h48data, i);
+		}
 	}
 
-	if (arg->lb_inverse > target)
-		return true;
-	nh = arg->lb_inverse == target;
-	arg->movemask_normal = nh * MM18_NOHALFTURNS + (1-nh) * MM18_ALLMOVES;
+	/* Stage 2: get pval from inverse, prefetch normal */
+	for (m = 0; m < NMOVES; m++) {
+		if (prune[m].stop)
+			continue;
 
-	/* Normal probing */
-
-	if (!arg->use_lb_normal) {
-		arg->table_lookups++;
-		arg->use_lb_normal = true;
-		coord = coord_h48_edges(
-		    arg->cube, COCLASS(data), TTREP(data), arg->h);
-		pval = get_h48_pval_and_min(arg->h48data, coord, &pval_min);
-
-		if (pval == 0) {
-			arg->table_fallbacks++;
-
-			pval_eoesep = get_eoesep_pval_cube(
-			    arg->h48data_fallback_eoesep, arg->cube);
-			pval = MAX(pval_min, pval_eoesep);
-		} else {
-			pval += arg->base;
+		if (prune[m].pi == 0) {
+			prune[m].pi = h48_prune_lookup(
+			    prune[m].coord, prune[m].inverse, arg);
+			if (prune[m].pi > target) {
+				prune[m].stop = 1;
+				continue;
+			}
 		}
 
-		arg->lb_normal = pval;
+		p = get_h48_cdata(prune[m].cube, arg->cocsepdata, &cdata);
+		if (p > target) {
+			prune[m].stop = 1;
+			continue;
+		}
+		prune[m].coord = coord_h48_edges(
+		    prune[m].cube, COCLASS(cdata), TTREP(cdata), arg->h);
+		i = H48_INDEX(H48_LINE_EXT(prune[m].coord));
+		prefetch(arg->h48data, i);
 	}
 
-	if (arg->lb_normal > target)
-		return true;
-	nh = arg->lb_normal == target;
-	arg->movemask_inverse = nh * MM18_NOHALFTURNS + (1-nh) * MM18_ALLMOVES;
+	/* Stage 3: get pval from normal */
+	for (m = 0; m < NMOVES; m++) {
+		if (prune[m].stop)
+			continue;
 
-	return false;
+		prune[m].pn = h48_prune_lookup(
+		    prune[m].coord, prune[m].cube, arg);
+		prune[m].stop = prune[m].pn > target;
+	}
+}
+
+STATIC_INLINE void
+h48_prune_restore_normal(
+	const h48_prune_t prune[static 1],
+	dfsarg_solve_h48_t arg[static 1],
+	uint8_t target
+)
+{
+	uint8_t nm;
+
+	arg->cube = prune->cube;
+	arg->inverse = prune->inverse;
+	arg->lb_inverse = prune->pi;
+	arg->lb_normal = prune->pn;
+
+	nm = arg->solution_moves->nmoves;
+	arg->solution_moves->moves[nm-1] = prune->m;
+	arg->movemask_normal = allowedmask[movebase(prune->m)];
+
+	if (arg->lb_inverse == target)
+		arg->movemask_normal &= MM18_NOHALFTURNS;
+	if (arg->lb_normal == target)
+		arg->movemask_inverse &= MM18_NOHALFTURNS;
+}
+
+STATIC_INLINE void
+h48_prune_restore_inverse(
+	const h48_prune_t prune[static 1],
+	dfsarg_solve_h48_t arg[static 1],
+	uint8_t target
+)
+{
+	uint8_t nm;
+
+	arg->cube = prune->inverse;
+	arg->inverse = prune->cube;
+	arg->lb_inverse = prune->pn;
+	arg->lb_normal = prune->pi;
+
+	nm = arg->solution_moves->npremoves;
+	arg->solution_moves->premoves[nm-1] = prune->m;
+	arg->movemask_inverse = allowedmask[movebase(prune->m)];
+
+	if (arg->lb_inverse == target)
+		arg->movemask_normal &= MM18_NOHALFTURNS;
+	if (arg->lb_normal == target)
+		arg->movemask_inverse &= MM18_NOHALFTURNS;
 }
 
 STATIC int64_t
 solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 {
 	int64_t ret, n;
-	uint8_t m, nm, lbn, lbi, t;
+	uint8_t m, nm, nn, ni, target;
 	uint64_t mm_normal, mm_inverse;
-	bool ulbi, ulbn;
-	cube_t backup_cube, backup_inverse;
+	cube_t cube, backup_cube, backup_inverse;
+	h48_prune_t prune[NMOVES];
 
-	nm = arg->solution_moves->nmoves + arg->solution_moves->npremoves;
-	if (equal(arg->cube, SOLVED_CUBE)) {
-		if (arg->target_depth != nm)
-			return 0;
-		wrapthread_mutex_lock(arg->solutions_mutex);
-		ret = appendsolution(arg->solution_moves, H48_STARTING_MOVES,
-		    arg->tmask, arg->solution_settings, arg->solution_list);
-		wrapthread_mutex_unlock(arg->solutions_mutex);
-		return ret;
-	}
-
-	if (solve_h48_stop(arg))
-		return 0;
-
-	t = arg->solution_list->shortest_sol + arg->solution_settings->optimal;
-	if (nm + 1 > MIN(t, arg->target_depth) ||
+	if (equal(arg->cube, SOLVED_CUBE) || /* Solved before target depth */
 	    arg->solution_list->nsols >= arg->solution_settings->maxsolutions)
 		return 0;
 
+	nn = arg->solution_moves->nmoves;
+	ni = arg->solution_moves->npremoves;
+	nm = nn + ni;
+	target = arg->target_depth - (nm + 1);
+	mm_normal = arg->movemask_normal;
+	mm_inverse = arg->movemask_inverse;
+	if (target == 0) { /* Last move */
+		arg->solution_moves->nmoves++;
+		for (m = 0; m < NMOVES; m++) {
+			if (!(mm_normal & mm_inverse & MM_SINGLE(m)))
+				continue;
+			cube = move(arg->cube, m);
+			arg->solution_moves->moves[nn] = m;
+			arg->nodes_visited++;
+			if (!equal(cube, SOLVED_CUBE))
+				continue;
+			wrapthread_mutex_lock(arg->solutions_mutex);
+			ret = appendsolution(arg->solution_moves,
+			    H48_STARTING_MOVES, arg->tmask,
+			    arg->solution_settings, arg->solution_list);
+			wrapthread_mutex_unlock(arg->solutions_mutex);
+			arg->solution_moves->nmoves--;
+			return ret;
+		}
+		arg->solution_moves->nmoves--;
+		return 0;
+	}
+
 	backup_cube = arg->cube;
 	backup_inverse = arg->inverse;
-	lbn = arg->lb_normal;
-	lbi = arg->lb_inverse;
-	ulbn = arg->use_lb_normal;
-	ulbi = arg->use_lb_inverse;
 
 	ret = 0;
-	mm_normal = arg->movemask_normal;
-	if (arg->solution_moves->nmoves > 0) {
-		m = arg->solution_moves->moves[arg->solution_moves->nmoves-1];
-		mm_normal &= allowedmask[movebase(m)];
-	}
-	mm_inverse = arg->movemask_inverse;
-	if (arg->solution_moves->npremoves > 0) {
-		m = arg->solution_moves->premoves[arg->solution_moves->npremoves-1];
-		mm_inverse &= allowedmask[movebase(m)];
-	}
 	if (popcount_u32(mm_normal) <= popcount_u32(mm_inverse)) {
+		h48_prune_pipeline(arg, prune, target, true);
 		arg->solution_moves->nmoves++;
-		for (m = 0; m < 18; m++) {
-			if (!(mm_normal & MM_SINGLE(m)))
+		for (m = 0; m < NMOVES; m++) {
+			if (prune[m].stop)
 				continue;
-			arg->solution_moves->moves[
-			    arg->solution_moves->nmoves-1] = m;
-			arg->cube = move(backup_cube, m);
-			arg->inverse = premove(backup_inverse, m);
-			arg->lb_inverse = lbi;
-			arg->use_lb_normal = false;
-			arg->use_lb_inverse = ulbi && m % 3 == 1;
+			arg->movemask_normal = mm_normal;
+			arg->movemask_inverse = mm_inverse;
+			h48_prune_restore_normal(&prune[m], arg, target);
 			n = solve_h48_dfs(arg);
 			if (n < 0)
 				return n;
@@ -256,17 +359,14 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 		}
 		arg->solution_moves->nmoves--;
 	} else {
+		h48_prune_pipeline(arg, prune, target, false);
 		arg->solution_moves->npremoves++;
-		for (m = 0; m < 18; m++) {
-			if(!(mm_inverse & MM_SINGLE(m)))
+		for (m = 0; m < NMOVES; m++) {
+			if (prune[m].stop)
 				continue;
-			arg->solution_moves->premoves[
-			    arg->solution_moves->npremoves-1] = m;
-			arg->inverse = move(backup_inverse, m);
-			arg->cube = premove(backup_cube, m);
-			arg->lb_normal = lbn;
-			arg->use_lb_inverse = false;
-			arg->use_lb_normal = ulbn && m % 3 == 1;
+			arg->movemask_normal = mm_normal;
+			arg->movemask_inverse = mm_inverse;
+			h48_prune_restore_inverse(&prune[m], arg, target);
 			n = solve_h48_dfs(arg);
 			if (n < 0)
 				return n;
@@ -277,6 +377,8 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 
 	arg->cube = backup_cube;
 	arg->inverse = backup_inverse;
+	arg->movemask_normal = mm_normal;
+	arg->movemask_inverse = mm_inverse;
 
 	return ret;
 }
@@ -286,7 +388,7 @@ solve_h48_runthread(void *arg)
 {
 	int i, j;
 	uint8_t lastmove;
-	int64_t nprev;
+	int64_t d, f, nprev;
 	dfsarg_solve_h48_t *dfsarg;
 
 	dfsarg = (dfsarg_solve_h48_t *)arg;
@@ -309,11 +411,15 @@ solve_h48_runthread(void *arg)
 			   move(dfsarg->cube, dfsarg->tasks[i].moves[j]);
 		dfsarg->inverse = inverse(dfsarg->cube);
 
+		dfsarg->nodes_visited++;
+		if (dfsarg->tasks[i].pval + H48_STARTING_MOVES
+		    > dfsarg->target_depth)
+			continue;
+
 		dfsarg->lb_normal = 0;
 		dfsarg->lb_inverse = 0;
-		dfsarg->use_lb_normal = false;
-		dfsarg->use_lb_inverse = false;
-		dfsarg->movemask_normal = MM18_ALLMOVES;
+		dfsarg->movemask_normal = allowedmask[
+		    movebase(dfsarg->tasks[i].moves[H48_STARTING_MOVES-1])];
 		dfsarg->movemask_inverse = MM18_ALLMOVES;
 		dfsarg->tmask = dfsarg->tasks[i].tmask;
 
@@ -331,8 +437,9 @@ solve_h48_runthread(void *arg)
 		inspired by Andrew Skalski's vcube.
 		*/
 		lastmove = dfsarg->tasks[i].moves[H48_STARTING_MOVES-1];
-		dfsarg->tasks[i].rank = (dfsarg->nodes_visited - nprev) *
-		    (movebase(lastmove) % 2 == 0 ? 47525 : 58206);
+		d = (int64_t)dfsarg->nodes_visited - nprev;
+		f = movebase(lastmove) % 2 == 0 ? 47525 : 58206;
+		dfsarg->tasks[i].rank = d * f;
 		nprev = dfsarg->nodes_visited;
 	}
 
@@ -374,6 +481,8 @@ solve_h48_maketasks(
 
 	if (mtarg->nmoves == H48_STARTING_MOVES) {
 		tasks[*ntasks].cube = mtarg->cube;
+		tasks[*ntasks].pval =
+		    h48_prune_lookup_nocoord(mtarg->cube, solve_arg);
 		memcpy(tasks[*ntasks].moves, mtarg->moves,
 		    H48_STARTING_MOVES * sizeof(uint8_t));
 		memcpy(tasks[*ntasks].tmask, mtarg->tmask,
@@ -393,7 +502,7 @@ solve_h48_maketasks(
 
 	mtarg->nmoves++;
 	backup_cube = mtarg->cube;
-	for (m = 0; m < 18; m++) {
+	for (m = 0; m < NMOVES; m++) {
 		if (!(mm & MM_SINGLE(m)))
 			continue;
 
@@ -514,7 +623,7 @@ solve_h48(
 			.base = info.base,
 			.cocsepdata = cocsepdata,
 			.h48data = h48data,
-			.h48data_fallback_eoesep = eoesep,
+			.eoesepdata = eoesep,
 			.solution_moves = &solution_moves[i],
 			.solution_settings = &settings,
 			.solution_list = &sollist,
