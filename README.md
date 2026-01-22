@@ -16,7 +16,7 @@ of pruning tables that were developed independently.
 This project is mainly developed on UNIX systems (Linux, MacOS, BSD...),
 but it is also possible to build it on Windows, with some limitations.
 
-### UNIX (Linux, MaxOS, BSD...)
+### UNIX (Linux, MacOS, BSD...)
 
 To build nissy simply run
 
@@ -35,7 +35,7 @@ $ CC=gcc ./build.sh
 ```
 
 is going to configure `nissy` to use at most 3 threads, and build it with
-`gcc`. Se the comments in `./build.sh` for more details.
+`gcc`. See the comments in `./build.sh` for more details.
 
 ### Windows
 
@@ -43,7 +43,7 @@ It is possible to build this project on Windows using `build.bat`. The
 [Clang](https://clang.llvm.org/) compiler must be installed, and the
 command prompt must be correctly configured to run it.
 
-We suggest installing Clang via the Visual Studio Istaller, selecting
+We suggest installing Clang via the Visual Studio Installer, selecting
 the "C++ development" pack, as well as the "clang" and "Windows SDK 11"
 components. It is advised to use "x64 Native Tools Command Prompt for
 VS 2022" instead of a regular command prompt to run the build script.
@@ -64,13 +64,13 @@ can be used to build the basic shell, while
 Builds and runs the unit tests. See `build.bat help` for a list of
 all available options.
 
-Not: At the moment certain optimizations, such as multithreading and
+Note: At the moment certain optimizations, such as multithreading and
 advanced CPU instructions, are not supported on Windows.
 Work is ongoing to improve Windows support.
 
 ## Running tests
 
-This project includes a suite of "unit" test. You can run them with:
+This project includes a suite of "unit" tests. You can run them with:
 
 ```
 $ ./build.sh test
@@ -86,14 +86,14 @@ To run only a subset of the tests, you can pass as argument a regular
 expression that matches only the name of the tests you want to run:
 
 ```
-$ ./buld test coord
+$ ./build test coord
 ```
 
 Each subfolder of the test folder contains a test. A test can consist
 of multiple test cases (.in files). Running a test means compiling and
 running the corresponding test against each test case. When a test case
-is run, the .in file is read a the output of the program is compared
-to the corresponding .out filei using diff(1). If the two differ, the
+is run, the .in file is read and the output of the program is compared
+to the corresponding .out file using diff(1). If the two differ, the
 difference is printed out and no other test is run.
 
 The results of the last test case run is saved in test/last.out (standard
@@ -108,7 +108,7 @@ More comprehensive tests (integration tests) can be performed with *tools*.
 ## Running "tools"
 
 In the tools folder there are some small programs that test various
-functionality of the H48 library. They work similarly to test, but they
+functionality of the H48 library. They work similarly to tests, but they
 are not run in debug mode by default.
 
 To run a tool you can use:
@@ -124,13 +124,13 @@ parameters.
 For example:
 
 ```
-$ :./build.sh tool gendata h48h2
+$ ./build.sh tool gendata h48h2
 ```
 
 Will run a tool that generates the data table for the H48 solver with `h=2`.
 
 Each tool run is automatically timed, so these tools can be used as
-benchmark.  The output as well as the time of the run are saved to a
+benchmarks.  The output as well as the time of the run are saved to a
 file in the tools/results folder.
 
 To build and run a tool in debug mode, use `./build.sh -d tool`.
@@ -150,7 +150,7 @@ If one of the solvetests fails, subsequent tests are going to be skipped.
 ## Command-line interface
 
 The `shell` folder contains the code for a rudimentary shell that can
-be used to run commands manually. The user experience in not amazing,
+be used to run commands manually. The user experience is not amazing,
 as the commands require quite verbose options.
 
 To build the shell run:
@@ -169,7 +169,7 @@ JLQWSVUH=ZLCUABGIVTKH=A
 
 The cube format is meant to be easy to copy-paste and read for the
 software, but not necessarily intuitive for the user. See below for a
-detaileed description.
+detailed description.
 
 You can also get a random cube
 
@@ -192,7 +192,7 @@ $ ./run solve_scramble -solver h48h0k4 -n 1 -M 4 -moves "R' U' F"
 F' U' R
 ```
 
-For a full list of available command, use `./run help`.
+For a full list of available commands, use `./run help`.
 
 ## Using this software as a library
 
@@ -204,7 +204,7 @@ The API is documented in the public header file `src/nissy.h`.
 
 ### C
 
-To use this in a C project, simly include `src/nissy.h`. The tools
+To use this in a C project, simply include `src/nissy.h`. The tools
 in the `tools/` folder are a good example for how to use this.
 
 NOTE: this project is developed using the C11 standard. If you are using
@@ -317,7 +317,7 @@ cccccccc=eeeeeeeeeeee=r
 ```
 
 Where the first 8 characters represent the corner, the 12 characters
-after the first 12 represent the edges and the last character represents
+after the first 8 represent the edges and the last character represents
 the orientation of the cube with respect to the base orientation.
 
 Edges are numbered as follows (see also constants.h):
@@ -337,7 +337,7 @@ UFR=0 UBL=1 DFL=2 DBR=3 UFL=4 UBR=5 DFR=6 DBL=7
 
 If the corner is twisted clockwise with respect to the U/D
 axis orientation, the value is increased by 8. If it is twisted
-counter-clowsie, the value is increased by 16.
+counter-clockwise, the value is increased by 16.
 
 The orientations of the cube are numbered as follows, where e.g. "RB"
 means that the R face in on top and the B face is on front:
