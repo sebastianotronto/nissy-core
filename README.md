@@ -86,7 +86,7 @@ To run only a subset of the tests, you can pass as argument a regular
 expression that matches only the name of the tests you want to run:
 
 ```
-$ ./build test coord
+$ ./build.sh test coord
 ```
 
 Each subfolder of the test folder contains a test. A test can consist
