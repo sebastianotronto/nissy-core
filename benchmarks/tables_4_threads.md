@@ -22,6 +22,7 @@ Speed-up factor (higher is better).
 |H48 h8    | 7.1 GiB|    3.53|    3.72|    3.81|        |         |
 |H48 h7    | 3.5 GiB|    3.60|    3.78|    3.80|        |         |
 |H48 h6    | 1.8 GiB|    3.77|    3.82|    3.79|        |         |
-<img src="img/4threads.png">
+
+<img src="img/4threadsspeedupfactor.png">
 
 </details>

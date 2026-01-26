@@ -108,6 +108,7 @@ with open(benchmarks_4_threads, "w") as f:
 	f.write("Speed-up factor (higher is better).\n")
 	f.write("\n")
 	print_factor_table(f, results_h48.h48_single_thread, results_h48.h48_4_threads)
+	f.write("\n")
 	f.write('<img src="img/4threadsspeedupfactor.png">\n')
 	f.write("\n")
 	f.write("</details>\n")
@@ -123,6 +124,7 @@ with open(benchmarks_16_threads, "w") as f:
 	f.write("Speed-up factor (higher is better).\n")
 	f.write("\n")
 	print_factor_table(f, results_h48.h48_single_thread, results_h48.h48_16_threads)
+	f.write("\n")
 	f.write('<img src="img/16threadsspeedupfactor.png">\n')
 	f.write("\n")
 	f.write("</details>\n")
@@ -178,7 +180,7 @@ def plot_multithread_scatter(title, slow, fast):
 		plt.legend(loc = "right")
 		filename = title.replace(" ", "").replace(",", "") + ".png"
 		plt.savefig(benchmarks_img_dir / filename, dpi=300)
-	plt.show()
+	#plt.show()
 
 plot_multithread_scatter("4 threads speedup factor", results_h48.h48_single_thread, results_h48.h48_4_threads)
 plot_multithread_scatter("16 threads speedup factor", results_h48.h48_single_thread, results_h48.h48_16_threads)
