@@ -1,19 +1,18 @@
 #if THREADS == 1
-	#define WRAPTHREADS_NOTHREADS 1
+	#define WRAPTHREAD_NOTHREADS 1
 #elif defined(__unix__)
-	#define WRAPTHREADS_PTHREADS 1
-#elif !defined(__STDC_NO_THREADS__)
-	#define WRAPTHREADS_C11THREADS 1
+	#define WRAPTHREAD_PTHREADS 1
 #elif defined(__has_include)
 	#if __has_include(<pthreads.h>)
-		#define WRAPTHREADS_PTHREADS 1
+		#define WRAPTHREAD_PTHREADS 1
 	#elif __has_include(<threads.h>)
-		#define WRAPTHREADS_C11THREADS 1
+		#define WRAPTHREAD_C11THREADS 1
 	#endif
+#else
+	#define WRAPTHREAD_NOTHREADS 1
 #endif
 
-#if WRAPTHREADS_PTHREADS
-
+#if WRAPTHREAD_PTHREADS
 	#include <pthread.h>
 
 	#define wrapthread_atomic _Atomic
@@ -34,8 +33,7 @@
 	#define wrapthread_mutex_lock(a) pthread_mutex_lock(a)
 	#define wrapthread_mutex_unlock(a) pthread_mutex_unlock(a)
 
-#elif WRAPTHREADS_C11THREADS
-
+#elif WRAPTHREAD_C11THREADS
 	#include <threads.h>
 
 	#define wrapthread_atomic _Atomic
