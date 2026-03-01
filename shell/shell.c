@@ -10,6 +10,7 @@
 
 #include "../src/nissy.h"
 
+#define INPUT_BUFFER_SIZE     UINT64_C(1024)
 #define PRINTCUBE_BUFFER_SIZE UINT64_C(1024)
 #define SOLUTIONS_BUFFER_SIZE UINT64_C(500000)
 #define MAX_PATH_LENGTH       UINT64_C(10000)
@@ -328,6 +329,7 @@ gendata_exec(args_t *args)
 	int i;
 	FILE *file;
 	char path[MAX_PATH_LENGTH], dataid[NISSY_SIZE_DATAID];
+	char r[INPUT_BUFFER_SIZE];
 	unsigned char *buf;
 	int64_t ret, size;
 	size_t written;
@@ -340,10 +342,21 @@ gendata_exec(args_t *args)
 		return -3;
 	}
 
-	/* TODO: should give warning if overwriting existing file */
 	for (i = 0; tablepaths[i] != NULL; i++) {
 		strcpy(path, tablepaths[i]);
 		strcat(path, dataid);
+
+		if ((file = fopen(path, "rb")) != NULL) {
+			fclose(file);
+			fprintf(stderr, "gendata: file %s already exists, "
+			    "overwrite? [Y/n] ", path);
+			fgets(r, INPUT_BUFFER_SIZE, stdin);
+			if (r[0] != '\n' && r[0] != 'Y' && r[0] != 'y') {
+				fprintf(stderr, "gendata: aborting.\n");
+				return -1;
+			}
+		}
+
 		file = fopen(path, "wb");
 		if (file != NULL)
 			break;
