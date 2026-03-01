@@ -53,6 +53,7 @@
 		#define WRAPTHREADS_NOTHREADS 1
 	#endif
 
+#endif
 
 #if WRAPTHREADS_NOTHREADS
 
