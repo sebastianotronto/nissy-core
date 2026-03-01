@@ -78,7 +78,7 @@ STATIC_INLINE void h48_prune_restore_inverse(const h48_prune_t [static 1],
 STATIC int64_t solve_h48_maketasks(
     dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
     solve_h48_task_t [static H48_STARTING_CUBES], int [static 1]);
-STATIC void *solve_h48_runthread(void *);
+STATIC wrapthread_return_t solve_h48_runthread(void *);
 STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [static 1]);
 STATIC void solve_h48_log_solutions(solution_list_t [static 1], size_t);
 STATIC int solve_h48_compare_tasks(const void *, const void *);
@@ -383,7 +383,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
 	return ret;
 }
 
-STATIC void *
+STATIC wrapthread_return_t 
 solve_h48_runthread(void *arg)
 {
 	int i, j;
@@ -445,7 +445,7 @@ solve_h48_runthread(void *arg)
 
 solve_h48_runthread_end:
 	dfsarg->thread_done = true;
-	return NULL;
+	return wrapthread_return_val;
 }
 
 STATIC int64_t

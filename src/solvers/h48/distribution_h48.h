@@ -4,11 +4,11 @@ needed for H48 because of the intertwined fallback table, and it is easier
 to have some duplication than to make these functions needlessly generic.
 */
 
-STATIC void *getdistribution_h48_runthread(void *);
+STATIC wrapthread_return_t getdistribution_h48_runthread(void *);
 STATIC void getdistribution_h48(const unsigned char *,
     uint64_t [static INFO_DISTRIBUTION_LEN], const tableinfo_t [static 1]);
 
-STATIC void *
+STATIC wrapthread_return_t 
 getdistribution_h48_runthread(void *arg)
 {
 	getdistribution_data_t *data = (getdistribution_data_t *)arg;
@@ -33,7 +33,7 @@ getdistribution_h48_runthread(void *arg)
 		data->distr[(t & (m << (3*k))) >> (3*k)]--;
 	}
 
-	return NULL;
+	return wrapthread_return_val;
 }
 
 STATIC void

@@ -3,7 +3,7 @@ STATIC long long gendata_h48_dispatch(
 STATIC uint64_t gendata_h48short(gendata_h48short_arg_t [static 1]);
 STATIC int64_t gendata_h48(gendata_h48_arg_t [static 1]);
 STATIC void gendata_h48_maintable(gendata_h48_arg_t [static 1]);
-STATIC void *gendata_h48_runthread(void *);
+STATIC wrapthread_return_t gendata_h48_runthread(void *);
 
 STATIC_INLINE void gendata_h48_mark(gendata_h48_mark_t [static 1]);
 STATIC_INLINE bool gendata_h48_dfs_stop(
@@ -291,7 +291,7 @@ gendata_h48_maintable(gendata_h48_arg_t arg[static 1])
 	writetableinfo(&arg->info, bufsize, (unsigned char *)arg->h48buf);
 }
 
-STATIC void *
+STATIC wrapthread_return_t 
 gendata_h48_runthread(void *arg)
 {
 	uint64_t coord, coordext, coordmin;
@@ -328,7 +328,7 @@ gendata_h48_runthread(void *arg)
 		}
 	}
 
-	return NULL;
+	return wrapthread_return_val;
 }
 
 STATIC void
