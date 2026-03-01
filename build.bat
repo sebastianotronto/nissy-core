@@ -38,7 +38,9 @@ SET STACKSIZE=-Wl,-stack:16777216
 SET LFLAGS=%STACKSIZE%
 
 :: Python libraries - change to match your local installation
-SET PYPATH=%userprofile%\AppData\Local\Programs\Python\Python313
+for /f "delims=" %%i in ('python -c "import sys; print(sys.base_prefix)"') do set PYPATH=%%i
+::SET PYPATH=%userprofile%\AppData\Local\Programs\Python\Python313
+
 SET PYINCLUDE=%PYPATH%\include
 SET PYLIBS=%PYPATH%\libs
 
