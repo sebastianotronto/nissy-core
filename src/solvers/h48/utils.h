@@ -12,7 +12,7 @@ parse_h48h(const char *buf, uint8_t h[static 1])
 {
 	char format_error_msg[100];
 	sprintf(format_error_msg, "[H48] Error parsing H48 solver: must be in "
-	    "'h48h*' format, but got '%s'\n", buf);
+	    "'h48hNN' format, but got '%s'\n", buf);
 
 	buf += 3;
 
@@ -21,6 +21,13 @@ parse_h48h(const char *buf, uint8_t h[static 1])
 		goto parse_h48h_error;
 	}
 	buf++;
+
+	if (strlen(buf) > 2 ||
+	    (strlen(buf) >= 1 && *buf < '1' && *buf > '9') ||
+	    (strlen(buf) == 2 && *buf < '0' && *buf > '9')) {
+		LOG(format_error_msg);
+		goto parse_h48h_error;
+	}
 
 	*h = atoi(buf);
 	if (*h > H48_HMAX) {
