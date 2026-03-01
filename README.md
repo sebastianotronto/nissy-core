@@ -64,9 +64,9 @@ can be used to build the basic shell, while
 Builds and runs the unit tests. See `build.bat help` for a list of
 all available options.
 
-Note: At the moment certain optimizations, such as multithreading and
-advanced CPU instructions, are not supported on Windows.
-Work is ongoing to improve Windows support.
+Note: The build script for Windows does not support all the options
+available with build.sh. If you want to tune the build options, you'll
+have to manually edit the build script.
 
 ## Running tests
 

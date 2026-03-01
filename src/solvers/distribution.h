@@ -10,13 +10,13 @@ typedef struct {
 	const unsigned char *table;
 } getdistribution_data_t;
 
-STATIC void *getdistribution_runthread(void *);
+STATIC wrapthread_return_t getdistribution_runthread(void *);
 STATIC void getdistribution(const unsigned char *,
     uint64_t [static INFO_DISTRIBUTION_LEN], const tableinfo_t [static 1]);
 STATIC bool distribution_equal(const uint64_t [static INFO_DISTRIBUTION_LEN],
     const uint64_t [static INFO_DISTRIBUTION_LEN], uint8_t);
 
-STATIC void *
+STATIC wrapthread_return_t
 getdistribution_runthread(void *arg)
 {
 	getdistribution_data_t *data = (getdistribution_data_t *)arg;
@@ -33,7 +33,7 @@ getdistribution_runthread(void *arg)
 		for (j = 0; j < ENTRIES_PER_BYTE(k); j++)
 			data->distr[(table[i] & (m << (j*k))) >> (j*k)]++;
 
-	return NULL;
+	return wrapthread_return_val;
 }
 
 STATIC void
@@ -60,12 +60,12 @@ getdistribution(
 			.distr = local_distr[i],
 			.table = table,
 		};
-		wrapthread_create(&thread[i], NULL,
+		wrapthread_create(&thread[i],
 		    getdistribution_runthread, &targ[i]);
 	}
 
 	for (i = 0; i < THREADS; i++)
-		wrapthread_join(thread[i], NULL);
+		wrapthread_join(thread[i]);
 
 	memset(distr, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
 	for (i = 0; i < THREADS; i++)

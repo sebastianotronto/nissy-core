@@ -9,15 +9,25 @@ if [%1]==[/d] (
 
 SET CC=clang
 SET CXX=clang++
-SET ARCH=PORTABLE
-SET THREADS=1
+SET THREADS=16
 SET SANITIZE=
 
-:: TODO depends on ARCH variable
-SET ARCHOPTS=
-:: TODO depends on SANITIZE variable
-SET DFLAGS=-g3 -DDEBUG
+SET ARCH=PORTABLE
+clang -march=native -dM -E - < NUL | findstr /C:"__AVX2__" >NUL 2>&1
+if %ERRORLEVEL% EQU 0 (
+    SET ARCH=AVX2
+    SET ARCHOPTS=-mavx2
+    goto :ArchDone
+)
+clang -march=native -dM -E - < NUL | findstr /C:"__ARM_NEON" >NUL 2>&1
+if %ERRORLEVEL% EQU 0 (
+    SET ARCH=NEON
+    goto :ArchDone
+)
+:ArchDone
 
+
+SET DFLAGS=-g3 -DDEBUG
 SET WARNINGS=-Wno-deprecated-declarations
 SET VARIABLES=-DTHREADS=%THREADS% -D%ARCH%
 SET OFLAGS=-O3
@@ -28,7 +38,9 @@ SET STACKSIZE=-Wl,-stack:16777216
 SET LFLAGS=%STACKSIZE%
 
 :: Python libraries - change to match your local installation
-SET PYPATH=%userprofile%\AppData\Local\Programs\Python\Python313
+for /f "delims=" %%i in ('python -c "import sys; print(sys.base_prefix)"') do set PYPATH=%%i
+::SET PYPATH=%userprofile%\AppData\Local\Programs\Python\Python313
+
 SET PYINCLUDE=%PYPATH%\include
 SET PYLIBS=%PYPATH%\libs
 
