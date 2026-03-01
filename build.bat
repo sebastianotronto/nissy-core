@@ -10,7 +10,7 @@ if [%1]==[/d] (
 SET CC=clang
 SET CXX=clang++
 SET ARCH=PORTABLE
-SET THREADS=1
+SET THREADS=16
 SET SANITIZE=
 
 :: TODO depends on ARCH variable

@@ -230,9 +230,9 @@ gendata_h48_maintable(gendata_h48_arg_t arg[static 1])
 
 	inext = 0;
 	count = 0;
-	wrapthread_mutex_init(&shortcubes_mutex, NULL);
+	wrapthread_mutex_init(&shortcubes_mutex);
 	for (i = 0; i < CHUNKS; i++)
-		wrapthread_mutex_init(&table_mutex[i], NULL);
+		wrapthread_mutex_init(&table_mutex[i]);
 	for (i = 0; i < THREADS; i++) {
 		dfsarg[i] = (h48_dfs_arg_t){
 			.h = arg->h,
@@ -251,7 +251,7 @@ gendata_h48_maintable(gendata_h48_arg_t arg[static 1])
 			dfsarg[i].table_mutex[ii] = &table_mutex[ii];
 
 		wrapthread_create(
-		    &thread[i], NULL, gendata_h48_runthread, &dfsarg[i]);
+		    &thread[i], gendata_h48_runthread, &dfsarg[i]);
 	}
 
 	if (NISSY_CANSLEEP) {
@@ -281,7 +281,7 @@ gendata_h48_maintable(gendata_h48_arg_t arg[static 1])
 	}
 
 	for (i = 0; i < THREADS; i++)
-		wrapthread_join(thread[i], NULL);
+		wrapthread_join(thread[i]);
 
 	h48map_destroy(&shortcubes);
 

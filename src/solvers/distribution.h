@@ -60,12 +60,12 @@ getdistribution(
 			.distr = local_distr[i],
 			.table = table,
 		};
-		wrapthread_create(&thread[i], NULL,
+		wrapthread_create(&thread[i],
 		    getdistribution_runthread, &targ[i]);
 	}
 
 	for (i = 0; i < THREADS; i++)
-		wrapthread_join(thread[i], NULL);
+		wrapthread_join(thread[i]);
 
 	memset(distr, 0, INFO_DISTRIBUTION_LEN * sizeof(uint64_t));
 	for (i = 0; i < THREADS; i++)

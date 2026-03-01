@@ -9,13 +9,32 @@
 
 #define wrapthread_define_if_threads(T, x) T x; (void)(x)
 
-#define wrapthread_create(a, b, c, d) c(d)
-#define wrapthread_join(a, b)
-#define wrapthread_mutex_init(a, b)
+#define wrapthread_create(t, f, arg) f(arg)
+#define wrapthread_join(a)
+#define wrapthread_mutex_init(a)
 #define wrapthread_mutex_lock(a)
 #define wrapthread_mutex_unlock(a)
 
-#else
+#elif defined(_WIN32)
+
+#include <threads.h>
+
+#define wrapthread_atomic _Atomic
+
+#define wrapthread_define_var_thread_t(x) thrd_t x
+#define wrapthread_define_var_mutex_t(x) mtx_t x
+#define wrapthread_define_struct_thread_t(x) thrd_t x
+#define wrapthread_define_struct_mutex_t(x) mtx_t x
+
+#define wrapthread_define_if_threads(T, x) T x
+
+#define wrapthread_create(a, f, arg) thrd_create(a, (int(*)(void *))f, arg)
+#define wrapthread_join(a) thrd_join(a, NULL)
+#define wrapthread_mutex_init(a) mtx_init(a, mtx_plain)
+#define wrapthread_mutex_lock(a) mtx_lock(a)
+#define wrapthread_mutex_unlock(a) mtx_unlock(a)
+
+#elif defined(__unix__)
 
 #include <pthread.h>
 
@@ -28,9 +47,9 @@
 
 #define wrapthread_define_if_threads(T, x) T x
 
-#define wrapthread_create(a, b, c, d) pthread_create(a, b, c, d)
-#define wrapthread_join(a, b) pthread_join(a, b)
-#define wrapthread_mutex_init(a, b) pthread_mutex_init(a, b)
+#define wrapthread_create(a, f, arg) pthread_create(a, NULL, f, arg)
+#define wrapthread_join(a) pthread_join(a, NULL)
+#define wrapthread_mutex_init(a) pthread_mutex_init(a, NULL)
 #define wrapthread_mutex_lock(a) pthread_mutex_lock(a)
 #define wrapthread_mutex_unlock(a) pthread_mutex_unlock(a)
 

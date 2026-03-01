@@ -638,7 +638,7 @@ solve_h48(
 
 	}
 
-	wrapthread_mutex_init(&solutions_mutex, NULL);
+	wrapthread_mutex_init(&solutions_mutex);
 
 	mtarg = (dfsarg_solve_h48_maketasks_t) {
 		.cube = oc.cube,
@@ -689,7 +689,7 @@ solve_h48(
 			arg[i].target_depth = d;
 			arg[i].thread_done = false;
 			wrapthread_create(
-			    &thread[i], NULL, solve_h48_runthread, &arg[i]);
+			    &thread[i], solve_h48_runthread, &arg[i]);
 		}
 
 		/* Log solutions and handle pause / stop / resume */
@@ -718,7 +718,7 @@ solve_h48(
 		}
 
 		for (i = 0; i < threads; i++)
-			wrapthread_join(thread[i], NULL);
+			wrapthread_join(thread[i]);
 
 		solve_h48_log_solutions(&sollist, lastused);
 		lastused = sollist.used;
