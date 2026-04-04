@@ -1,7 +1,7 @@
 typedef struct {
 	const char *solvername;
 	const char *prefix;
-	long long (*dataid)(const char *, char [static NISSY_SIZE_DATAID]);
+	long long (*dataid)(const char *, char [SIZE(NISSY_SIZE_DATAID)]);
 	long long (*gendata)(
 	    const char *, unsigned long long, unsigned char *);
 	long long (*checkdata)(
@@ -9,7 +9,7 @@ typedef struct {
 	long long (*solve)(oriented_cube_t, const char *, unsigned, unsigned,
 	    unsigned, unsigned, unsigned, unsigned, unsigned long long,
 	    const unsigned char *, unsigned, char *,
-	    long long [static NISSY_SIZE_SOLVE_STATS],
+	    long long [SIZE(NISSY_SIZE_SOLVE_STATS)],
 	    int (*)(void *), void *);
 } solver_dispatch_t;
 

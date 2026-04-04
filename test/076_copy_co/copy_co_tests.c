@@ -1,7 +1,7 @@
 #include "../test.h"
 
 void copy_co(cube_t *, cube_t);
-void pieces(cube_t *, uint8_t [static 8], uint8_t [static 12]);
+void pieces(cube_t *, uint8_t [SIZE(8)], uint8_t [SIZE(12)]);
 
 void run(void) {
 	char str[STRLENMAX];

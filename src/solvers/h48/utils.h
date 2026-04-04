@@ -4,11 +4,11 @@
 #define H48_HMAX UINT8_C(7)
 #endif
 
-long long parse_h48h(const char *, uint8_t [static 1]);
-STATIC long long dataid_h48(const char *, char [static NISSY_SIZE_DATAID]);
+long long parse_h48h(const char *, uint8_t [NON_NULL]);
+STATIC long long dataid_h48(const char *, char [SIZE(NISSY_SIZE_DATAID)]);
 
 long long
-parse_h48h(const char *buf, uint8_t h[static 1])
+parse_h48h(const char *buf, uint8_t h[NON_NULL])
 {
 	char format_error_msg[100];
 	sprintf(format_error_msg, "[H48] Error parsing H48 solver: must be in "
@@ -51,7 +51,7 @@ parse_h48h_error:
 }
 
 STATIC long long
-dataid_h48(const char *str, char buf[static NISSY_SIZE_DATAID])
+dataid_h48(const char *str, char buf[SIZE(NISSY_SIZE_DATAID)])
 {
 	uint8_t h;
 	long long err;

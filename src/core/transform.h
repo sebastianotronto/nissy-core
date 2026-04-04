@@ -17,9 +17,9 @@
         invertco(compose(compose(TRANS_CUBE_ ## T, c), \
         TRANS_CUBE_ ## T ## _INVERSE))
 
-STATIC uint8_t readtrans(const char [static NISSY_SIZE_TRANSFORMATION]);
-STATIC uint8_t readrotation(const char [static 2]);
-STATIC void writetrans(uint8_t, char [static NISSY_SIZE_TRANSFORMATION]);
+STATIC uint8_t readtrans(const char [SIZE(NISSY_SIZE_TRANSFORMATION)]);
+STATIC uint8_t readrotation(const char [SIZE(2)]);
+STATIC void writetrans(uint8_t, char [SIZE(NISSY_SIZE_TRANSFORMATION)]);
 
 STATIC cube_t transform_edges(cube_t, uint8_t);
 STATIC cube_t transform_corners(cube_t, uint8_t);
@@ -29,7 +29,7 @@ STATIC_INLINE uint8_t inverse_trans(uint8_t);
 STATIC uint64_t symmetry_mask(cube_t);
 
 STATIC uint8_t
-readtrans(const char buf[static NISSY_SIZE_TRANSFORMATION])
+readtrans(const char buf[SIZE(NISSY_SIZE_TRANSFORMATION)])
 {
 	uint8_t t;
 
@@ -41,7 +41,7 @@ readtrans(const char buf[static NISSY_SIZE_TRANSFORMATION])
 }
 
 STATIC uint8_t
-readrotation(const char buf[static 2])
+readrotation(const char buf[SIZE(2)])
 {
 	char trans_str[NISSY_SIZE_TRANSFORMATION];
 
@@ -53,7 +53,7 @@ readrotation(const char buf[static 2])
 }
 
 STATIC void
-writetrans(uint8_t t, char buf[static NISSY_SIZE_TRANSFORMATION])
+writetrans(uint8_t t, char buf[SIZE(NISSY_SIZE_TRANSFORMATION)])
 {
 	if (t >= 48)
 		memcpy(buf, "error trans", 11);

@@ -64,27 +64,27 @@ typedef struct {
 STATIC long long solve_h48_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
-    long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
-STATIC_INLINE void h48_prune_pipeline(dfsarg_solve_h48_t [static 1],
-    h48_prune_t [static NMOVES], uint8_t, bool);
+    long long [SIZE(NISSY_SIZE_SOLVE_STATS)], int (*)(void *), void *);
+STATIC_INLINE void h48_prune_pipeline(dfsarg_solve_h48_t [NON_NULL],
+    h48_prune_t [SIZE(NMOVES)], uint8_t, bool);
 STATIC_INLINE uint8_t h48_prune_lookup(
-    uint64_t, cube_t, dfsarg_solve_h48_t [static 1]);
+    uint64_t, cube_t, dfsarg_solve_h48_t [NON_NULL]);
 STATIC_INLINE uint8_t h48_prune_lookup_nocoord(
-    cube_t, dfsarg_solve_h48_t [static 1]);
-STATIC_INLINE void h48_prune_restore_normal(const h48_prune_t [static 1],
-    dfsarg_solve_h48_t [static 1], uint8_t);
-STATIC_INLINE void h48_prune_restore_inverse(const h48_prune_t [static 1],
-    dfsarg_solve_h48_t [static 1], uint8_t);
+    cube_t, dfsarg_solve_h48_t [NON_NULL]);
+STATIC_INLINE void h48_prune_restore_normal(const h48_prune_t [NON_NULL],
+    dfsarg_solve_h48_t [NON_NULL], uint8_t);
+STATIC_INLINE void h48_prune_restore_inverse(const h48_prune_t [NON_NULL],
+    dfsarg_solve_h48_t [NON_NULL], uint8_t);
 STATIC int64_t solve_h48_maketasks(
-    dfsarg_solve_h48_t [static 1], dfsarg_solve_h48_maketasks_t [static 1],
-    solve_h48_task_t [static H48_STARTING_CUBES], int [static 1]);
+    dfsarg_solve_h48_t [NON_NULL], dfsarg_solve_h48_maketasks_t [NON_NULL],
+    solve_h48_task_t [SIZE(H48_STARTING_CUBES)], int [NON_NULL]);
 STATIC wrapthread_return_t solve_h48_runthread(void *);
-STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [static 1]);
-STATIC void solve_h48_log_solutions(solution_list_t [static 1], size_t);
+STATIC int64_t solve_h48_dfs(dfsarg_solve_h48_t [NON_NULL]);
+STATIC void solve_h48_log_solutions(solution_list_t [NON_NULL], size_t);
 STATIC int solve_h48_compare_tasks(const void *, const void *);
 STATIC int64_t solve_h48(oriented_cube_t, uint8_t, uint8_t, uint64_t, uint8_t,
     uint8_t, uint64_t, const unsigned char *, size_t, char *,
-    long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
+    long long [SIZE(NISSY_SIZE_SOLVE_STATS)], int (*)(void *), void *);
 
 STATIC long long solve_h48_dispatch(
 	oriented_cube_t oc,
@@ -99,7 +99,7 @@ STATIC long long solve_h48_dispatch(
         const unsigned char *data,
         unsigned sols_size,
         char *sols,
-        long long stats[static NISSY_SIZE_SOLVE_STATS],
+        long long stats[SIZE(NISSY_SIZE_SOLVE_STATS)],
         int (*poll_status)(void *),
         void *poll_status_data
 )
@@ -120,7 +120,7 @@ STATIC_INLINE uint8_t
 h48_prune_lookup(
 	uint64_t coord,
 	cube_t cube,
-	dfsarg_solve_h48_t arg[static 1]
+	dfsarg_solve_h48_t arg[NON_NULL]
 )
 {
 	uint8_t p, pmin, pe;
@@ -139,7 +139,7 @@ h48_prune_lookup(
 STATIC_INLINE uint8_t
 h48_prune_lookup_nocoord(
 	cube_t cube,
-	dfsarg_solve_h48_t arg[static 1]
+	dfsarg_solve_h48_t arg[NON_NULL]
 )
 {
 	uint32_t cdata;
@@ -152,8 +152,8 @@ h48_prune_lookup_nocoord(
 
 STATIC_INLINE void
 h48_prune_pipeline(
-	dfsarg_solve_h48_t arg[static 1],
-	h48_prune_t prune[static NMOVES],
+	dfsarg_solve_h48_t arg[NON_NULL],
+	h48_prune_t prune[SIZE(NMOVES)],
 	uint8_t target,
 	bool normal
 )
@@ -252,8 +252,8 @@ h48_prune_pipeline(
 
 STATIC_INLINE void
 h48_prune_restore_normal(
-	const h48_prune_t prune[static 1],
-	dfsarg_solve_h48_t arg[static 1],
+	const h48_prune_t prune[NON_NULL],
+	dfsarg_solve_h48_t arg[NON_NULL],
 	uint8_t target
 )
 {
@@ -276,8 +276,8 @@ h48_prune_restore_normal(
 
 STATIC_INLINE void
 h48_prune_restore_inverse(
-	const h48_prune_t prune[static 1],
-	dfsarg_solve_h48_t arg[static 1],
+	const h48_prune_t prune[NON_NULL],
+	dfsarg_solve_h48_t arg[NON_NULL],
 	uint8_t target
 )
 {
@@ -299,7 +299,7 @@ h48_prune_restore_inverse(
 }
 
 STATIC int64_t
-solve_h48_dfs(dfsarg_solve_h48_t arg[static 1])
+solve_h48_dfs(dfsarg_solve_h48_t arg[NON_NULL])
 {
 	int64_t ret, n;
 	uint8_t m, nm, nn, ni, target;
@@ -450,10 +450,10 @@ solve_h48_runthread_end:
 
 STATIC int64_t
 solve_h48_maketasks(
-	dfsarg_solve_h48_t solve_arg[static 1],
-	dfsarg_solve_h48_maketasks_t mtarg[static 1],
-	solve_h48_task_t tasks[static H48_STARTING_CUBES],
-	int ntasks[static 1]
+	dfsarg_solve_h48_t solve_arg[NON_NULL],
+	dfsarg_solve_h48_maketasks_t mtarg[NON_NULL],
+	solve_h48_task_t tasks[SIZE(H48_STARTING_CUBES)],
+	int ntasks[NON_NULL]
 )
 {
 	int r;
@@ -524,7 +524,7 @@ solve_h48_maketasks(
 }
 
 STATIC void
-solve_h48_log_solutions(solution_list_t s[static 1], size_t e)
+solve_h48_log_solutions(solution_list_t s[NON_NULL], size_t e)
 {
 	size_t i;
 	char b;
@@ -561,7 +561,7 @@ solve_h48(
 	const unsigned char *data,
 	size_t solutions_size,
 	char *solutions,
-	long long stats[static NISSY_SIZE_SOLVE_STATS],
+	long long stats[SIZE(NISSY_SIZE_SOLVE_STATS)],
 	int (*poll_status)(void *),
 	void *poll_status_data
 )

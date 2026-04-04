@@ -4,15 +4,15 @@
 STATIC uint8_t readmove(char);
 STATIC int64_t readmoves(const char *,
     size_t, size_t, size_t *, size_t *, uint8_t *, uint8_t *);
-STATIC int64_t readmoves_struct(const char *, moves_struct_t [static 1]);
+STATIC int64_t readmoves_struct(const char *, moves_struct_t [NON_NULL]);
 STATIC int64_t countmoves(const char *);
 STATIC bool moves_struct_equal(
-    const moves_struct_t [static 1], const moves_struct_t [static 1]);
+    const moves_struct_t [NON_NULL], const moves_struct_t [NON_NULL]);
 STATIC long long comparemoves(const char *, const char *);
 STATIC uint8_t readmodifier(char);
 STATIC int64_t writemoves(size_t, const uint8_t *, size_t, char *);
 STATIC int64_t writemoves_struct(
-    const moves_struct_t [static 1], size_t, char *);
+    const moves_struct_t [NON_NULL], size_t, char *);
 
 STATIC_INLINE bool allowednextmove(uint8_t, uint8_t);
 STATIC bool allowedmoves(size_t, const uint8_t *);
@@ -36,9 +36,9 @@ STATIC bool are_lastmoves_singlecw(size_t, const uint8_t*);
 
 STATIC int64_t move_variations(const char *, const char *, size_t, char *);
 STATIC int64_t move_variations_lastqt(
-    const moves_struct_t [static 1], size_t, char *);
+    const moves_struct_t [NON_NULL], size_t, char *);
 STATIC int64_t move_variations_unniss(
-    const moves_struct_t [static 1], size_t, char *);
+    const moves_struct_t [NON_NULL], size_t, char *);
 
 #define FOREACH_READMOVE(ARG_BUF, ARG_MOVE, ARG_C, ARG_MAX, \
 	RET_ERROR, ARG_ACTION) \
@@ -167,7 +167,7 @@ readmoves(
 }
 
 STATIC int64_t
-readmoves_struct(const char *moves, moves_struct_t ret[static 1])
+readmoves_struct(const char *moves, moves_struct_t ret[NON_NULL])
 {
 	return readmoves(moves, NISSY_SIZE_MOVES, NISSY_SIZE_MOVES,
 	    &ret->nnormal, &ret->ninverse, ret->normal, ret->inverse);
@@ -190,8 +190,8 @@ countmoves(const char *buf)
 
 STATIC bool
 moves_struct_equal(
-	const moves_struct_t ms1[static 1],
-	const moves_struct_t ms2[static 1]
+	const moves_struct_t ms1[NON_NULL],
+	const moves_struct_t ms2[NON_NULL]
 )
 {
 	size_t i;
@@ -281,7 +281,7 @@ writemoves_error:
 
 STATIC int64_t
 writemoves_struct(
-	const moves_struct_t moves[static 1],
+	const moves_struct_t moves[NON_NULL],
 	size_t buf_size,
 	char *buf
 )
@@ -612,7 +612,7 @@ move_variations(
 
 STATIC int64_t
 move_variations_lastqt(
-	const moves_struct_t s[static 1],
+	const moves_struct_t s[NON_NULL],
 	size_t result_size,
 	char *result
 )
@@ -686,7 +686,7 @@ lastqt_error:
 
 STATIC int64_t
 move_variations_unniss(
-	const moves_struct_t s[static 1],
+	const moves_struct_t s[NON_NULL],
 	size_t result_size,
 	char *result
 )

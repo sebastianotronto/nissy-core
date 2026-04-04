@@ -1,15 +1,15 @@
 STATIC long long gendata_h48_dispatch(
     const char *, unsigned long long, unsigned char *);
-STATIC uint64_t gendata_h48short(gendata_h48short_arg_t [static 1]);
-STATIC int64_t gendata_h48(gendata_h48_arg_t [static 1]);
-STATIC void gendata_h48_maintable(gendata_h48_arg_t [static 1]);
+STATIC uint64_t gendata_h48short(gendata_h48short_arg_t [NON_NULL]);
+STATIC int64_t gendata_h48(gendata_h48_arg_t [NON_NULL]);
+STATIC void gendata_h48_maintable(gendata_h48_arg_t [NON_NULL]);
 STATIC wrapthread_return_t gendata_h48_runthread(void *);
 
-STATIC_INLINE void gendata_h48_mark(gendata_h48_mark_t [static 1]);
+STATIC_INLINE void gendata_h48_mark(gendata_h48_mark_t [NON_NULL]);
 STATIC_INLINE bool gendata_h48_dfs_stop(
-    cube_t, int8_t, h48_dfs_arg_t [static 1]);
-STATIC void gendata_h48_dfs(h48_dfs_arg_t [static 1]);
-STATIC tableinfo_t makeinfo_h48(gendata_h48_arg_t [static 1]);
+    cube_t, int8_t, h48_dfs_arg_t [NON_NULL]);
+STATIC void gendata_h48_dfs(h48_dfs_arg_t [NON_NULL]);
+STATIC tableinfo_t makeinfo_h48(gendata_h48_arg_t [NON_NULL]);
 
 STATIC const uint32_t *get_cocsepdata_constptr(const unsigned char *);
 STATIC const unsigned char *get_h48data_constptr(const unsigned char *);
@@ -19,7 +19,7 @@ STATIC_INLINE void set_h48_pval(unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE uint8_t get_h48_pvalmin(const unsigned char *, uint64_t);
 STATIC_INLINE void set_h48_pvalmin(unsigned char *, uint64_t, uint8_t);
 STATIC_INLINE uint8_t get_h48_pval_and_min(
-    const unsigned char *, uint64_t, uint8_t [static 1]);
+    const unsigned char *, uint64_t, uint8_t [NON_NULL]);
 
 STATIC long long
 gendata_h48_dispatch(
@@ -43,7 +43,7 @@ gendata_h48_dispatch(
 }
 
 STATIC uint64_t
-gendata_h48short(gendata_h48short_arg_t arg[static 1])
+gendata_h48short(gendata_h48short_arg_t arg[NON_NULL])
 {
 	uint8_t i, m;
 	uint64_t coord;
@@ -77,7 +77,7 @@ gendata_h48short(gendata_h48short_arg_t arg[static 1])
 }
 
 STATIC int64_t
-gendata_h48(gendata_h48_arg_t arg[static 1])
+gendata_h48(gendata_h48_arg_t arg[NON_NULL])
 {
 	uint64_t size, cocsepsize, h48size, eoesepsize;
 	long long r;
@@ -149,7 +149,7 @@ gendata_h48(gendata_h48_arg_t arg[static 1])
 }
 
 STATIC void
-gendata_h48_maintable(gendata_h48_arg_t arg[static 1])
+gendata_h48_maintable(gendata_h48_arg_t arg[NON_NULL])
 {
 	/*
 	 * A good base value for the h48 tables have few positions with value
@@ -332,7 +332,7 @@ gendata_h48_runthread(void *arg)
 }
 
 STATIC void
-gendata_h48_dfs(h48_dfs_arg_t arg[static 1])
+gendata_h48_dfs(h48_dfs_arg_t arg[NON_NULL])
 {
 	int8_t d;
 	uint8_t m[4];
@@ -411,7 +411,7 @@ gendata_h48_dfs(h48_dfs_arg_t arg[static 1])
 }
 
 STATIC_INLINE void
-gendata_h48_mark(gendata_h48_mark_t arg[static 1])
+gendata_h48_mark(gendata_h48_mark_t arg[NON_NULL])
 {
 	uint8_t oldval, newval, v;
 	uint64_t coord, coordext, coordmin;
@@ -435,7 +435,7 @@ gendata_h48_mark(gendata_h48_mark_t arg[static 1])
 }
 
 STATIC_INLINE bool
-gendata_h48_dfs_stop(cube_t cube, int8_t d, h48_dfs_arg_t arg[static 1])
+gendata_h48_dfs_stop(cube_t cube, int8_t d, h48_dfs_arg_t arg[NON_NULL])
 {
 	uint64_t val;
 	uint64_t coord, coordext;
@@ -463,7 +463,7 @@ gendata_h48_dfs_stop(cube_t cube, int8_t d, h48_dfs_arg_t arg[static 1])
 }
 
 STATIC tableinfo_t
-makeinfo_h48(gendata_h48_arg_t arg[static 1])
+makeinfo_h48(gendata_h48_arg_t arg[NON_NULL])
 {
 	tableinfo_t info;
 
@@ -533,7 +533,7 @@ STATIC_INLINE uint8_t
 get_h48_pval_and_min(
 	const unsigned char *table,
 	uint64_t coord_noext,
-	uint8_t pval_min[static 1]
+	uint8_t pval_min[NON_NULL]
 )
 {
 	uint64_t iext, imin;

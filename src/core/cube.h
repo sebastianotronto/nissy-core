@@ -1,6 +1,6 @@
 STATIC bool cube_true(cube_t);
 
-STATIC cube_t cubefromarray(uint8_t [static 8], uint8_t [static 12]);
+STATIC cube_t cubefromarray(uint8_t [SIZE(8)], uint8_t [SIZE(12)]);
 STATIC bool isconsistent(oriented_cube_t);
 STATIC bool issolvable(oriented_cube_t);
 STATIC bool issolved(oriented_cube_t);
@@ -29,7 +29,7 @@ cube_true(cube_t cube)
 }
 
 STATIC cube_t
-cubefromarray(uint8_t c[static 8], uint8_t e[static 12])
+cubefromarray(uint8_t c[SIZE(8)], uint8_t e[SIZE(12)])
 {
 	return STATIC_CUBE(
 	    c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7],

@@ -35,7 +35,7 @@ popcount_u32(uint32_t x)
 }
 
 STATIC void
-pieces(cube_t cube[static 1], uint8_t c[static 8], uint8_t e[static 12])
+pieces(cube_t cube[NON_NULL], uint8_t c[SIZE(8)], uint8_t e[SIZE(12)])
 {
 	memcpy(c, cube->corner, 8);
 	memcpy(e, cube->edge, 12);
@@ -155,7 +155,7 @@ inverse(cube_t cube)
 }
 
 STATIC_INLINE void
-copy_co(cube_t cube[static 1], cube_t co)
+copy_co(cube_t cube[NON_NULL], cube_t co)
 {
 	uint8_t c;
 	size_t i;
@@ -280,19 +280,19 @@ invcoord_esep(uint64_t esep)
 }
 
 STATIC_INLINE void
-copy_corners(cube_t dest[static 1], cube_t src)
+copy_corners(cube_t dest[NON_NULL], cube_t src)
 {
 	memcpy(&dest->corner, src.corner, sizeof(src.corner));
 }
 
 STATIC_INLINE void
-copy_edges(cube_t dest[static 1], cube_t src)
+copy_edges(cube_t dest[NON_NULL], cube_t src)
 {
 	memcpy(&dest->edge, src.edge, sizeof(src.edge));
 }
 
 STATIC_INLINE void
-set_eo(cube_t cube[static 1], uint64_t eo)
+set_eo(cube_t cube[NON_NULL], uint64_t eo)
 {
 	uint8_t i, sum, flip;
 

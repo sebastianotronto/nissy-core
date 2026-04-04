@@ -13,20 +13,20 @@ typedef struct {
 	const unsigned char *ptable;
 } dfsarg_solve_coord_t;
 
-STATIC int64_t solve_coord(oriented_cube_t, coord_t [static 1], uint8_t,
+STATIC int64_t solve_coord(oriented_cube_t, coord_t [NON_NULL], uint8_t,
     uint8_t, uint8_t, uint8_t, uint64_t, uint8_t, uint8_t, uint64_t,
     const unsigned char *, size_t, char *, int (*)(void *), void *);
 STATIC long long solve_coord_dispatch(oriented_cube_t, const char *, unsigned,
     unsigned, unsigned, unsigned, unsigned, unsigned, unsigned long long,
     const unsigned char *, unsigned, char *,
-    long long [static NISSY_SIZE_SOLVE_STATS], int (*)(void *), void *);
-STATIC bool coord_solution_admissible(const dfsarg_solve_coord_t [static 1]);
-STATIC bool coord_continue_onnormal(const dfsarg_solve_coord_t [static 1]);
-STATIC bool coord_continue_oninverse(const dfsarg_solve_coord_t [static 1]);
-STATIC int64_t solve_coord_dfs(dfsarg_solve_coord_t [static 1]);
+    long long [SIZE(NISSY_SIZE_SOLVE_STATS)], int (*)(void *), void *);
+STATIC bool coord_solution_admissible(const dfsarg_solve_coord_t [NON_NULL]);
+STATIC bool coord_continue_onnormal(const dfsarg_solve_coord_t [NON_NULL]);
+STATIC bool coord_continue_oninverse(const dfsarg_solve_coord_t [NON_NULL]);
+STATIC int64_t solve_coord_dfs(dfsarg_solve_coord_t [NON_NULL]);
 
 STATIC bool
-coord_solution_admissible(const dfsarg_solve_coord_t arg[static 1])
+coord_solution_admissible(const dfsarg_solve_coord_t arg[NON_NULL])
 {
 	uint8_t n;
 
@@ -39,7 +39,7 @@ coord_solution_admissible(const dfsarg_solve_coord_t arg[static 1])
 }
 
 STATIC bool
-coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
+coord_continue_onnormal(const dfsarg_solve_coord_t arg[NON_NULL])
 {
 	uint8_t flag, nn, ni, swbound_n, swbound_i, pval;
 	uint64_t coord;
@@ -93,7 +93,7 @@ coord_continue_onnormal(const dfsarg_solve_coord_t arg[static 1])
 }
 
 STATIC bool
-coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
+coord_continue_oninverse(const dfsarg_solve_coord_t arg[NON_NULL])
 {
 	uint8_t flag, nn, ni, swbound_n, swbound_i, pval;
 	uint64_t coord;
@@ -147,7 +147,7 @@ coord_continue_oninverse(const dfsarg_solve_coord_t arg[static 1])
 }
 
 STATIC int64_t
-solve_coord_dfs(dfsarg_solve_coord_t arg[static 1])
+solve_coord_dfs(dfsarg_solve_coord_t arg[NON_NULL])
 {
 	bool lastbackup;
 	uint8_t m, l, nnbackup, nibackup, nmoves;
@@ -258,7 +258,7 @@ solve_coord_dispatch(
 	const unsigned char *data,
 	unsigned solutions_size,
 	char *sols,
-	long long stats[static NISSY_SIZE_SOLVE_STATS],
+	long long stats[SIZE(NISSY_SIZE_SOLVE_STATS)],
 	int (*poll_status)(void *),
 	void *poll_status_data
 )
@@ -288,7 +288,7 @@ solve_coord_dispatch(
 STATIC int64_t
 solve_coord(
 	oriented_cube_t oc,
-	coord_t coord [static 1],
+	coord_t coord [NON_NULL],
 	uint8_t trans,
 	uint8_t nissflag,
 	uint8_t minmoves,

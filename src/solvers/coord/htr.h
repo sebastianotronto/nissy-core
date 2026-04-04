@@ -4,7 +4,7 @@ STATIC bool coordinate_htr_isnasty(uint64_t, const unsigned char *);
 STATIC size_t coordinate_htr_gendata(unsigned char *);
 
 STATIC bool htr_checkmoves(bool *, uint8_t, const uint8_t *);
-STATIC bool htr_solution_prune(const solution_moves_t [static 1]);
+STATIC bool htr_solution_prune(const solution_moves_t [NON_NULL]);
 STATIC bool is_cp_htr(uint64_t, const unsigned char *);
 
 STATIC coord_t coordinate_htr = {
@@ -97,7 +97,7 @@ htr_checkmoves(bool *f, uint8_t n, const uint8_t *moves)
 }
 
 STATIC bool
-htr_solution_prune(const solution_moves_t s[static 1])
+htr_solution_prune(const solution_moves_t s[NON_NULL])
 {
 	bool f;
 

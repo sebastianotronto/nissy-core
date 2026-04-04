@@ -1,35 +1,35 @@
-STATIC void solution_moves_reset(solution_moves_t [static 1]);
-STATIC void solution_moves_transform(solution_moves_t [static 1], size_t,
+STATIC void solution_moves_reset(solution_moves_t [NON_NULL]);
+STATIC void solution_moves_transform(solution_moves_t [NON_NULL], size_t,
     uint8_t);
-STATIC void solution_moves_reorient(solution_moves_t [static 1], uint8_t);
-STATIC bool solution_list_init(solution_list_t [static 1], size_t, char *);
+STATIC void solution_moves_reorient(solution_moves_t [NON_NULL], uint8_t);
+STATIC bool solution_list_init(solution_list_t [NON_NULL], size_t, char *);
 STATIC bool solution_moves_equal(
-    const solution_moves_t [static 1], const solution_moves_t [static 1]);
-STATIC bool last_solution_is_duplicate(const solution_list_t [static 1]);
-STATIC bool appendchar(solution_list_t [static 1], char);
+    const solution_moves_t [NON_NULL], const solution_moves_t [NON_NULL]);
+STATIC bool last_solution_is_duplicate(const solution_list_t [NON_NULL]);
+STATIC bool appendchar(solution_list_t [NON_NULL], char);
 STATIC bool appendnormal(
-    const solution_moves_t [static 1], solution_list_t [static 1]);
+    const solution_moves_t [NON_NULL], solution_list_t [NON_NULL]);
 STATIC bool appendinverse(
-    const solution_moves_t [static 1], solution_list_t [static 1]);
-STATIC void appendsolution_dfs(const solution_moves_t [static 1], size_t,
-    const uint64_t *, size_t, uint8_t *, const solution_settings_t [static 1],
-    solution_list_t [static 1],
-    solution_moves_t [static NTRANS * SOLUTION_MAXLEN], int64_t [static 1]);
-STATIC int64_t appendsolution(const solution_moves_t [static 1],
-    size_t, const uint64_t *, const solution_settings_t [static 1],
-    solution_list_t [static 1]);
-STATIC bool solutions_done(const solution_list_t [static 1],
-    const solution_settings_t [static 1], int8_t depth);
+    const solution_moves_t [NON_NULL], solution_list_t [NON_NULL]);
+STATIC void appendsolution_dfs(const solution_moves_t [NON_NULL], size_t,
+    const uint64_t *, size_t, uint8_t *, const solution_settings_t [NON_NULL],
+    solution_list_t [NON_NULL],
+    solution_moves_t [static NTRANS * SOLUTION_MAXLEN], int64_t [NON_NULL]);
+STATIC int64_t appendsolution(const solution_moves_t [NON_NULL],
+    size_t, const uint64_t *, const solution_settings_t [NON_NULL],
+    solution_list_t [NON_NULL]);
+STATIC bool solutions_done(const solution_list_t [NON_NULL],
+    const solution_settings_t [NON_NULL], int8_t depth);
 
 STATIC void
-solution_moves_reset(solution_moves_t sol[static 1])
+solution_moves_reset(solution_moves_t sol[NON_NULL])
 {
 	sol->nmoves = 0;
 	sol->npremoves = 0;
 }
 
 STATIC void
-solution_moves_transform(solution_moves_t moves[static 1], size_t z, uint8_t t)
+solution_moves_transform(solution_moves_t moves[NON_NULL], size_t z, uint8_t t)
 {
 	uint8_t i;
 
@@ -41,7 +41,7 @@ solution_moves_transform(solution_moves_t moves[static 1], size_t z, uint8_t t)
 }
 
 STATIC void
-solution_moves_reorient(solution_moves_t moves[static 1], uint8_t or)
+solution_moves_reorient(solution_moves_t moves[NON_NULL], uint8_t or)
 {
 	uint8_t i;
 
@@ -55,7 +55,7 @@ solution_moves_reorient(solution_moves_t moves[static 1], uint8_t or)
 }
 
 STATIC bool
-solution_list_init(solution_list_t sols[static 1], size_t n, char *buf)
+solution_list_init(solution_list_t sols[NON_NULL], size_t n, char *buf)
 {
 	if (n == 0)
 		return false;
@@ -72,8 +72,8 @@ solution_list_init(solution_list_t sols[static 1], size_t n, char *buf)
 
 STATIC bool
 solution_moves_equal(
-	const solution_moves_t a[static 1],
-	const solution_moves_t b[static 1]
+	const solution_moves_t a[NON_NULL],
+	const solution_moves_t b[NON_NULL]
 )
 {
 	uint8_t i;
@@ -93,7 +93,7 @@ solution_moves_equal(
 }
 
 STATIC bool
-last_solution_is_duplicate(const solution_list_t l[static 1])
+last_solution_is_duplicate(const solution_list_t l[NON_NULL])
 {
 	size_t i, j;
 
@@ -119,7 +119,7 @@ last_solution_is_duplicate(const solution_list_t l[static 1])
 }
 
 STATIC bool
-appendchar(solution_list_t solutions[static 1], char c)
+appendchar(solution_list_t solutions[NON_NULL], char c)
 {
 	if (solutions->size <= solutions->used)
 		return false;
@@ -131,8 +131,8 @@ appendchar(solution_list_t solutions[static 1], char c)
 
 STATIC bool
 appendnormal(
-	const solution_moves_t moves[static 1],
-	solution_list_t list[static 1]
+	const solution_moves_t moves[NON_NULL],
+	solution_list_t list[NON_NULL]
 )
 {
 	int64_t strl;
@@ -150,8 +150,8 @@ appendnormal(
 
 STATIC bool
 appendinverse(
-	const solution_moves_t moves[static 1],
-	solution_list_t list[static 1]
+	const solution_moves_t moves[NON_NULL],
+	solution_list_t list[NON_NULL]
 )
 {
 	int64_t strl;
@@ -172,15 +172,15 @@ appendinverse(
 
 STATIC void
 appendsolution_dfs(
-	const solution_moves_t moves[static 1],
+	const solution_moves_t moves[NON_NULL],
 	size_t ntmask,
 	const uint64_t *tmask,
 	size_t itm,
 	uint8_t *tt,
-	const solution_settings_t settings[static 1],
-	solution_list_t list[static 1],
+	const solution_settings_t settings[NON_NULL],
+	solution_list_t list[NON_NULL],
 	solution_moves_t tsol[static NTRANS * SOLUTION_MAXLEN],
-	int64_t r[static 1]
+	int64_t r[NON_NULL]
 )
 {
 	/*
@@ -276,11 +276,11 @@ appendsolution_dfs_error_buffer:
 
 STATIC int64_t
 appendsolution(
-	const solution_moves_t moves[static 1],
+	const solution_moves_t moves[NON_NULL],
 	size_t ntmask,
 	const uint64_t *tmask,
-	const solution_settings_t settings[static 1],
-	solution_list_t list[static 1]
+	const solution_settings_t settings[NON_NULL],
+	solution_list_t list[NON_NULL]
 )
 {
 	int64_t r;
@@ -329,8 +329,8 @@ appendsolution_error_solution_length:
 
 STATIC bool
 solutions_done(
-	const solution_list_t list[static 1],
-	const solution_settings_t settings[static 1],
+	const solution_list_t list[NON_NULL],
+	const solution_settings_t settings[NON_NULL],
 	int8_t depth
 )
 {

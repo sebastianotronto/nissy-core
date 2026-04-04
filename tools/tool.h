@@ -18,10 +18,9 @@
 static void log_stderr(const char *, void *);
 static double timerun(void (*)(void));
 static void writetable(const unsigned char *, int64_t, const char *);
-static long long int generatetable(const char *, unsigned char **,
-    char [static NISSY_SIZE_DATAID]);
+static long long int generatetable(const char *, unsigned char **, char *);
 static int getdata(const char *, unsigned char **, const char *);
-static void gendata_run(const char *, uint64_t[static 21]);
+static void gendata_run(const char *, uint64_t *);
 
 static void
 log_stderr(const char *str, void *unused)
@@ -113,7 +112,7 @@ static long long int
 generatetable(
 	const char *solver,
 	unsigned char **buf,
-	char dataid[static NISSY_SIZE_DATAID]
+	char *dataid
 )
 {
 	long long int size, gensize;
@@ -183,7 +182,7 @@ getdata_error_nofree:
 static void
 gendata_run(
 	const char *solver,
-	uint64_t expected[static 21]
+	uint64_t *expected
 ) {
 	long long int size;
 	char filename[1024], dataid[NISSY_SIZE_DATAID];

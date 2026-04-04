@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../src/utils/compilers.h"
 #include "../src/utils/wrapthread.h"
 #include "../src/nissy.h"
 #include "../src/arch/arch.h"

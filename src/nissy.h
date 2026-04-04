@@ -149,7 +149,9 @@ Compute the inverse of the given cube.
 
 Parameters:
    cube   - The cube to be inverted.
+            Required size: NISSY_SIZE_CUBE.
    result - The return parameter for the resulting cube.
+            Required size: NISSY_SIZE_CUBE.
 
 Return values:
    NISSY_OK                  - The cube was inverted succesfully.
@@ -161,8 +163,8 @@ Return values:
 */
 long long
 nissy_inverse(
-	const char cube[static NISSY_SIZE_CUBE],
-	char result[static NISSY_SIZE_CUBE]
+	const char cube[], /* NISSY_SIZE_CUBE */
+	char result[]      /* NISSY_SIZE_CUBE */
 );
 
 /*
@@ -170,8 +172,10 @@ Apply the given sequence of moves on the given cube.
 
 Parameters:
    cube   - The cube to move.
+            Required size: NISSY_SIZE_CUBE.
    moves  - The moves to apply to the cube. Must be a NULL-terminated string.
    result - The return parameter for the resulting cube.
+            Required size: NISSY_SIZE_CUBE.
 
 Return values:
    NISSY_OK                  - The moves were applied succesfully.
@@ -184,9 +188,9 @@ Return values:
 */
 long long
 nissy_applymoves(
-	const char cube[static NISSY_SIZE_CUBE],
+	const char cube[], /* NISSY_SIZE_CUBE */
 	const char *moves,
-	char result[static NISSY_SIZE_CUBE]
+	char result[]      /* NISSY_SIZE_CUBE */
 );
 
 /*
@@ -194,8 +198,11 @@ Apply the single given transformation to the given cube.
 
 Parameters:
    cube           - The cube to be transformed.
+                    Required size: NISSY_SIZE_CUBE.
    transformation - The transformation in "(rotation|mirrored) __" format.
+                    Required size: NISSY_SIZE_TRANSFORMATION.
    result         - The return parameter for the resulting cube.
+                    Required size: NISSY_SIZE_CUBE.
 
 Return values:
    NISSY_OK                  - The transformation was performed succesfully.
@@ -206,9 +213,9 @@ Return values:
 */
 long long
 nissy_applytrans(
-	const char cube[static NISSY_SIZE_CUBE],
-	const char transformation[static NISSY_SIZE_TRANSFORMATION],
-	char result[static NISSY_SIZE_CUBE]
+	const char cube[],           /* NISSY_SIZE_CUBE */
+	const char transformation[], /* NISSY_SIZE_TRANSFORMATION */
+	char result[]                /* NISSY_SIZE_CUBE */
 );
 
 /*
@@ -256,6 +263,7 @@ Parameters:
    orient  - The orientation of the cube, 0 <= orient < 24
    options - Other options.
    result  - The return parameter for the resulting cube.
+             Required size: NISSY_SIZE_CUBE.
 
 Return values:
    NISSY_OK                 - The cube was generated succesfully.
@@ -270,7 +278,7 @@ nissy_getcube(
 	long long co,
 	long long orient,
 	const char *options,
-	char result[static NISSY_SIZE_CUBE]
+	char result[] /* NISSY_SIZE_CUBE */
 );
 
 /*
@@ -283,6 +291,7 @@ Parameters:
             solvers may use equivalent data. This identifier can be used
             e.g. as a filename or database key to save and retrieve the
             correct data for each solver, without duplication.
+            Required size: NISSY_SIZE_DATAID.
 
 Return values:
    NISSY_ERROR_INVALID_SOLVER - The given solver is not known.
@@ -293,7 +302,7 @@ Return values:
 long long
 nissy_solverinfo(
 	const char *solver,
-	char dataid[static NISSY_SIZE_DATAID]
+	char dataid[] /* NISSY_SIZE_DATAID */
 );
 
 /*
@@ -350,6 +359,7 @@ Solve the given cube using the given solver and options.
 
 Parameters:
    cube             - The cube to solver.
+                      Required size: NISSY_SIZE_CUBE.
    solver           - The name of the solver. See doc/solvers.md for a list.
    nissflag         - The flags for NISS (linear, inverse, mixed, or
                       combinations; see the constants at the top of this file).
@@ -370,6 +380,7 @@ Parameters:
                       separated by a '\n' (newline) and a '\0' (NULL character)
                       terminates the list.
    stats            - An array to store some statistics about the solve.
+                      Required size: NISSY_SIZE_SOLVE_STATS.
    poll_status      - A callback function that should return the current
                       requested status for the solver (e.g. run, stop, pause,
                       resume; see the constants at the top of this file). The
@@ -391,7 +402,7 @@ Return values:
 */
 long long
 nissy_solve(
-	const char cube[static NISSY_SIZE_CUBE],
+	const char cube[], /* NISSY_SIZE_CUBE */
 	const char *solver, 
 	unsigned nissflag,
 	unsigned minmoves,
@@ -403,7 +414,7 @@ nissy_solve(
 	const unsigned char *data,
 	unsigned sols_size,
 	char *sols,
-	long long stats[static NISSY_SIZE_SOLVE_STATS],
+	long long stats[], /* NISSY_SIZE_SOLVE_STATS */
 	int (*poll_status)(void *),
 	void *poll_status_data
 );

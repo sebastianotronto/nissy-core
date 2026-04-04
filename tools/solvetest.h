@@ -13,7 +13,7 @@ bool check_one(
 	const char *aname,
 	const char *bstr,
 	const char *bname,
-	bool exp[static MAXSOLUTIONS]
+	bool *exp
 ) {
 	size_t i, j, nn, lb;
 	char b[MAX_SOLUTION_LEN];

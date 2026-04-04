@@ -1,16 +1,16 @@
 STATIC uint64_t coord_coord_generic(
-    const coord_t [static 1], cube_t, const unsigned char *);
+    const coord_t [NON_NULL], cube_t, const unsigned char *);
 STATIC cube_t coord_cube_generic(
-    const coord_t [static 1], uint64_t, const unsigned char *);
+    const coord_t [NON_NULL], uint64_t, const unsigned char *);
 STATIC bool coord_isnasty_generic(
-    const coord_t [static 1], uint64_t, const unsigned char *);
-STATIC size_t coord_gendata_generic(const coord_t [static 1], unsigned char *);
+    const coord_t [NON_NULL], uint64_t, const unsigned char *);
+STATIC size_t coord_gendata_generic(const coord_t [NON_NULL], unsigned char *);
 
-STATIC bool solution_lastqt_cw(const solution_moves_t [static 1]);
-STATIC bool coord_can_switch(const coord_t [static 1], const unsigned char *,
+STATIC bool solution_lastqt_cw(const solution_moves_t [NON_NULL]);
+STATIC bool coord_can_switch(const coord_t [NON_NULL], const unsigned char *,
     size_t, const uint8_t *);
 STATIC bool coord_is_solved(
-    const coord_t [static 1], uint64_t, const unsigned char *);
+    const coord_t [NON_NULL], uint64_t, const unsigned char *);
 
 STATIC cube_t coordinate_merge_ce(cube_t, cube_t);
 STATIC cube_t coordinate_merge_ec(cube_t, cube_t);
@@ -18,7 +18,7 @@ STATIC cube_t coordinate_merge_cpco(cube_t, cube_t);
 
 STATIC uint64_t
 coord_coord_generic(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	cube_t c,
 	const unsigned char *data
 )
@@ -36,7 +36,7 @@ coord_coord_generic(
 
 STATIC cube_t
 coord_cube_generic(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	uint64_t i,
 	const unsigned char *data
 )
@@ -54,7 +54,7 @@ coord_cube_generic(
 
 STATIC bool
 coord_isnasty_generic(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	uint64_t i,
 	const unsigned char *data
 )
@@ -73,7 +73,7 @@ coord_isnasty_generic(
 
 STATIC size_t
 coord_gendata_generic(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	unsigned char *data
 )
 {
@@ -144,21 +144,21 @@ coord_gendata_generic(
 }
 
 STATIC bool
-solution_lastqt_cw(const solution_moves_t s[static 1])
+solution_lastqt_cw(const solution_moves_t s[NON_NULL])
 {
 	return are_lastmoves_singlecw(s->nmoves, s->moves) &&
 	    are_lastmoves_singlecw(s->npremoves, s->premoves);
 }
 
 STATIC bool
-solution_always_valid(const solution_moves_t s[static 1])
+solution_always_valid(const solution_moves_t s[NON_NULL])
 {
 	return true;
 }
 
 STATIC bool
 coord_can_switch(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	const unsigned char *data,
 	size_t n,
 	const uint8_t *moves
@@ -192,7 +192,7 @@ coord_can_switch(
 
 STATIC bool
 coord_is_solved(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	uint64_t i,
 	const unsigned char *data
 )

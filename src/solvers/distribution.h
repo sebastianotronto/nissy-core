@@ -12,9 +12,9 @@ typedef struct {
 
 STATIC wrapthread_return_t getdistribution_runthread(void *);
 STATIC void getdistribution(const unsigned char *,
-    uint64_t [static INFO_DISTRIBUTION_LEN], const tableinfo_t [static 1]);
-STATIC bool distribution_equal(const uint64_t [static INFO_DISTRIBUTION_LEN],
-    const uint64_t [static INFO_DISTRIBUTION_LEN], uint8_t);
+    uint64_t [SIZE(INFO_DISTRIBUTION_LEN)], const tableinfo_t [NON_NULL]);
+STATIC bool distribution_equal(const uint64_t [SIZE(INFO_DISTRIBUTION_LEN)],
+    const uint64_t [SIZE(INFO_DISTRIBUTION_LEN)], uint8_t);
 
 STATIC wrapthread_return_t
 getdistribution_runthread(void *arg)
@@ -39,8 +39,8 @@ getdistribution_runthread(void *arg)
 STATIC void
 getdistribution(
 	const unsigned char *table,
-	uint64_t distr[static INFO_DISTRIBUTION_LEN],
-	const tableinfo_t info[static 1]
+	uint64_t distr[SIZE(INFO_DISTRIBUTION_LEN)],
+	const tableinfo_t info[NON_NULL]
 ) {
 	getdistribution_data_t targ[THREADS];
 	wrapthread_define_var_thread_t(thread[THREADS]);
@@ -80,8 +80,8 @@ getdistribution(
 
 STATIC bool
 distribution_equal(
-	const uint64_t expected[static INFO_DISTRIBUTION_LEN],
-	const uint64_t actual[static INFO_DISTRIBUTION_LEN],
+	const uint64_t expected[SIZE(INFO_DISTRIBUTION_LEN)],
+	const uint64_t actual[SIZE(INFO_DISTRIBUTION_LEN)],
 	uint8_t maxvalue
 )
 {
