@@ -10,7 +10,7 @@ STATIC void getcube_fix(long long *, long long *,
 STATIC cube_t getcube(uint64_t, uint64_t, uint64_t, uint64_t);
 
 STATIC oriented_cube_t readcube(const char *);
-STATIC int64_t writecube(oriented_cube_t, size_t n, char [n]);
+STATIC int64_t writecube(oriented_cube_t, size_t n, char *);
 STATIC uint8_t readco(const char *);
 STATIC uint8_t readcp(const char *);
 STATIC uint8_t readeo(const char *);
@@ -304,7 +304,7 @@ readcube(const char *buf)
 }
 
 STATIC int64_t
-writecube(oriented_cube_t cube, size_t buf_size, char buf[buf_size])
+writecube(oriented_cube_t cube, size_t buf_size, char *buf)
 {
 	int i;
 	uint8_t corner[8], edge[12];

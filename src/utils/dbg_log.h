@@ -7,8 +7,7 @@ void write_wrapper(void (*)(const char *, void *), const char *, ...);
 void
 write_wrapper(void (*write)(const char *, void *), const char *str, ...)
 {
-	static const size_t len = 1000;
-	char message[len];
+	char message[1000];
 	va_list args;
 
 	va_start(args, str);

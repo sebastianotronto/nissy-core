@@ -14,7 +14,7 @@ STATIC bool appendinverse(
 STATIC void appendsolution_dfs(const solution_moves_t [NON_NULL], size_t,
     const uint64_t *, size_t, uint8_t *, const solution_settings_t [NON_NULL],
     solution_list_t [NON_NULL],
-    solution_moves_t [static NTRANS * SOLUTION_MAXLEN], int64_t [NON_NULL]);
+    solution_moves_t [SIZE(NTRANS * SOLUTION_MAXLEN)], int64_t [NON_NULL]);
 STATIC int64_t appendsolution(const solution_moves_t [NON_NULL],
     size_t, const uint64_t *, const solution_settings_t [NON_NULL],
     solution_list_t [NON_NULL]);
@@ -179,7 +179,7 @@ appendsolution_dfs(
 	uint8_t *tt,
 	const solution_settings_t settings[NON_NULL],
 	solution_list_t list[NON_NULL],
-	solution_moves_t tsol[static NTRANS * SOLUTION_MAXLEN],
+	solution_moves_t tsol[SIZE(NTRANS * SOLUTION_MAXLEN)],
 	int64_t r[NON_NULL]
 )
 {
