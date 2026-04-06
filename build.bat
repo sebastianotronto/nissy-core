@@ -60,11 +60,11 @@ exit /b 1
     SET LFLAGS=/F 16777216
 
     SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% /c src\nissy.c
-    SET CC_SHELL=%CC% %CFLAGS% %ODFALGS% %LFLAGS% nissy.o shell\shell.c /Fe:run.exe
-    SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% /I"%PYINCLUDE%" /LD /Fe:python\nissy.pyd python\nissy_module.c nissy.o /link /LIBPATH:"%PYLIBS%" python3.lib
-    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtest.exe nissy.o
-    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtool.exe nissy.o
-    SET CC_CXX=%CXX% %ODFLAGS% /std:c++20 /Fe:runcpp.exe cpp\nissy.cpp nissy.o
+    SET CC_SHELL=%CC% %CFLAGS% %ODFALGS% %LFLAGS% nissy.obj shell\shell.c /Fe:run.exe
+    SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% /I"%PYINCLUDE%" /LD /Fe:python\nissy.pyd python\nissy_module.c nissy.obj /link /LIBPATH:"%PYLIBS%" python3.lib
+    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtest.exe nissy.obj
+    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtool.exe nissy.obj
+    SET CC_CXX=%CXX% %ODFLAGS% /std:c++20 /Fe:runcpp.exe cpp\nissy.cpp nissy.obj
 goto :compiler_done
 
 :set_clang
@@ -83,11 +83,11 @@ goto :compiler_done
     SET LFLAGS=-Wl,-stack:16777216
 
     SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% -c src\nissy.c
-    SET CC_SHELL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o shell\shell.c -o run.exe
-    SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% -I%PYINCLUDE% -L%PYLIBS% -shared -lpython3 python\nissy_module.c nissy.o -o python\nissy.pyd
-    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtest.exe nissy.o
-    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtool.exe nissy.o
-    SET CC_CXX=%CXX% %ODFLAGS% -std=c++20 -o runcpp.exe cpp\nissy.cpp nissy.o
+    SET CC_SHELL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.obj shell\shell.c -o run.exe
+    SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% -I%PYINCLUDE% -L%PYLIBS% -shared -lpython3 python\nissy_module.c nissy.obj -o python\nissy.pyd
+    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtest.exe nissy.obj
+    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtool.exe nissy.obj
+    SET CC_CXX=%CXX% %ODFLAGS% -std=c++20 -o runcpp.exe cpp\nissy.cpp nissy.obj
 :compiler_done
 
 :: Select compilation target from command line argument
@@ -112,7 +112,7 @@ exit /b 1
     echo.
     echo Possible values for TARGET (defaults to 'nissy' if unspecified):
     echo.
-    echo nissy       Build the nissy.o object file.
+    echo nissy       Build the nissy.obj object file.
     echo python      Build the Python module for nissy.
     echo             NOTE: Python development headers must be installed in
     echo                   order to build the Python module. The path of these
@@ -179,7 +179,7 @@ exit /b
 
 :build_clean
     @echo on
-    del *.o *.so *.a *.ilk *.pdb *.exe
+    del *.o *.obj *.so *.a *.ilk *.pdb *.exe
     @echo off
 exit /b
 
