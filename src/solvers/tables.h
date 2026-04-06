@@ -140,7 +140,7 @@ writetableinfo(
 STATIC void
 append_name(tableinfo_t info[NON_NULL], const char *str)
 {
-	int i, j;
+	size_t i, j;
 
 	for (i = 0, j = strlen(info->solver); str[i] != '\0'; i++, j++)
 		info->solver[j] = str[i];

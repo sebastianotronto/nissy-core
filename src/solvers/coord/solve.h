@@ -151,8 +151,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[NON_NULL])
 {
 	bool lastbackup;
 	uint8_t m, l, nnbackup, nibackup, nmoves;
-	uint32_t mm;
-	uint64_t coord;
+	uint64_t mm, coord;
 	int64_t n, ret;
 	cube_t backup_cube, backup_inverse;
 
@@ -190,7 +189,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[NON_NULL])
 		arg->lastisnormal = true;
 
 		for (m = 0; m < NMOVES; m++) {
-			if (!(mm & (UINT32_C(1) << (uint32_t)m)))
+			if (!(mm & (UINT64_C(1) << (uint64_t)m)))
 				continue;
 
 			arg->solution_moves->moves[l] = m;
@@ -221,7 +220,7 @@ solve_coord_dfs(dfsarg_solve_coord_t arg[NON_NULL])
 		arg->lastisnormal = false;
 		
 		for (m = 0; m < NMOVES; m++) {
-			if (!(mm & (UINT32_C(1) << (uint32_t)m)))
+			if (!(mm & (UINT64_C(1) << (uint64_t)m)))
 				continue;
 
 			arg->solution_moves->premoves[l] = m;
@@ -280,8 +279,9 @@ solve_coord_dispatch(
 		return NISSY_ERROR_INVALID_SOLVER;
 	}
 
-	return solve_coord(oc, coord, trans, nissflag, minmoves, maxmoves,
-	    maxsolutions, optimal, threads, data_size, data,
+	return solve_coord(oc, coord, trans, (uint8_t)nissflag,
+	    (uint8_t)minmoves, (uint8_t)maxmoves, (uint8_t)maxsolutions,
+		(uint8_t)optimal, (uint8_t)threads, data_size, data,
 	    solutions_size, sols, poll_status, poll_status_data);
 }
 

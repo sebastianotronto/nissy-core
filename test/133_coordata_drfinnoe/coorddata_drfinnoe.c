@@ -10,7 +10,7 @@ size_t coordinate_drfinnoe_gendata(unsigned char *);
 
 void run(void) {
 	bool found;
-	uint64_t t;
+	uint8_t t;
 	char str[STRLENMAX];
 	unsigned char *data;
 	size_t size;
@@ -32,8 +32,8 @@ void run(void) {
 			goto cleanup;
 		}
 
-		for (t = 0, found = false; t < 48; t++) {
-			if (!((UINT64_C(1) << t) & TGROUP))
+		for (t = 0, found = false, coord2 = UINT64_MAX; t < 48; t++) {
+			if (!((UINT64_C(1) << (uint64_t)t) & TGROUP))
 				continue;
 
 			coord2 = coordinate_drfinnoe_coord(transform(cube, t), data);

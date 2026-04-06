@@ -29,7 +29,7 @@ parse_h48h(const char *buf, uint8_t h[NON_NULL])
 		goto parse_h48h_error;
 	}
 
-	*h = atoi(buf);
+	*h = (uint8_t)atoi(buf);
 	if (*h > H48_HMAX) {
 		LOG("[H48] Invalid value %" PRIu8 " for parameter h (must be "
 		     "at most %" PRIu8 ")\n", *h, H48_HMAX);

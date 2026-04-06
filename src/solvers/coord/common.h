@@ -77,7 +77,8 @@ coord_gendata_generic(
 	unsigned char *data
 )
 {
-	uint64_t i, j, n, t, nasty;
+	uint64_t i, j, n, nasty;
+	uint8_t t;
 	unsigned char *datanoinfo;
 	uint32_t *classttrep, *rep;
 	size_t coord_datasize;
@@ -122,16 +123,17 @@ coord_gendata_generic(
 		}
 
 		for (t = 0; t < NTRANS; t++) {
-			if (!((UINT64_C(1) << t) & coord->trans_mask))
+			if (!((UINT64_C(1) << (uint64_t)t) & coord->trans_mask))
 				continue;
 
 			j = coord->sym.coord(transform(c, t));
-			classttrep[j] =
+			classttrep[j] = (uint32_t)(
 			    (n << COORD_CLASS_SHIFT) |
 			    (nasty << COORD_ISNASTY_SHIFT) |
-			    (inverse_trans(t) << COORD_TTREP_SHIFT);
+			    (inverse_trans(t) << COORD_TTREP_SHIFT)
+			);
 		}
-		rep[n++] = i;
+		rep[n++] = (uint32_t)i;
 	}
 
 	writetableinfo(&info, coord_datasize, data);

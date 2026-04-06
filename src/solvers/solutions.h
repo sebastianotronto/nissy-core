@@ -33,7 +33,7 @@ solution_moves_transform(solution_moves_t moves[NON_NULL], size_t z, uint8_t t)
 {
 	uint8_t i;
 
-	for (i = z; i < moves->nmoves; i++)
+	for (i = (uint8_t)z; i < moves->nmoves; i++)
 		moves->moves[i] = transform_move(moves->moves[i], t);
 
 	for (i = 0; i < moves->npremoves; i++)

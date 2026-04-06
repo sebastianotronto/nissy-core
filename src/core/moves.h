@@ -623,10 +623,10 @@ move_variations_lastqt(
 	size_t u;
 	moves_struct_t ss;
 
-	in1 = s->nnormal-1;
-	in2 = s->nnormal-2;
-	ii1 = s->ninverse-1;
-	ii2 = s->ninverse-2;
+	in1 = (uint8_t)(s->nnormal-1);
+	in2 = (uint8_t)(s->nnormal-2);
+	ii1 = (uint8_t)(s->ninverse-1);
+	ii2 = (uint8_t)(s->ninverse-2);
 
 	n1 = in1 >= 0 ? s->normal[in1] : UINT8_ERROR;
 	n2 = in2 >= 0 ? s->normal[in2] : UINT8_ERROR;

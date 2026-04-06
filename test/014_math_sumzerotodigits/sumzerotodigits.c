@@ -8,9 +8,9 @@ void run(void) {
 	uint64_t d;
 
 	fgets(str, STRLENMAX, stdin);
-	n = atoi(str);
+	n = (uint8_t)atoi(str);
 	fgets(str, STRLENMAX, stdin);
-	b = atoi(str);
+	b = (uint8_t)atoi(str);
 	fgets(str, STRLENMAX, stdin);
 	d = atoll(str);
 

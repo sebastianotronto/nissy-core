@@ -264,7 +264,7 @@ gendata_h48_maintable(gendata_h48_arg_t arg[NON_NULL])
 		velocity = count;
 
 		/* We plan to log 10 times */
-		sleeptime = (100*(nshort-velocity)) / velocity;
+		sleeptime = (int)((100*(nshort-velocity)) / velocity);
 
 		done = count;
 		while (nshort - done > (velocity * sleeptime) / 1000) {
@@ -320,7 +320,7 @@ gendata_h48_runthread(void *arg)
 			mutex = H48_LINE(coord) % CHUNKS;
 			wrapthread_mutex_lock(dfsarg->table_mutex[mutex]);
 			set_h48_pval(dfsarg->table, coordext, 0);
-			set_h48_pvalmin(dfsarg->table, coordmin, kv.val);
+			set_h48_pvalmin(dfsarg->table, coordmin, (uint8_t)kv.val);
 			wrapthread_mutex_unlock(dfsarg->table_mutex[mutex]);
 		} else {
 			dfsarg->cube = invcoord_h48(kv.key, dfsarg->crep, 11);

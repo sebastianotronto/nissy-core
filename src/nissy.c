@@ -197,7 +197,7 @@ nissy_getcube(
 			getcube_options[i].fix(&ep, &eo, &cp, &co, &orient);
 
 	oc.cube = getcube(ep, eo, cp, co);
-	oc.orientation = orient;
+	oc.orientation = (uint8_t)orient;
 
 	if (!isconsistent(oc)) {
 		LOG("[getcube] Error: could not get cube with ep=%lld, "

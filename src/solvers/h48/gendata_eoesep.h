@@ -59,7 +59,7 @@ gendata_esep_classes(
 			esep_classes[j] = cl | ti;
 			visited[j] = true;
 		}
-		rep[class] = i;
+		rep[class] = (uint16_t)i;
 		class++;
 	}
 
@@ -140,7 +140,8 @@ gendata_eoesep_fromdone(
 )
 {
 	uint8_t pval;
-	uint64_t i, esep, eo, coord, done;
+	uint32_t done;
+	uint64_t i, esep, eo, coord;
 
 	done = 0;
 	for (i = 0; i < ESEP_CLASSES; i++) {
@@ -169,7 +170,8 @@ gendata_eoesep_fromnew(
 )
 {
 	uint8_t pval;
-	uint64_t i, esep, eo, coord, done;
+	uint32_t done;
+	uint64_t i, esep, eo, coord;
 	cube_t c;
 
 	done = 0;

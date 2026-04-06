@@ -407,12 +407,13 @@ inverse_trans(uint8_t t)
 STATIC uint64_t
 symmetry_mask(cube_t cube)
 {
-	uint64_t t, ret;
+	uint64_t ret;
+	uint8_t t;
 	cube_t transformed;
 
 	for (t = 0, ret = 0; t < NTRANS; t++) {
 		transformed = transform(cube, t);
-		ret |= ((uint64_t)equal(cube, transformed)) << t;
+		ret |= ((uint64_t)equal(cube, transformed)) << (uint64_t)t;
 	}
 
 	return ret;

@@ -39,7 +39,7 @@ void run(void) {
 		.unniss = false,
 		.maxmoves = 20,
 		.maxsolutions = 100,
-		.optimal = -1,
+		.optimal = 0,
 	};
 
 	fgets(str, STRLENMAX, stdin);
@@ -48,8 +48,8 @@ void run(void) {
 		printf("Test error reading moves\n");
 		return;
 	}
-	moves.nmoves = nm;
-	moves.npremoves = np;
+	moves.nmoves = (uint8_t)nm;
+	moves.npremoves = (uint8_t)np;
 	fgets(str, STRLENMAX, stdin);
 	settings.unniss = (bool)atoi(str);
 
@@ -64,7 +64,7 @@ void run(void) {
 		}
 	}
 	fgets(str, STRLENMAX, stdin);
-	settings.orientation = atoi(str);
+	settings.orientation = (uint8_t)atoi(str);
 
 	appendsolution(&moves, nnt, tmask, &settings, &list);
 

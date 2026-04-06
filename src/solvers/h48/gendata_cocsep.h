@@ -81,9 +81,8 @@ gendata_cocsep_return_size:
 STATIC uint32_t
 gendata_cocsep_dfs(cocsep_dfs_arg_t arg[NON_NULL])
 {
-	uint8_t m;
+	uint8_t m, t;
 	uint32_t cc, class, ttrep, depth, olddepth, tinv;
-	uint64_t t;
 	uint64_t i, j;
 	cube_t d;
 	cocsep_dfs_arg_t nextarg;
@@ -105,7 +104,7 @@ gendata_cocsep_dfs(cocsep_dfs_arg_t arg[NON_NULL])
 			d = transform_corners(arg->cube, t);
 			j = coord_cocsep(d);
 			if (i == j && arg->selfsim != NULL)
-				arg->selfsim[*arg->n] |= UINT64_C(1) << t;
+				arg->selfsim[*arg->n] |= UINT64_C(1) << (uint64_t)t;
 			if (COCLASS(arg->buf32[j]) != UINT32_C(0xFFFF))
 				continue;
 			gendata_cocsep_set_visited(arg->visited, j);

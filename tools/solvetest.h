@@ -130,7 +130,7 @@ int main(int argc, char **argv) {
 		printf("Using user-specified solver %s\n", solver);
 	}
 
-	srand(time(NULL));
+	srand((unsigned)time(NULL));
 	nissy_setlogger(log_stderr, NULL);
 
 	size = nissy_solverinfo(solver, dataid);

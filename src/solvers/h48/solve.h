@@ -111,7 +111,8 @@ STATIC long long solve_h48_dispatch(
 	if (err != NISSY_OK)
 		return err;
 
-	return solve_h48(oc, minmoves, maxmoves, maxsols, optimal, threads,
+	return solve_h48(oc, (uint8_t)minmoves, (uint8_t)maxmoves,
+	    (uint8_t)maxsols, (uint8_t)optimal, (uint8_t)threads,
 	    data_size, data, sols_size, sols, stats,
 	    poll_status, poll_status_data);
 }
@@ -343,7 +344,7 @@ solve_h48_dfs(dfsarg_solve_h48_t arg[NON_NULL])
 	backup_inverse = arg->inverse;
 
 	ret = 0;
-	if (popcount_u32(mm_normal) <= popcount_u32(mm_inverse)) {
+	if (popcount_u64(mm_normal) <= popcount_u64(mm_inverse)) {
 		h48_prune_pipeline(arg, prune, target, true);
 		arg->solution_moves->nmoves++;
 		for (m = 0; m < NMOVES; m++) {
@@ -456,8 +457,7 @@ solve_h48_maketasks(
 	int ntasks[NON_NULL]
 )
 {
-	int r;
-	int64_t appret;
+	int64_t r, appret;
 	uint8_t m, t;
 	uint64_t mm;
 	cube_t backup_cube;

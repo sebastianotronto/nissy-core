@@ -13,7 +13,7 @@ void run(void) {
 
 	for (i = 0; i < n; i++) {
 		fgets(str, STRLENMAX, stdin);
-		a[i] = atoi(str);
+		a[i] = (uint8_t)atoi(str);
 	}
 
 	p = permsign(n, a);

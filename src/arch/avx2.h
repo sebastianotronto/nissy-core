@@ -37,7 +37,7 @@ popcount_u32(uint32_t x)
 STATIC_INLINE int
 popcount_u64(uint64_t x)
 {
-	return _mm_popcnt_u64(x);
+	return (int)_mm_popcnt_u64(x);
 }
 
 STATIC void

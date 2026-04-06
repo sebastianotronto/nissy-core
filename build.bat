@@ -49,14 +49,14 @@ exit /b 1
     SET CXX=cl
 
     SET DFLAGS=/Zi /DDEBUG
-    SET WARNINGS=/W2 /wd4505 /wd4996
+    SET WARNINGS=/W4 /wd4100 /wd4324 /wd4505 /wd4996
     SET VARIABLES=/DTHREADS=%THREADS% /D%ARCH%
     SET OFLAGS=/O2
 
     if %DEBUG%==1 (SET ODFLAGS=%DFLAGS%) else (SET ODFLAGS=%OFLAGS%)
     if "%ARCH%"=="AVX2" (SET ARCHOPTS=/arch:AVX2) else (SET ARCHOPTS=)
 
-    SET CFLAGS=/std:c11 /experimental:c11atomics %ARCHOPTS% %WARNINGS% %VARIABLES%
+    SET CFLAGS=/std:c11 /experimental:c11atomics /nologo %ARCHOPTS% %WARNINGS% %VARIABLES%
     SET LFLAGS=/F 16777216
 
     SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% /c src\nissy.c
@@ -64,7 +64,7 @@ exit /b 1
     SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% /I"%PYINCLUDE%" /LD /Fe:python\nissy.pyd python\nissy_module.c nissy.obj /link /LIBPATH:"%PYLIBS%" python3.lib
     SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtest.exe nissy.obj
     SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtool.exe nissy.obj
-    SET CC_CXX=%CXX% /EHsc %ARCHOPTS% %ODFLAGS% %LFLAGS% /std:c++20 /Fe:runcpp.exe nissy_c.obj cpp\nissy.cpp
+    SET CC_CXX=%CXX% /EHsc /nologo %ARCHOPTS% %ODFLAGS% %LFLAGS% /std:c++20 /Fe:runcpp.exe nissy_c.obj cpp\nissy.cpp
 goto :compiler_done
 
 :set_clang

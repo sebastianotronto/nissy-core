@@ -34,7 +34,7 @@ void run(void) {
 
 	capacity = readl();
 	randomizer = readl();
-	arg.maxdepth = readl();
+	arg.maxdepth = (uint8_t)readl();
 	arg.crep = crep;
 	arg.selfsim = selfsim;
 	arg.map = &map;
