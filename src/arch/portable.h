@@ -34,6 +34,17 @@ popcount_u32(uint32_t x)
 	return (int)x;
 }
 
+STATIC_INLINE int
+popcount_u64(uint64_t x)
+{
+	int top, bottom;
+
+	bottom = popcount_u32((uint32_t)(x & UINT64_C(0xFFFFFFFF)));
+	top = popcount_u32((uint32_t)(x >> UINT64_C(32)));
+
+	return top + bottom;
+}
+
 STATIC void
 pieces(cube_t cube[static 1], uint8_t c[static 8], uint8_t e[static 12])
 {

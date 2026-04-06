@@ -13,6 +13,7 @@
 #define EFLIP       UINT8_C(0x10)
 
 STATIC_INLINE int popcount_u32(uint32_t);
+STATIC_INLINE int popcount_u64(uint64_t);
 
 STATIC void pieces(cube_t [static 1], uint8_t [static 8], uint8_t [static 12]);
 STATIC_INLINE bool equal(cube_t, cube_t);
