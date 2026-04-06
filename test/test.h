@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../src/utils/compilers.h"
 #include "../src/utils/wrapthread.h"
 #include "../src/nissy.h"
 #include "../src/arch/arch.h"
@@ -27,7 +28,7 @@ bool isconsistent(oriented_cube_t);
 bool issolvable(oriented_cube_t);
 bool issolved(oriented_cube_t);
 oriented_cube_t readcube(char *);
-int64_t writecube(oriented_cube_t, size_t n, char [n]);
+int64_t writecube(oriented_cube_t, size_t n, char *);
 
 /* Test function to be implemented by all tests */
 void run(void);

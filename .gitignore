@@ -33,6 +33,7 @@ tools/results
 .vscode
 *.a
 *.o
+*.obj
 *.so
 */*.so
 *.s

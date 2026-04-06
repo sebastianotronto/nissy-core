@@ -1,13 +1,13 @@
 STATIC_INLINE uint64_t coord_h48(
-    cube_t, const uint32_t [static COCSEP_TABLESIZE], uint8_t);
+    cube_t, const uint32_t [SIZE(COCSEP_TABLESIZE)], uint8_t);
 STATIC_INLINE uint64_t coord_h48_edges(cube_t, uint64_t, uint8_t, uint8_t);
 STATIC_INLINE cube_t invcoord_h48(
-    uint64_t, const cube_t [static COCSEP_CLASSES], uint8_t);
+    uint64_t, const cube_t [SIZE(COCSEP_CLASSES)], uint8_t);
 
 STATIC_INLINE uint64_t
 coord_h48(
 	cube_t c,
-	const uint32_t cocsepdata[static COCSEP_TABLESIZE],
+	const uint32_t cocsepdata[SIZE(COCSEP_TABLESIZE)],
 	uint8_t h
 )
 {
@@ -47,7 +47,7 @@ returned cube is a transformed cube of one that gives the correct value.
 STATIC_INLINE cube_t
 invcoord_h48(
 	uint64_t i,
-	const cube_t crep[static COCSEP_CLASSES],
+	const cube_t crep[SIZE(COCSEP_CLASSES)],
 	uint8_t h
 )
 {

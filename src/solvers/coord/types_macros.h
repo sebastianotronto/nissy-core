@@ -27,8 +27,8 @@ typedef struct {
 	uint64_t moves_mask_gendata;
 	uint64_t moves_mask_solve;
 	uint64_t trans_mask;
-	bool (*is_admissible)(const solution_moves_t[static 1]);
-	bool (*solution_prune)(const solution_moves_t[static 1]);
+	bool (*is_admissible)(const solution_moves_t[NON_NULL]);
+	bool (*solution_prune)(const solution_moves_t[NON_NULL]);
 	bool (*is_solvable)(cube_t);
 	/* if is_solved is null, coord == 0 is used */
 	bool (*is_solved)(uint64_t, const unsigned char *);

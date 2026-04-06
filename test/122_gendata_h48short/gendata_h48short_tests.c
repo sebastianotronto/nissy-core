@@ -2,11 +2,11 @@
 
 #define MAXPOS 200
 
-void h48map_create(h48map_t [static 1], uint64_t, uint64_t);
-void h48map_destroy(h48map_t [static 1]);
-kvpair_t h48map_nextkvpair(h48map_t [static 1], uint64_t [static 1]);
+void h48map_create(h48map_t [NON_NULL], uint64_t, uint64_t);
+void h48map_destroy(h48map_t [NON_NULL]);
+kvpair_t h48map_nextkvpair(h48map_t [NON_NULL], uint64_t [NON_NULL]);
 size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
-uint64_t gendata_h48short(gendata_h48short_arg_t [static 1]);
+uint64_t gendata_h48short(gendata_h48short_arg_t [NON_NULL]);
 
 char str[STRLENMAX];
 
@@ -34,7 +34,7 @@ void run(void) {
 
 	capacity = readl();
 	randomizer = readl();
-	arg.maxdepth = readl();
+	arg.maxdepth = (uint8_t)readl();
 	arg.crep = crep;
 	arg.selfsim = selfsim;
 	arg.map = &map;

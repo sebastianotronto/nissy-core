@@ -59,7 +59,7 @@ popcount_u64(uint64_t x)
 }
 
 STATIC void
-pieces(cube_t cube[static 1], uint8_t c[static 8], uint8_t e[static 12])
+pieces(cube_t cube[NON_NULL], uint8_t c[SIZE(8)], uint8_t e[SIZE(12)])
 {
 	// First 8 bytes of the corner vector are copied from the c array
 	vst1_u8(c, cube->corner);
@@ -244,7 +244,7 @@ coord_co(cube_t c)
 }
 
 STATIC_INLINE void
-copy_co(cube_t cube[static 1], cube_t co)
+copy_co(cube_t cube[NON_NULL], cube_t co)
 {
 	uint8x8_t coclean;
 
@@ -340,19 +340,19 @@ coord_esep(cube_t c)
 }
 
 STATIC_INLINE void
-copy_corners(cube_t dst[static 1], cube_t src)
+copy_corners(cube_t dst[NON_NULL], cube_t src)
 {
 	dst->corner = src.corner;
 }
 
 STATIC_INLINE void
-copy_edges(cube_t dst[static 1], cube_t src)
+copy_edges(cube_t dst[NON_NULL], cube_t src)
 {
 	dst->edge = src.edge;
 }
 
 STATIC_INLINE void
-set_eo(cube_t cube[static 1], uint64_t eo)
+set_eo(cube_t cube[NON_NULL], uint64_t eo)
 {
 	// Temp array to store the NEON vector
 	uint8_t mem[16];

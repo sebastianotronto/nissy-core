@@ -73,10 +73,10 @@ indextoperm(uint64_t p, size_t n, uint8_t *r)
 
 		/* Find k-th unused number */
 		for (j = 0, c = 0; c <= k; j++)
-			c += 1 - ((used & (1<<j)) >> j);
+			c += UINT64_C(1) - ((used & (UINT64_C(1)<<j)) >> j);
 
-		r[i] = j-1;
-		used |= 1 << (j-1);
+		r[i] = (uint8_t)(j-1);
+		used |= UINT64_C(1) << (j-1);
 		p %= factorial[n-i-1];
 	}
 

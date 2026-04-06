@@ -1,6 +1,6 @@
 #include "../test.h"
 
-bool allowedmoves(size_t n, const uint8_t [n]);
+bool allowedmoves(size_t n, const uint8_t *);
 
 static char *moves[] = {
 	"U", "U2", "U'",
@@ -13,8 +13,8 @@ static char *moves[] = {
 
 void run(void) {
 	char movestr[STRLENMAX];
-	uint8_t m[100];
-	int n, i, j;
+	uint8_t j, m[100];
+	int n, i;
 
 	fgets(movestr, STRLENMAX, stdin);
 	n = atoi(movestr);

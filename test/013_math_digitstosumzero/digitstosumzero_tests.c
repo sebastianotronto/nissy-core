@@ -1,6 +1,6 @@
 #include "../test.h"
 
-uint64_t digitstosumzero(size_t n, uint8_t [n], uint8_t);
+uint64_t digitstosumzero(size_t n, uint8_t *, uint8_t);
 
 void run(void) {
 	char str[STRLENMAX];
@@ -11,10 +11,10 @@ void run(void) {
 	fgets(str, STRLENMAX, stdin);
 	n = atoi(str);
 	fgets(str, STRLENMAX, stdin);
-	b = atoi(str);
+	b = (uint8_t)atoi(str);
 	for (i = 0; i < n; i++) {
 		fgets(str, STRLENMAX, stdin);
-		a[i] = atoi(str);
+		a[i] = (uint8_t)atoi(str);
 	}
 
 	p = digitstosumzero(n, a, b);

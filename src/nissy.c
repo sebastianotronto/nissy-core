@@ -12,8 +12,8 @@
 #include "core/core.h"
 #include "solvers/solvers.h"
 
-STATIC long long write_result(oriented_cube_t, char [static NISSY_SIZE_CUBE]);
-STATIC long long nissy_dataid(const char *, char [static NISSY_SIZE_DATAID]);
+STATIC long long write_result(oriented_cube_t, char [SIZE(NISSY_SIZE_CUBE)]);
+STATIC long long nissy_dataid(const char *, char [SIZE(NISSY_SIZE_DATAID)]);
 STATIC long long nissy_gendata_unsafe(
     const char *, unsigned long long, unsigned char *);
 
@@ -28,7 +28,7 @@ struct {
 };
 
 STATIC long long
-write_result(oriented_cube_t cube, char result[static NISSY_SIZE_CUBE])
+write_result(oriented_cube_t cube, char result[SIZE(NISSY_SIZE_CUBE)])
 {
 	writecube(cube, NISSY_SIZE_CUBE, result);
 
@@ -42,8 +42,8 @@ write_result(oriented_cube_t cube, char result[static NISSY_SIZE_CUBE])
 
 long long
 nissy_inverse(
-	const char cube[static NISSY_SIZE_CUBE],
-	char result[static NISSY_SIZE_CUBE]
+	const char cube[],
+	char result[]
 )
 {
 	oriented_cube_t c, res;
@@ -77,9 +77,9 @@ nissy_inverse_error:
 
 long long
 nissy_applymoves(
-	const char cube[static NISSY_SIZE_CUBE],
+	const char cube[],
 	const char *moves,
-	char result[static NISSY_SIZE_CUBE]
+	char result[]
 )
 {
 	oriented_cube_t c, res;
@@ -116,9 +116,9 @@ nissy_applymoves_error:
 
 long long
 nissy_applytrans(
-	const char cube[static NISSY_SIZE_CUBE],
-	const char transformation[static NISSY_SIZE_TRANSFORMATION],
-	char result[static NISSY_SIZE_CUBE]
+	const char cube[],
+	const char transformation[],
+	char result[]
 )
 {
 	oriented_cube_t c, res;
@@ -181,7 +181,7 @@ nissy_getcube(
 	long long co,
 	long long orient,
 	const char *options,
-	char result[static NISSY_SIZE_CUBE]
+	char result[]
 )
 {
 	int i;
@@ -197,7 +197,7 @@ nissy_getcube(
 			getcube_options[i].fix(&ep, &eo, &cp, &co, &orient);
 
 	oc.cube = getcube(ep, eo, cp, co);
-	oc.orientation = orient;
+	oc.orientation = (uint8_t)orient;
 
 	if (!isconsistent(oc)) {
 		LOG("[getcube] Error: could not get cube with ep=%lld, "
@@ -210,7 +210,7 @@ nissy_getcube(
 }
 
 STATIC long long
-nissy_dataid(const char *solver, char dataid[static NISSY_SIZE_DATAID])
+nissy_dataid(const char *solver, char dataid[SIZE(NISSY_SIZE_DATAID)])
 {
 	solver_dispatch_t dispatch;
 
@@ -226,7 +226,7 @@ nissy_dataid(const char *solver, char dataid[static NISSY_SIZE_DATAID])
 long long
 nissy_solverinfo(
 	const char *solver,
-	char dataid[static NISSY_SIZE_DATAID]
+	char dataid[]
 )
 {
 	long long err;
@@ -295,7 +295,7 @@ nissy_checkdata(
 
 long long
 nissy_solve(
-	const char cube[static NISSY_SIZE_CUBE],
+	const char cube[],
 	const char *solver, 
 	unsigned nissflag,
 	unsigned minmoves,
@@ -307,7 +307,7 @@ nissy_solve(
 	const unsigned char *data,
 	unsigned sols_size,
 	char *sols,
-	long long stats[static NISSY_SIZE_SOLVE_STATS],
+	long long stats[],
 	int (*poll_status)(void *),
 	void *poll_status_data
 )

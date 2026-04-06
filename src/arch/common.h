@@ -15,7 +15,7 @@
 STATIC_INLINE int popcount_u32(uint32_t);
 STATIC_INLINE int popcount_u64(uint64_t);
 
-STATIC void pieces(cube_t [static 1], uint8_t [static 8], uint8_t [static 12]);
+STATIC void pieces(cube_t [NON_NULL], uint8_t [SIZE(8)], uint8_t [SIZE(12)]);
 STATIC_INLINE bool equal(cube_t, cube_t);
 STATIC_INLINE cube_t invertco(cube_t);
 STATIC_INLINE cube_t compose_edges(cube_t, cube_t);
@@ -35,12 +35,12 @@ STATIC_INLINE cube_t invcoord_epudsep(uint64_t);
 
 STATIC_INLINE bool is_eo_even(cube_t);
 
-STATIC_INLINE void copy_corners(cube_t [static 1], cube_t);
-STATIC_INLINE void copy_co(cube_t [static 1], cube_t);
-STATIC_INLINE void copy_edges(cube_t [static 1], cube_t);
-STATIC_INLINE void set_eo(cube_t [static 1], uint64_t);
+STATIC_INLINE void copy_corners(cube_t [NON_NULL], cube_t);
+STATIC_INLINE void copy_co(cube_t [NON_NULL], cube_t);
+STATIC_INLINE void copy_edges(cube_t [NON_NULL], cube_t);
+STATIC_INLINE void set_eo(cube_t [NON_NULL], uint64_t);
 
-STATIC_INLINE void invcoord_esep_array(uint64_t, uint64_t, uint8_t[static 12]);
+STATIC_INLINE void invcoord_esep_array(uint64_t, uint64_t, uint8_t[SIZE(12)]);
 STATIC_INLINE cube_t invcoord_eoesep(uint64_t);
 STATIC_INLINE uint64_t coord_epudsep_array(const uint8_t [8]);
 STATIC_INLINE void invcoord_epudsep_array(uint64_t, uint8_t [8]);
@@ -53,7 +53,7 @@ STATIC_INLINE uint64_t coord_epe(cube_t);
 STATIC_INLINE cube_t invcoord_epe(uint64_t);
 
 STATIC_INLINE void
-invcoord_esep_array(uint64_t set1, uint64_t set2, uint8_t mem[static 12])
+invcoord_esep_array(uint64_t set1, uint64_t set2, uint8_t mem[SIZE(12)])
 {
 	uint64_t bit1, bit2, i, j, jj, k, l, s, v, w, is1;
 	uint8_t slice[3] = {0};

@@ -61,8 +61,8 @@
 	#define wrapthread_return_t int
 	#define wrapthread_return_val 0
 
-	#define wrapthread_define_var_thread_t(x) unused char x
-	#define wrapthread_define_var_mutex_t(x) unused char x
+	#define wrapthread_define_var_thread_t(x) UNUSED char x
+	#define wrapthread_define_var_mutex_t(x) UNUSED char x
 	#define wrapthread_define_struct_thread_t(x) char x
 	#define wrapthread_define_struct_mutex_t(x) char x
 

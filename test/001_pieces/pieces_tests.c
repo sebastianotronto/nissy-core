@@ -1,6 +1,6 @@
 #include "../test.h"
 
-void pieces(cube_t *, uint8_t [static 8], uint8_t [static 12]);
+void pieces(cube_t *, uint8_t [SIZE(8)], uint8_t [SIZE(12)]);
 
 void run(void) {
 	int i;

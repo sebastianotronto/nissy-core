@@ -1,17 +1,17 @@
 STATIC uint64_t read_unaligned_u64(
-    const unsigned char [static sizeof(uint64_t)]);
+    const unsigned char [SIZE(sizeof(uint64_t))]);
 STATIC void write_unaligned_u64(
-    unsigned char [static sizeof(uint64_t)], uint64_t);
+    unsigned char [SIZE(sizeof(uint64_t))], uint64_t);
 STATIC int64_t readtableinfo(
-    size_t, const unsigned char *, tableinfo_t [static 1]);
+    size_t, const unsigned char *, tableinfo_t [NON_NULL]);
 STATIC int64_t readtableinfo_n(
-    size_t, const unsigned char *, uint8_t, tableinfo_t [static 1]);
+    size_t, const unsigned char *, uint8_t, tableinfo_t [NON_NULL]);
 STATIC int64_t writetableinfo(
-    const tableinfo_t [static 1], size_t, unsigned char *);
-STATIC void append_name(tableinfo_t [static 1], const char *);
+    const tableinfo_t [NON_NULL], size_t, unsigned char *);
+STATIC void append_name(tableinfo_t [NON_NULL], const char *);
 
 STATIC uint64_t
-read_unaligned_u64(const unsigned char buf[static sizeof(uint64_t)])
+read_unaligned_u64(const unsigned char buf[SIZE(sizeof(uint64_t))])
 {
 	uint64_t ret;
 
@@ -21,7 +21,7 @@ read_unaligned_u64(const unsigned char buf[static sizeof(uint64_t)])
 }
 
 STATIC void
-write_unaligned_u64(unsigned char buf[static sizeof(uint64_t)], uint64_t x)
+write_unaligned_u64(unsigned char buf[SIZE(sizeof(uint64_t))], uint64_t x)
 {
 	memcpy(buf, &x, sizeof(uint64_t));
 }
@@ -30,7 +30,7 @@ STATIC int64_t
 readtableinfo(
 	size_t buf_size,
 	const unsigned char *buf,
-	tableinfo_t info[static 1]
+	tableinfo_t info[NON_NULL]
 )
 {
 	size_t i;
@@ -75,7 +75,7 @@ readtableinfo_n(
 	size_t buf_size,
 	const unsigned char *buf,
 	uint8_t n,
-	tableinfo_t info[static 1]
+	tableinfo_t info[NON_NULL]
 )
 {
 	int64_t ret;
@@ -89,7 +89,7 @@ readtableinfo_n(
 
 STATIC int64_t
 writetableinfo(
-	const tableinfo_t info[static 1],
+	const tableinfo_t info[NON_NULL],
 	size_t data_size,
 	unsigned char *buf
 )
@@ -138,9 +138,9 @@ writetableinfo(
 }
 
 STATIC void
-append_name(tableinfo_t info[static 1], const char *str)
+append_name(tableinfo_t info[NON_NULL], const char *str)
 {
-	int i, j;
+	size_t i, j;
 
 	for (i = 0, j = strlen(info->solver); str[i] != '\0'; i++, j++)
 		info->solver[j] = str[i];

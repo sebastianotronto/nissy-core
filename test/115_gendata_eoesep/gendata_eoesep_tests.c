@@ -25,7 +25,7 @@ The test does not generate the full table. For reference, these are the values:
 
 unsigned char buf[FULLSIZE];
 
-size_t gendata_eoesep(unsigned char [static FULLSIZE], uint8_t);
+size_t gendata_eoesep(unsigned char [SIZE(FULLSIZE)], uint8_t);
 int64_t readtableinfo(size_t, const unsigned char *, tableinfo_t *);
 
 void run(void) {

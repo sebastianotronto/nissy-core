@@ -6,9 +6,9 @@ uint64_t coord_cocsep(cube_t);
 size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
 
 void run(void) {
-	uint8_t t;
+	uint8_t t, tt;
 	unsigned char buf[2000000];
-	uint32_t *cocsepdata, tt;
+	uint32_t *cocsepdata;
 	uint64_t i, selfsim[COCSEP_CLASSES];
 	uint64_t j, k, l;
 	cube_t rep[COCSEP_CLASSES], c, d;

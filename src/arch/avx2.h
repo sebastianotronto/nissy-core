@@ -37,11 +37,11 @@ popcount_u32(uint32_t x)
 STATIC_INLINE int
 popcount_u64(uint64_t x)
 {
-	return _mm_popcnt_u64(x);
+	return (int)_mm_popcnt_u64(x);
 }
 
 STATIC void
-pieces(cube_t cube[static 1], uint8_t c[static 8], uint8_t e[static 12])
+pieces(cube_t cube[NON_NULL], uint8_t c[SIZE(8)], uint8_t e[SIZE(12)])
 {
 	uint8_t aux[32];
 
@@ -167,7 +167,7 @@ coord_co(cube_t c)
 }
 
 STATIC_INLINE void
-copy_co(cube_t cube[static 1], cube_t co)
+copy_co(cube_t cube[NON_NULL], cube_t co)
 {
 	cube_t coclean;
 
@@ -274,19 +274,19 @@ invcoord_esep(uint64_t esep)
 }
 
 STATIC_INLINE void
-copy_corners(cube_t dest[static 1], cube_t src)
+copy_corners(cube_t dest[NON_NULL], cube_t src)
 {
 	*dest = _mm256_blend_epi32(*dest, src, 0x0F);
 }
 
 STATIC_INLINE void
-copy_edges(cube_t dest[static 1], cube_t src)
+copy_edges(cube_t dest[NON_NULL], cube_t src)
 {
 	*dest = _mm256_blend_epi32(*dest, src, 0xF0);
 }
 
 STATIC_INLINE void
-set_eo(cube_t cube[static 1], uint64_t eo)
+set_eo(cube_t cube[NON_NULL], uint64_t eo)
 {
 	uint64_t eo12, eotop, eobot;
 	__m256i veo;

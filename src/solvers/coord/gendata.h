@@ -1,21 +1,21 @@
-STATIC size_t gendata_coord(const coord_t [static 1], unsigned char *);
+STATIC size_t gendata_coord(const coord_t [NON_NULL], unsigned char *);
 STATIC size_t gendata_multicoord(
-    const multicoord_t [static 1], unsigned char *);
+    const multicoord_t [NON_NULL], unsigned char *);
 STATIC long long gendata_coord_dispatch(const char *, unsigned long long,
     unsigned char *);
 STATIC tableinfo_t genptable_coord(
-    const coord_t [static 1], const unsigned char *, unsigned char *);
+    const coord_t [NON_NULL], const unsigned char *, unsigned char *);
 STATIC uint64_t genptable_coord_init_solved(
-    const coord_t [static 1], const unsigned char *, unsigned char *);
+    const coord_t [NON_NULL], const unsigned char *, unsigned char *);
 STATIC bool switch_to_fromnew(uint64_t, uint64_t, uint64_t);
-STATIC uint64_t genptable_coord_fillneighbors(const coord_t [static 1],
+STATIC uint64_t genptable_coord_fillneighbors(const coord_t [NON_NULL],
     const unsigned char *, uint64_t, uint8_t, unsigned char *);
-STATIC uint64_t genptable_coord_fillfromnew(const coord_t [static 1],
+STATIC uint64_t genptable_coord_fillfromnew(const coord_t [NON_NULL],
     const unsigned char *, uint64_t, uint8_t, unsigned char *);
 STATIC uint8_t get_coord_pval(
-    const coord_t [static 1], const unsigned char *, uint64_t);
+    const coord_t [NON_NULL], const unsigned char *, uint64_t);
 STATIC void set_coord_pval(
-    const coord_t [static 1], unsigned char *, uint64_t, uint8_t);
+    const coord_t [NON_NULL], unsigned char *, uint64_t, uint8_t);
 
 STATIC long long
 gendata_coord_dispatch(
@@ -40,7 +40,7 @@ gendata_coord_dispatch(
 }
 
 STATIC size_t
-gendata_coord(const coord_t coord[static 1], unsigned char *buf)
+gendata_coord(const coord_t coord[NON_NULL], unsigned char *buf)
 {
 	uint64_t coord_dsize, tablesize, ninfo;
 	unsigned char *pruningbuf, *coord_data;
@@ -96,7 +96,7 @@ gendata_coord_error:
 }
 
 STATIC size_t
-gendata_multicoord(const multicoord_t mcoord[static 1], unsigned char *buf)
+gendata_multicoord(const multicoord_t mcoord[NON_NULL], unsigned char *buf)
 {
 	unsigned char *b;
 	size_t i, s, ret;
@@ -141,12 +141,13 @@ gendata_multicoord(const multicoord_t mcoord[static 1], unsigned char *buf)
 
 STATIC tableinfo_t
 genptable_coord(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	const unsigned char *data,
 	unsigned char *table
 )
 {
-	uint64_t tablesize, i, d, tot, t, nm;
+	uint64_t tablesize, i, tot, t, nm;
+	uint8_t d;
 	tableinfo_t info;
 
 	tablesize = DIV_ROUND_UP(coord->max, 2);
@@ -170,7 +171,7 @@ genptable_coord(
 
 	tot = info.distribution[0] =
 	    genptable_coord_init_solved(coord, data, table);
-	nm = popcount_u32(coord->moves_mask_gendata);
+	nm = popcount_u64(coord->moves_mask_gendata);
 	for (d = 1; tot < coord->max && d < 15; d++) {
 		t = 0;
 		if (switch_to_fromnew(tot, coord->max, nm)) {
@@ -204,7 +205,7 @@ genptable_coord(
 
 STATIC uint64_t
 genptable_coord_init_solved(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	const unsigned char *coord_data,
 	unsigned char *table
 )
@@ -238,7 +239,7 @@ switch_to_fromnew(uint64_t done, uint64_t max, uint64_t nm)
 
 STATIC uint64_t
 genptable_coord_fillneighbors(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	const unsigned char *data,
 	uint64_t i, 
 	uint8_t d,
@@ -247,20 +248,21 @@ genptable_coord_fillneighbors(
 {
 	bool isnasty;
 	uint8_t m;
-	uint64_t ii, j, t, tot;
+	uint64_t ii, j, tot;
+	uint8_t t;
 	cube_t c, moved;
 
 	c = coord->cube(i, data);
 	tot = 0;
 	for (m = 0; m < NMOVES; m++) {
-		if (!((UINT32_C(1) << (uint32_t)m) &
+		if (!((UINT64_C(1) << (uint64_t)m) &
 		    coord->moves_mask_gendata))
 			continue;
 		moved = move(c, m);
 		ii = coord->coord(moved, data);
 		isnasty = coord->isnasty(ii, data);
 		for (t = 0; t < NTRANS && (t == 0 || isnasty); t++) {
-			if (!((UINT64_C(1) << t) & coord->trans_mask))
+			if (!((UINT64_C(1) << (uint64_t)t) & coord->trans_mask))
 				continue;
 
 			j = coord->coord(transform(moved, t), data);
@@ -276,7 +278,7 @@ genptable_coord_fillneighbors(
 
 STATIC uint64_t
 genptable_coord_fillfromnew(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	const unsigned char *data,
 	uint64_t i,
 	uint8_t d,
@@ -285,14 +287,15 @@ genptable_coord_fillfromnew(
 {
 	bool found;
 	uint8_t m;
-	uint64_t tot, t, ii, j, nsim, sim[NTRANS];
+	uint64_t tot, j, ii, nsim, sim[NTRANS];
+	uint8_t t;
 	cube_t c;
 
 	tot = 0;
 	c = coord->cube(i, data);
 
 	for (t = 0, nsim = 0; t < NTRANS; t++) {
-		if (!((UINT64_C(1) << t) & coord->trans_mask))
+		if (!((UINT64_C(1) << (uint64_t)t) & coord->trans_mask))
 			continue;
 
 		ii = coord->coord(transform(c, t), data);
@@ -305,7 +308,7 @@ genptable_coord_fillfromnew(
 	for (j = 0, found = false; j < nsim && !found; j++) {
 		c = coord->cube(sim[j], data);
 		for (m = 0; m < NMOVES; m++) {
-			if (!((UINT32_C(1) << (uint32_t)m) &
+			if (!((UINT64_C(1) << (uint64_t)m) &
 			    coord->moves_mask_gendata))
 				continue;
 			ii = coord->coord(move(c, m), data);
@@ -331,7 +334,7 @@ genptable_coord_fillfromnew(
 
 STATIC uint8_t
 get_coord_pval(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	const unsigned char *table,
 	uint64_t i
 )
@@ -341,7 +344,7 @@ get_coord_pval(
 
 STATIC void
 set_coord_pval(
-	const coord_t coord[static 1],
+	const coord_t coord[NON_NULL],
 	unsigned char *table,
 	uint64_t i,
 	uint8_t val

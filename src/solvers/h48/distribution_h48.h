@@ -6,7 +6,7 @@ to have some duplication than to make these functions needlessly generic.
 
 STATIC wrapthread_return_t getdistribution_h48_runthread(void *);
 STATIC void getdistribution_h48(const unsigned char *,
-    uint64_t [static INFO_DISTRIBUTION_LEN], const tableinfo_t [static 1]);
+    uint64_t [SIZE(INFO_DISTRIBUTION_LEN)], const tableinfo_t [NON_NULL]);
 
 STATIC wrapthread_return_t 
 getdistribution_h48_runthread(void *arg)
@@ -39,8 +39,8 @@ getdistribution_h48_runthread(void *arg)
 STATIC void
 getdistribution_h48(
 	const unsigned char *table,
-	uint64_t distr[static INFO_DISTRIBUTION_LEN],
-	const tableinfo_t info[static 1]
+	uint64_t distr[SIZE(INFO_DISTRIBUTION_LEN)],
+	const tableinfo_t info[NON_NULL]
 ) {
 	getdistribution_data_t targ[THREADS];
 	wrapthread_define_var_thread_t(thread[THREADS]);

@@ -1,6 +1,6 @@
 #include "../test.h"
 
-uint64_t permtoindex(size_t n, const uint8_t [n]);
+uint64_t permtoindex(size_t n, const uint8_t *);
 
 void run(void) {
 	char str[STRLENMAX];
@@ -11,7 +11,7 @@ void run(void) {
 	n = atoll(str);
 	for (i = 0; i < n; i++) {
 		fgets(str, STRLENMAX, stdin);
-		a[i] = atoi(str);
+		a[i] = (uint8_t)atoi(str);
 	}
 
 	p = permtoindex(n, a);

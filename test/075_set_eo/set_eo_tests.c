@@ -2,7 +2,7 @@
 
 uint64_t coord_eo(cube_t);
 void set_eo(cube_t *, uint64_t);
-void pieces(cube_t *, uint8_t [static 8], uint8_t [static 12]);
+void pieces(cube_t *, uint8_t [SIZE(8)], uint8_t [SIZE(12)]);
 
 void run(void) {
 	char str[STRLENMAX];
