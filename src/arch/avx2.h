@@ -34,6 +34,12 @@ popcount_u32(uint32_t x)
 	return _mm_popcnt_u32(x);
 }
 
+STATIC_INLINE int
+popcount_u64(uint64_t x)
+{
+	return _mm_popcnt_u64(x);
+}
+
 STATIC void
 pieces(cube_t cube[NON_NULL], uint8_t c[SIZE(8)], uint8_t e[SIZE(12)])
 {
