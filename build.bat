@@ -64,7 +64,7 @@ exit /b 1
     SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% /I"%PYINCLUDE%" /LD /Fe:python\nissy.pyd python\nissy_module.c nissy.obj /link /LIBPATH:"%PYLIBS%" python3.lib
     SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtest.exe nissy.obj
     SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtool.exe nissy.obj
-    SET CC_CXX=%CXX% %ODFLAGS% /std:c++20 /Fe:runcpp.exe cpp\nissy.cpp nissy.obj
+    SET CC_CXX=%CXX% %ODFLAGS% /std:c++20 /Fe:runcpp.exe nissy.obj cpp\nissy.cpp
 goto :compiler_done
 
 :set_clang
@@ -82,12 +82,12 @@ goto :compiler_done
     SET CFLAGS=-std=c11 %ARCHOPTS% %WARNINGS% %VARIABLES%
     SET LFLAGS=-Wl,-stack:16777216
 
-    SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% -c src\nissy.c
+    SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% -c src\nissy.c -o nissy.obj
     SET CC_SHELL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.obj shell\shell.c -o run.exe
     SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% -I%PYINCLUDE% -L%PYLIBS% -shared -lpython3 python\nissy_module.c nissy.obj -o python\nissy.pyd
     SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtest.exe nissy.obj
     SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtool.exe nissy.obj
-    SET CC_CXX=%CXX% %ODFLAGS% -std=c++20 -o runcpp.exe cpp\nissy.cpp nissy.obj
+    SET CC_CXX=%CXX% %ODFLAGS% -std=c++20 -o runcpp.exe nissy.obj cpp\nissy.cpp
 :compiler_done
 
 :: Select compilation target from command line argument
