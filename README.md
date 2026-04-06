@@ -39,14 +39,26 @@ is going to configure `nissy` to use at most 3 threads, and build it with
 
 ### Windows
 
-It is possible to build this project on Windows using `build.bat`. The
-[Clang](https://clang.llvm.org/) compiler must be installed, and the
-command prompt must be correctly configured to run it.
+It is possible to build this project on Windows using `build.bat`, using
+either MSVC (default) or [Clang](https://clang.llvm.org/). In either case,
+the command prompt must be correctly configured to run the compiler from
+the command line.
 
-We suggest installing Clang via the Visual Studio Installer, selecting
-the "C++ development" pack, as well as the "clang" and "Windows SDK 11"
-components. It is advised to use "x64 Native Tools Command Prompt for
-VS 2022" instead of a regular command prompt to run the build script.
+For Clang, we suggest installing it via the Visual Studio Installer,
+selecting the "C++ development" pack, as well as the "clang" and "Windows
+SDK 11" components. It is advised to use "x64 Native Tools Command Prompt
+for VS 2022" instead of a regular command prompt to run the build script.
+
+
+You can specify the compiler to use by setting the
+`CC` environment variable to either `clang` or `msvc`. For example:
+
+```
+> SET CC=clang
+> build.bat test
+```
+
+Will run all the tests using clang.
 
 The `build.bat` script has the same syntax as the `build.sh` script,
 but not all options are available. For example
@@ -64,9 +76,20 @@ can be used to build the basic shell, while
 Builds and runs the unit tests. See `build.bat help` for a list of
 all available options.
 
-Note: The build script for Windows does not support all the options
+#### Caveats for building on Windows
+
+* The build script for Windows does not support all the options
 available with build.sh. If you want to tune the build options, you'll
 have to manually edit the build script.
+* If you are building on an old x86-64 machine that does not support AVX2
+instructions, you will have to manually set the architecture to `PORTABLE`
+with `SET ARCH=PORTABLE`.
+* Build on Windows on ARM has not been tested at all.
+* When building with MSVC, the option `/experimental:c11atomics` is used.
+Despite atomic types being part of the C11 standard for 15 years now,
+they have only [recently been
+implemented](https://devblogs.microsoft.com/cppblog/c11-atomics-in-visual-studio-2022-version-17-5-preview-2),
+and Microsoft still considers them an experimental feature. Impressive!
 
 ## Running tests
 
