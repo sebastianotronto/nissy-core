@@ -1,6 +1,6 @@
 #include "../test.h"
 
-bool allowedmoves(size_t n, const uint8_t [n]);
+bool allowedmoves(size_t n, const uint8_t *);
 
 static char *moves[] = {
 	"U", "U2", "U'",

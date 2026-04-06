@@ -5,7 +5,7 @@
 cube_t applytrans(cube_t, const char *);
 uint8_t transform_move(uint8_t, uint8_t);
 int64_t readmoves(const char *, size_t n, size_t m,
-    size_t *, size_t *, uint8_t [n], uint8_t [m]);
+    size_t *, size_t *, uint8_t *, uint8_t *);
 oriented_cube_t move_extended(oriented_cube_t, uint8_t);
 oriented_cube_t applymoves(oriented_cube_t, const char *);
 uint8_t readtrans(const char[SIZE(NISSY_SIZE_TRANSFORMATION)]);

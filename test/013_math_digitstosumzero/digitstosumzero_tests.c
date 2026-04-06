@@ -1,6 +1,6 @@
 #include "../test.h"
 
-uint64_t digitstosumzero(size_t n, uint8_t [n], uint8_t);
+uint64_t digitstosumzero(size_t n, uint8_t *, uint8_t);
 
 void run(void) {
 	char str[STRLENMAX];

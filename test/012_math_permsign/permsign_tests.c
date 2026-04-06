@@ -1,6 +1,6 @@
 #include "../test.h"
 
-int permsign(size_t n, const uint8_t [n]);
+int permsign(size_t n, const uint8_t *);
 
 void run(void) {
 	char str[STRLENMAX];
