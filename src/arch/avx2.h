@@ -308,13 +308,13 @@ STATIC_INLINE uint64_t
 permtoindex_Nx8(uint64_t n, int64_t a)
 {
 	uint64_t i, c, ret;
-	__m64 cmp;
+	__m256i cmp;
 
 	for (i = 0, ret = 0; i < n; i++) {
-		cmp = _mm_set1_pi8(a & INT64_C(0xFF));
+		cmp = _mm256_set1_epi8((char)(a & INT64_C(0xFF)));
 		a = (a >> INT64_C(8)) | INT64_C(0x0F00000000000000);
-		cmp = _mm_cmpgt_pi8(cmp, _mm_cvtsi64_m64(a));
-		c = _mm_popcnt_u64(_mm_cvtm64_si64(cmp)) >> UINT64_C(3);
+		cmp = _mm256_cmpgt_epi8(cmp, _mm256_set1_epi64x(a));
+		c = _mm_popcnt_u32(_mm256_movemask_epi8(cmp)) >> 2;
 		ret += c * factorial[n-1-i];
 	}
 
@@ -428,11 +428,12 @@ STATIC_INLINE cube_t
 invcoord_epe(uint64_t i)
 {
 	int64_t a;
-	__m64 a64;
+	__m256i b, r;
 
 	a = indextoperm_4x8(i);
-	a64 = _mm_add_pi8(_mm_cvtsi64_m64(a), _mm_set_pi32(0, 0x08080808));
-	a = _mm_cvtm64_si64(a64);
+	b = _mm256_set1_epi64x(INT64_C(0x08080808));
+	r = _mm256_add_epi8(_mm256_set1_epi64x(a), b);
+	a = _mm256_extract_epi64(r, 0);
 
 	return _mm256_set_epi64x(a, SOLVED_L, 0, SOLVED_L);
 }
