@@ -1,11 +1,11 @@
 @echo off
 
+SET DEBUG=0
 if "%1"=="/d" (
     SET DEBUG=1
     shift
-) else (
-    SET DEBUG=0
 )
+if "%1"=="test" (SET DEBUG=1)
 
 :: Detect architecture, or use user-specified one
 if "%ARCH%"=="" goto :detect_arch
@@ -62,8 +62,8 @@ exit /b 1
     SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% /c src\nissy.c
     SET CC_SHELL=%CC% %CFLAGS% %ODFALGS% %LFLAGS% nissy.o shell\shell.c /Fe:run.exe
     SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% /I"%PYINCLUDE%" /LD /Fe:python\nissy.pyd python\nissy_module.c nissy.o /link /LIBPATH:"%PYLIBS%" python3.lib
-    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o /Fe:runtest.exe
-    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o /Fe:runtool.exe
+    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtest.exe nissy.o
+    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% /Fe:runtool.exe nissy.o
     SET CC_CXX=%CXX% %ODFLAGS% /std:c++20 /Fe:runcpp.exe cpp\nissy.cpp nissy.o
 goto :compiler_done
 
@@ -85,8 +85,8 @@ goto :compiler_done
     SET CC_NISSY=%CC% %CFLAGS% %ODFLAGS% -c src\nissy.c
     SET CC_SHELL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o shell\shell.c -o run.exe
     SET CC_PYTHON=%CC% %CFLAGS% %LFLAGS% -I%PYINCLUDE% -L%PYLIBS% -shared -lpython3 python\nissy_module.c nissy.o -o python\nissy.pyd
-    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o -o runtest.exe
-    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% nissy.o -o runtool.exe
+    SET CC_TEST=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtest.exe nissy.o
+    SET CC_TOOL=%CC% %CFLAGS% %ODFLAGS% %LFLAGS% -o runtool.exe nissy.o
     SET CC_CXX=%CXX% %ODFLAGS% -std=c++20 -o runcpp.exe cpp\nissy.cpp nissy.o
 :compiler_done
 
@@ -164,7 +164,6 @@ exit /b
 exit /b
 
 :build_test
-    SET DEBUG=1
     call:build_nissy || exit /b 1
     if not defined EXPR (
         SET WILDCARD=*
