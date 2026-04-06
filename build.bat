@@ -49,7 +49,7 @@ exit /b 1
     SET CXX=cl
 
     SET DFLAGS=/Zi /DDEBUG
-    SET WARNINGS=/wd4996
+    SET WARNINGS=/W2 /wd4505 /wd4996
     SET VARIABLES=/DTHREADS=%THREADS% /D%ARCH%
     SET OFLAGS=/O2
 
@@ -72,7 +72,7 @@ goto :compiler_done
     SET CXX=clang++
 
     SET DFLAGS=-g3 -DDEBUG
-    SET WARNINGS=-Wno-deprecated-declarations
+    SET WARNINGS=-Wall -Wextra -Wno-unused-function -Wno-unused-parameter -Wno-deprecated-declarations
     SET VARIABLES=-DTHREADS=%THREADS% -D%ARCH%
     SET OFLAGS=-O3
 
