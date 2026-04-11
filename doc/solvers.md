@@ -169,11 +169,3 @@ These solvers include:
   to use `coord_DRSLICE_xx` as described above as it may produce shorter
   solutions, and it is easier to filter out duplicates (solutions that
   differ only by how they affect the E-layer).
-
-## Planned future solvers
-
-The following solvers are planned to be introduced in the future:
-
-* Finish from HTR
-* JZP / Axial reduction, from EO or direct
-* Finish / leave double slice from JZP
