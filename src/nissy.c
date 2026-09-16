@@ -328,10 +328,10 @@ nissy_solve(
 		return NISSY_ERROR_INVALID_CUBE;
 	}
 
-	if (maxmoves > 20) {
-		LOG("[solve] 'maxmoves' larger than 20 not supported yet, "
-		    "setting it to 20\n");
-		maxmoves = 20;
+	if (maxmoves > SOLUTION_MAXLEN) {
+		LOG("[solve] 'maxmoves' larger than %d not supported yet, "
+		    "setting it to %d\n", SOLUTION_MAXLEN, SOLUTION_MAXLEN);
+		maxmoves = SOLUTION_MAXLEN;
 	}
 
 	if (minmoves > maxmoves) {

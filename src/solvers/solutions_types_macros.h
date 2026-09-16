@@ -1,4 +1,4 @@
-#define SOLUTION_MAXLEN 20
+#define SOLUTION_MAXLEN 25
 
 typedef struct {
 	uint8_t nmoves;
