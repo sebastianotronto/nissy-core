@@ -1,3 +1,6 @@
+#ifndef ARCH_NEON_H
+#define ARCH_NEON_H
+
 #define CO2_NEON    vdup_n_u8(0x60)
 #define COCW_NEON   vdup_n_u8(0x20)
 #define EO_NEON     vdupq_n_u8(0x10)
@@ -557,3 +560,5 @@ invcoord_epudsep(uint64_t i)
 		.edge = vcombine_u8(vld1_u8(e), vld1_u8(SOLVED_H))
 	};
 }
+
+#endif /* ARCH_NEON_H */

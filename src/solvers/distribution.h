@@ -1,3 +1,6 @@
+#ifndef SOLVERS_DISTRIBUTION_H
+#define SOLVERS_DISTRIBUTION_H
+
 #define ENTRIES_PER_BYTE(k) (UINT64_C(8) / (uint64_t)(k))
 #define TABLE_SHIFT(i, k)   ((uint8_t)(k) * (uint8_t)((i) % ENTRIES_PER_BYTE(k)))
 #define TABLE_MASK(i, k)    ((UINT8_BIT(k) - UINT8_C(1)) << TABLE_SHIFT(i, k))
@@ -99,3 +102,5 @@ distribution_equal(
 
 	return wrong == 0;
 }
+
+#endif /* SOLVERS_DISTRIBUTION_H */

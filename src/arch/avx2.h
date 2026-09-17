@@ -1,3 +1,6 @@
+#ifndef ARCH_AVX2_H
+#define ARCH_AVX2_H
+
 #define CO2_AVX2 _mm256_set_epi64x(0, 0, 0, INT64_C(0x6060606060606060))
 #define COCW_AVX2 _mm256_set_epi64x(0, 0, 0, INT64_C(0x2020202020202020))
 #define CP_AVX2 _mm256_set_epi64x(0, 0, 0, INT64_C(0x0707070707070707))
@@ -478,3 +481,5 @@ invcoord_epudsep(uint64_t i)
 
 	return _mm256_or_si256(elow, cube);
 }
+
+#endif /* ARCH_AVX2_H */

@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_SOLVE_H
+#define SOLVERS_COORD_SOLVE_H
+
 typedef struct {
 	cube_t cube;
 	cube_t inverse;
@@ -400,3 +403,5 @@ solve_coord_error_unsolvable:
 	LOG("[%s solve] Error: cube not ready\n", coord->name);
 	return NISSY_ERROR_UNSOLVABLE_CUBE;
 }
+
+#endif /* SOLVERS_COORD_SOLVE_H */

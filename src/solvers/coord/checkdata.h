@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_CHECKDATA_H
+#define SOLVERS_COORD_CHECKDATA_H
+
 STATIC long long checkdata_coord_dispatch(
     const char *, unsigned long long, const unsigned char *);
 STATIC long long checkdata_coord(
@@ -120,3 +123,5 @@ checkdata_multicoord(
 
 	return NISSY_OK;
 }
+
+#endif /* SOLVERS_COORD_CHECKDATA_H */

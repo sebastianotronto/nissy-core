@@ -1,3 +1,6 @@
+#ifndef UTILS_PREFETCH_H
+#define UTILS_PREFETCH_H
+
 #if defined(__GNUC__) || defined(__clang__)
     #define prefetch(a, i) __builtin_prefetch(a+i, 0, 0)
 #elif defined(AVX2)
@@ -5,3 +8,5 @@
 #else
     #define prefetch(a, i) (void)i
 #endif
+
+#endif /* UTILS_PREFETCH_H */

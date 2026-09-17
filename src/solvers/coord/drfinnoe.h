@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_DRFINNOE_H
+#define SOLVERS_COORD_DRFINNOE_H
+
 /*
 TODO
 
@@ -96,3 +99,5 @@ is_drfinnoe_solvable(cube_t cube) {
 	       coord_eo(transform_edges(cube, TRANS_URr)) == 0 &&
 	       coord_co(cube) == 0;
 }
+
+#endif /* SOLVERS_COORD_DRFINNOE_H */

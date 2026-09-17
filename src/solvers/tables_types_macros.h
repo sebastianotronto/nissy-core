@@ -1,3 +1,6 @@
+#ifndef SOLVERS_TABLES_TYPES_MACROS_H
+#define SOLVERS_TABLES_TYPES_MACROS_H
+
 #define OFFSET(B, K)             (((unsigned char *)B) + K)
 
 #define INFOSIZE                 INT64_C(512)
@@ -37,3 +40,5 @@ typedef struct {
 	uint8_t base;
 	uint8_t maxvalue;
 } tableinfo_t;
+
+#endif /* SOLVERS_TABLES_TYPES_MACROS_H */

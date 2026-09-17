@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_GENDATA_COCSEP_H
+#define SOLVERS_H48_GENDATA_COCSEP_H
+
 STATIC size_t gendata_cocsep(unsigned char *, uint64_t *, cube_t *);
 STATIC uint32_t gendata_cocsep_dfs(cocsep_dfs_arg_t [NON_NULL]);
 
@@ -164,3 +167,5 @@ get_h48_cdata(
 
 	return CBOUND(*cdata);
 }
+
+#endif /* SOLVERS_H48_GENDATA_COCSEP_H */

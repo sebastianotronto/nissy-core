@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_TYPES_MACROS_H
+#define SOLVERS_COORD_TYPES_MACROS_H
+
 #define COORD_INDEX(i)      ((i)/2)
 #define COORD_SHIFT(i)      (UINT8_C(4) * (uint8_t)((i) % 2))
 #define COORD_MASK(i)       (UINT8_C(0xF) << COORD_SHIFT(i))
@@ -53,3 +56,5 @@ typedef struct {
 	uint64_t moves_mask;
 	bool (*is_solvable)(cube_t);
 } multicoord_t;
+
+#endif /* SOLVERS_COORD_TYPES_MACROS_H */

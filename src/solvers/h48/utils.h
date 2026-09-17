@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_UTILS_H
+#define SOLVERS_H48_UTILS_H
+
 #if SIZE_MAX == UINT64_MAX
 #define H48_HMAX UINT8_C(11)
 #else
@@ -63,3 +66,5 @@ dataid_h48(const char *str, char buf[SIZE(NISSY_SIZE_DATAID)])
 	sprintf(buf, "h48h%" PRIu8, h);
 	return NISSY_OK;
 }
+
+#endif /* SOLVERS_H48_UTILS_H */

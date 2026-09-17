@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_GENDATA_EOESEP_H
+#define SOLVERS_H48_GENDATA_EOESEP_H
+
 STATIC uint64_t coord_eoesep_sym(cube_t, const uint32_t [SIZE(ESEP_MAX)]);
 STATIC size_t gendata_esep_classes(
     uint32_t [SIZE(ESEP_MAX)], uint16_t [SIZE(ESEP_CLASSES)]);
@@ -280,3 +283,5 @@ set_eoesep_pval(
 	table[EOESEP_INDEX(i)] = (table[EOESEP_INDEX(i)] & (~EOESEP_MASK(i)))
 	    | (val << EOESEP_SHIFT(i));
 }
+
+#endif /* SOLVERS_H48_GENDATA_EOESEP_H */

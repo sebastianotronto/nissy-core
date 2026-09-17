@@ -1,3 +1,6 @@
+#ifndef UTILS_DBG_LOG_H
+#define UTILS_DBG_LOG_H
+
 #include <stdio.h>
 
 void (*nissy_log)(const char *, void *);
@@ -31,3 +34,5 @@ write_wrapper(void (*write)(const char *, void *), const char *str, ...)
 #define DBG_WARN(condition, ...)
 #define DBG_ASSERT(condition, ...)
 #endif
+
+#endif /* UTILS_DBG_LOG_H */

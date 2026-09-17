@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_UTILS_H
+#define SOLVERS_COORD_UTILS_H
+
 STATIC coord_t *parse_coord(size_t, const char *);
 STATIC multicoord_t *parse_multicoord(size_t, const char *);
 STATIC void parse_coord_and_trans(
@@ -80,3 +83,5 @@ dataid_coord(const char *ca, char dataid[SIZE(NISSY_SIZE_DATAID)])
 	LOG("Error: cannot parse coordinate from '%s'\n", ca);
 	return NISSY_ERROR_INVALID_SOLVER;
 }
+
+#endif /* SOLVERS_COORD_UTILS_H */

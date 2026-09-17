@@ -1,3 +1,6 @@
+#ifndef SRC_SOLVERS_TWOSTEP_TWOSTEP_H
+#define SRC_SOLVERS_TWOSTEP_TWOSTEP_H
+
 #include "../coord/coord.h"
 
 STATIC long long dataid_twostep(const char *, char [SIZE(NISSY_SIZE_DATAID)]);
@@ -91,3 +94,5 @@ solve_twostep(
 {
 //TODO
 }
+
+#endif /* SRC_SOLVERS_TWOSTEP_TWOSTEP_H */

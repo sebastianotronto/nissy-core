@@ -1,3 +1,6 @@
+#ifndef UTILS_WRAPTHREAD_H
+#define UTILS_WRAPTHREAD_H
+
 #if THREADS == 1
 	#define WRAPTHREAD_NOTHREADS 1
 #elif defined(__unix__)
@@ -75,3 +78,5 @@
 	#define wrapthread_mutex_unlock(a)
 
 #endif
+
+#endif /* UTILS_WRAPTHREAD_H */

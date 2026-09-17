@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_GENDATA_H48_H
+#define SOLVERS_H48_GENDATA_H48_H
+
 STATIC long long gendata_h48_dispatch(
     const char *, unsigned long long, unsigned char *);
 STATIC uint64_t gendata_h48short(gendata_h48short_arg_t [NON_NULL]);
@@ -547,3 +550,5 @@ get_h48_pval_and_min(
 	*pval_min = tmin >> UINT8_C(4);
 	return (t & H48_MASK(iext)) >> H48_SHIFT(iext);
 }
+
+#endif /* SOLVERS_H48_GENDATA_H48_H */
