@@ -1,3 +1,6 @@
+#ifndef SOLVERS_SOLUTIONS_H
+#define SOLVERS_SOLUTIONS_H
+
 STATIC void solution_moves_reset(solution_moves_t [NON_NULL]);
 STATIC void solution_moves_transform(solution_moves_t [NON_NULL], size_t,
     uint8_t);
@@ -338,3 +341,5 @@ solutions_done(
 	    depth > list->shortest_sol + settings->optimal ||
 	    list->nsols >= settings->maxsolutions;
 }
+
+#endif /* SOLVERS_SOLUTIONS_H */

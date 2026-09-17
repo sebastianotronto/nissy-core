@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_DISTRIBUTION_H48_H
+#define SOLVERS_H48_DISTRIBUTION_H48_H
+
 /*
 This file is very similar to ../distibution.h, but some adaptations are
 needed for H48 because of the intertwined fallback table, and it is easier
@@ -74,3 +77,5 @@ getdistribution_h48(
 	c = H48_LINE_EXT(H48_COORDMAX(info->h48h)) % H48_LINE_ALLCOORDS;
 	distr[3] -= H48_LINE_COORDS - c;
 }
+
+#endif /* SOLVERS_H48_DISTRIBUTION_H48_H */

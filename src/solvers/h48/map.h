@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_MAP_H
+#define SOLVERS_H48_MAP_H
+
 STATIC void h48map_create(h48map_t [NON_NULL], uint64_t, uint64_t);
 STATIC void h48map_clear(h48map_t [NON_NULL]);
 STATIC void h48map_destroy(h48map_t [NON_NULL]);
@@ -82,3 +85,5 @@ h48map_nextkvpair(h48map_t map[NON_NULL], uint64_t p[NON_NULL])
 
 	return kv;
 }
+
+#endif /* SOLVERS_H48_MAP_H */

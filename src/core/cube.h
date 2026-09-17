@@ -1,3 +1,6 @@
+#ifndef CORE_CUBE_H
+#define CORE_CUBE_H
+
 STATIC bool cube_true(cube_t);
 
 STATIC cube_t cubefromarray(uint8_t [SIZE(8)], uint8_t [SIZE(12)]);
@@ -369,3 +372,5 @@ cornertob32(uint8_t corner)
 
 	return val < 26 ? 'A' + (char)val : 'a' + (char)(val - 26);
 }
+
+#endif /* CORE_CUBE_H */

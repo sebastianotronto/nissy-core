@@ -1,3 +1,6 @@
+#ifndef SOLVERS_DISPATCH_H
+#define SOLVERS_DISPATCH_H
+
 typedef struct {
 	const char *solvername;
 	const char *prefix;
@@ -92,3 +95,5 @@ match_solver(const char *name)
 
 	return solver_dispatchers[i];
 }
+
+#endif /* SOLVERS_DISPATCH_H */

@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_DR_H
+#define SOLVERS_COORD_DR_H
+
 #define DREOESEP_CLASSES UINT64_C(64430)
 #define DREOESEP_MAX     (POW_2_11 * COMB_12_4)
 
@@ -117,3 +120,5 @@ is_eoco_solvable(cube_t cube) {
 
 	return cocount % 3 == 0 && eocount % 2 == 0;
 }
+
+#endif /* SOLVERS_COORD_DR_H */

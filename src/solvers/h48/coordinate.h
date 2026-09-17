@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_COORDINATE_H
+#define SOLVERS_H48_COORDINATE_H
+
 STATIC_INLINE uint64_t coord_h48(
     cube_t, const uint32_t [SIZE(COCSEP_TABLESIZE)], uint8_t);
 STATIC_INLINE uint64_t coord_h48_edges(cube_t, uint64_t, uint8_t, uint8_t);
@@ -68,3 +71,5 @@ invcoord_h48(
 
 	return ret;
 }
+
+#endif /* SOLVERS_H48_COORDINATE_H */

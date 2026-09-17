@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_MULTISOLVE_H
+#define SOLVERS_COORD_MULTISOLVE_H
+
 /*
 For now the only multicoordinate is DRFIN, and this solver reflects this.
 For example, NISS is not available.
@@ -297,3 +300,5 @@ solve_multicoord_error_unsolvable:
 	LOG("[%s solve] Error: cube not ready\n", mcoord->name);
 	return NISSY_ERROR_UNSOLVABLE_CUBE;
 }
+
+#endif /* SOLVERS_COORD_MULTISOLVE_H */

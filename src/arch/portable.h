@@ -1,3 +1,6 @@
+#ifndef ARCH_PORTABLE_H
+#define ARCH_PORTABLE_H
+
 #define STATIC_CUBE(c_ufr, c_ubl, c_dfl, c_dbr, c_ufl, c_ubr, c_dfr, c_dbl, \
     e_uf, e_ub, e_db, e_df, e_ur, e_ul, e_dl, e_dr, e_fr, e_fl, e_bl, e_br) \
     ((cube_t) { \
@@ -407,3 +410,5 @@ invcoord_epudsep(uint64_t c)
 	invcoord_epudsep_array(c, ret.edge);
 	return ret;
 }
+
+#endif /* ARCH_PORTABLE_H */

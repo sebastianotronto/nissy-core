@@ -1,3 +1,6 @@
+#ifndef ARCH_COMMON_H
+#define ARCH_COMMON_H
+
 #define EOSHIFT     UINT8_C(4)
 #define COSHIFT     UINT8_C(5)
 
@@ -126,3 +129,5 @@ invcoord_epudsep_array(uint64_t c, uint8_t ret[8])
 		k -= is;
 	}
 }
+
+#endif /* ARCH_COMMON_H */

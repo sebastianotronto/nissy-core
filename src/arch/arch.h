@@ -1,3 +1,6 @@
+#ifndef ARCH_ARCH_H
+#define ARCH_ARCH_H
+
 #if defined(AVX2)
 
 #include <immintrin.h>
@@ -36,3 +39,5 @@ typedef struct {
 #endif
 
 #endif
+
+#endif /* ARCH_ARCH_H */

@@ -1,3 +1,6 @@
+#ifndef UTILS_MATH_H
+#define UTILS_MATH_H
+
 #define SWAP(x, y) do { x ^= y; y ^= x; x ^= y; } while (0)
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 #define MAX(x, y) ((x) > (y) ? (x) : (y))
@@ -146,3 +149,5 @@ intpow(double b, uint64_t e)
 
 	return e % 2 == 0 ? r * r : b * r * r;
 }
+
+#endif /* UTILS_MATH_H */

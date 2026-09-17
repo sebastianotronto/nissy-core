@@ -1,3 +1,6 @@
+#ifndef SOLVERS_SOLUTIONS_TYPES_MACROS_H
+#define SOLVERS_SOLUTIONS_TYPES_MACROS_H
+
 #define SOLUTION_MAXLEN 20
 
 typedef struct {
@@ -22,3 +25,5 @@ typedef struct {
 	size_t used;
 	char *buf;
 } solution_list_t;
+
+#endif /* SOLVERS_SOLUTIONS_TYPES_MACROS_H */

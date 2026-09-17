@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_H48_H
+#define SOLVERS_H48_H48_H
+
 #include "utils.h"
 #include "coordinate_types_macros.h"
 #include "map_types_macros.h"
@@ -10,3 +13,5 @@
 #include "gendata_h48.h"
 #include "checkdata.h"
 #include "solve.h"
+
+#endif /* SOLVERS_H48_H48_H */

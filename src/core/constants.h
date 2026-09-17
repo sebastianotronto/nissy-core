@@ -1,3 +1,6 @@
+#ifndef CORE_CONSTANTS_H
+#define CORE_CONSTANTS_H
+
 #define ZERO_ORIENTED_CUBE ((oriented_cube_t) {0})
 #define SOLVED_ORIENTED_CUBE \
     ((oriented_cube_t) { .cube = SOLVED_CUBE, .orientation = 0 })
@@ -913,3 +916,5 @@ STATIC uint8_t basic_to_rotation[] = {
 	[MOVE_B2] = MOVE_z2,
 	[MOVE_B3] = MOVE_z,
 };
+
+#endif /* CORE_CONSTANTS_H */

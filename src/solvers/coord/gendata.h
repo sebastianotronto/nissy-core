@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_GENDATA_H
+#define SOLVERS_COORD_GENDATA_H
+
 STATIC size_t gendata_coord(const coord_t [NON_NULL], unsigned char *);
 STATIC size_t gendata_multicoord(
     const multicoord_t [NON_NULL], unsigned char *);
@@ -353,3 +356,5 @@ set_coord_pval(
 	table[COORD_INDEX(i)] = (table[COORD_INDEX(i)] & (~COORD_MASK(i)))
 	    | (val << COORD_SHIFT(i));
 }
+
+#endif /* SOLVERS_COORD_GENDATA_H */

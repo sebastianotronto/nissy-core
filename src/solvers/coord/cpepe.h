@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_CPEPE_H
+#define SOLVERS_COORD_CPEPE_H
+
 STATIC uint64_t coordinate_cpepe_coord(const cube_t, const unsigned char *);
 STATIC cube_t coordinate_cpepe_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_cpepe_isnasty(uint64_t, const unsigned char *);
@@ -71,3 +74,5 @@ coordinate_cpepe_gendata(unsigned char *data)
 {
 	return coord_gendata_generic(&coordinate_cpepe, data);
 }
+
+#endif /* SOLVERS_COORD_CPEPE_H */

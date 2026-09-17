@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_CORNERSX_H
+#define SOLVERS_COORD_CORNERSX_H
+
 STATIC bool is_cornersx_solved(uint64_t, const unsigned char *);
 
 STATIC coord_t coordinate_cornersx = {
@@ -74,3 +77,5 @@ is_cornersx_solved(uint64_t coord, const unsigned char *data)
 
 	return false;
 }
+
+#endif /* SOLVERS_COORD_CORNERSX_H */

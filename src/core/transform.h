@@ -1,3 +1,6 @@
+#ifndef CORE_TRANSFORM_H
+#define CORE_TRANSFORM_H
+
 #define TRANS_EDGES_ROTATION(T, c) \
         compose_edges(compose_edges(TRANS_CUBE_ ## T, c), \
         TRANS_CUBE_ ## T ## _INVERSE)
@@ -418,3 +421,5 @@ symmetry_mask(cube_t cube)
 
 	return ret;
 }
+
+#endif /* CORE_TRANSFORM_H */

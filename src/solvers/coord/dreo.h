@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_DREO_H
+#define SOLVERS_COORD_DREO_H
+
 #define DRESEP_CLASSES 81
 
 STATIC uint64_t coord_dresep_nosym(cube_t);
@@ -101,3 +104,5 @@ is_dreo_solvable(cube_t cube) {
 
 	return cocount % 3 == 0;
 }
+
+#endif /* SOLVERS_COORD_DREO_H */

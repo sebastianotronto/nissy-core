@@ -1,3 +1,6 @@
+#ifndef CORE_ORIENTED_CUBE_H
+#define CORE_ORIENTED_CUBE_H
+
 STATIC oriented_cube_t solvedcube(void);
 
 STATIC oriented_cube_t move_extended(oriented_cube_t, uint8_t);
@@ -75,3 +78,5 @@ applymoves(oriented_cube_t cube, const char *buf)
 	cinv.cube = inverse(cinv.cube);
 	return compose_oriented(cinv, c);
 }
+
+#endif /* CORE_ORIENTED_CUBE_H */
