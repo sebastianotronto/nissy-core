@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_DRFIN_H
+#define SOLVERS_COORD_DRFIN_H
+
 STATIC bool is_drfin_solvable(cube_t);
 
 STATIC multicoord_t multicoordinate_drfin = {
@@ -15,3 +18,5 @@ is_drfin_solvable(cube_t cube)
 	       coord_co(cube) == 0 &&
 	       issolvable((oriented_cube_t){.cube = cube, .orientation = 0});
 }
+
+#endif /* SOLVERS_COORD_DRFIN_H */

@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_CORNERS_H
+#define SOLVERS_COORD_CORNERS_H
+
 #define CLASSES_CP_48 984
 
 STATIC uint64_t coordinate_corners_coord(const cube_t, const unsigned char *);
@@ -70,3 +73,5 @@ coordinate_corners_gendata(unsigned char *data)
 {
 	return coord_gendata_generic(&coordinate_corners, data);
 }
+
+#endif /* SOLVERS_COORD_CORNERS_H */

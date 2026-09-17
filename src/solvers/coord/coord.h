@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_COORD_H
+#define SOLVERS_COORD_COORD_H
+
 #include "types_macros.h"
 #include "common.h"
 #include "eo.h"
@@ -16,3 +19,5 @@
 #include "checkdata.h"
 #include "solve.h"
 #include "multisolve.h"
+
+#endif /* SOLVERS_COORD_COORD_H */

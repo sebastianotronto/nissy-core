@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_GENDATA_TYPES_MACROS_H
+#define SOLVERS_H48_GENDATA_TYPES_MACROS_H
+
 #define COCSEP_CLASSES      ((size_t)3393)
 #define COCSEP_TABLESIZE    ((size_t)POW_3_7 << (size_t)7)
 #define COCSEP_VISITEDSIZE  DIV_ROUND_UP(COCSEP_TABLESIZE, (size_t)8)
@@ -116,3 +119,5 @@ typedef struct {
 	wrapthread_atomic unsigned char *table_atomic;
 	wrapthread_define_struct_mutex_t(**table_mutex);
 } gendata_h48_mark_t;
+
+#endif /* SOLVERS_H48_GENDATA_TYPES_MACROS_H */

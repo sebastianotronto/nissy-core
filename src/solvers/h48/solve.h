@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_SOLVE_H
+#define SOLVERS_H48_SOLVE_H
+
 #define H48_STARTING_MOVES 4
 #define H48_STARTING_CUBES 43254
 #define H48_SORT_TASKS_MIN_DEPTH 16
@@ -758,3 +761,5 @@ solve_h48_error_data:
 solve_h48_error_solutions_buffer:
 	return NISSY_ERROR_BUFFER_SIZE;
 }
+
+#endif /* SOLVERS_H48_SOLVE_H */

@@ -1,3 +1,6 @@
+#ifndef UTILS_SLEEP_H
+#define UTILS_SLEEP_H
+
 #define BASE_SLEEP_TIME 500
 
 STATIC void msleep(int);
@@ -50,3 +53,5 @@ msleep(int milliseconds)
 }
 
 #endif
+
+#endif /* UTILS_SLEEP_H */

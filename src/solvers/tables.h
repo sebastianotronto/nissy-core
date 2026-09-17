@@ -1,3 +1,6 @@
+#ifndef SOLVERS_TABLES_H
+#define SOLVERS_TABLES_H
+
 STATIC uint64_t read_unaligned_u64(
     const unsigned char [SIZE(sizeof(uint64_t))]);
 STATIC void write_unaligned_u64(
@@ -147,3 +150,5 @@ append_name(tableinfo_t info[NON_NULL], const char *str)
 
 	info->solver[j] = '\0';
 }
+
+#endif /* SOLVERS_TABLES_H */

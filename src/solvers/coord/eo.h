@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_EO_H
+#define SOLVERS_COORD_EO_H
+
 STATIC uint64_t coordinate_eo_coord(cube_t, const unsigned char *);
 STATIC cube_t coordinate_eo_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_eo_isnasty(uint64_t, const unsigned char *);
@@ -57,3 +60,5 @@ coordinate_eo_gendata(unsigned char *data)
 {
 	return 0;
 }
+
+#endif /* SOLVERS_COORD_EO_H */

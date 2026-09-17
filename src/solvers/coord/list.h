@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_LIST_H
+#define SOLVERS_COORD_LIST_H
+
 coord_t *all_coordinates[] = {
 	&coordinate_eo,
 	&coordinate_dr,
@@ -15,3 +18,5 @@ multicoord_t *all_multicoordinates[] = {
 	&multicoordinate_drfin,
 	NULL
 };
+
+#endif /* SOLVERS_COORD_LIST_H */

@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_HTR_H
+#define SOLVERS_COORD_HTR_H
+
 STATIC uint64_t coordinate_htr_coord(cube_t, const unsigned char *);
 STATIC cube_t coordinate_htr_cube(uint64_t, const unsigned char *);
 STATIC bool coordinate_htr_isnasty(uint64_t, const unsigned char *);
@@ -123,3 +126,5 @@ is_cp_htr(uint64_t i, const unsigned char *data)
 
 	return e == 0 && is_cp16_htr_table[c / 8] & (UINT8_C(1) << (c % 8));
 }
+
+#endif /* SOLVERS_COORD_HTR_H */

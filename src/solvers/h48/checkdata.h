@@ -1,3 +1,6 @@
+#ifndef SOLVERS_H48_CHECKDATA_H
+#define SOLVERS_H48_CHECKDATA_H
+
 STATIC long long checkdata_h48(
     const char *, unsigned long long, const unsigned char *);
 
@@ -194,3 +197,5 @@ checkdata_h48(
 
 	return NISSY_OK;
 }
+
+#endif /* SOLVERS_H48_CHECKDATA_H */

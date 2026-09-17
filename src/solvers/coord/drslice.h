@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_DRSLICE_H
+#define SOLVERS_COORD_DRSLICE_H
+
 /*
 The DRSLICE coordinate is almost identical to DRFINNOE, but it allows for
 the centers of the E layer to be off by a rotation. For this reason we reuse
@@ -95,3 +98,5 @@ is_drslice_solved(uint64_t i, const unsigned char *data)
 	/* Pre-computed coordinates of U D' (= U' D up to trans) and U2 D2 */
 	return i == 0 || i == 109779816 || i == 68468527;
 }
+
+#endif /* SOLVERS_COORD_DRSLICE_H */

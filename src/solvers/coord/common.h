@@ -1,3 +1,6 @@
+#ifndef SOLVERS_COORD_COMMON_H
+#define SOLVERS_COORD_COMMON_H
+
 STATIC uint64_t coord_coord_generic(
     const coord_t [NON_NULL], cube_t, const unsigned char *);
 STATIC cube_t coord_cube_generic(
@@ -229,3 +232,5 @@ coordinate_merge_cpco(cube_t cp, cube_t co)
 
 	return merged;
 }
+
+#endif /* SOLVERS_COORD_COMMON_H */

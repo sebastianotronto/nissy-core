@@ -1,3 +1,6 @@
+#ifndef UTILS_CONSTANTS_H
+#define UTILS_CONSTANTS_H
+
 #define UINT8_BIT(i) (UINT8_C(1) << (uint8_t)(i))
 
 #define FACTORIAL_MAX UINT64_C(12)
@@ -42,3 +45,5 @@ STATIC uint64_t binomial[12][12] = {
 	{1, 10, 45, 120, 210, 252, 210, 120,  45, 10,  1, 0},
 	{1, 11, 55, 165, 330, 462, 462, 330, 165, 55, 11, 1},
 };
+
+#endif /* UTILS_CONSTANTS_H */

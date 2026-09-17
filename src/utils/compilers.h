@@ -1,3 +1,6 @@
+#ifndef UTILS_COMPILERS_H
+#define UTILS_COMPILERS_H
+
 #if defined(__GNUC__)
 
 #define UNUSED __attribute__((unused))
@@ -22,3 +25,5 @@ a[static N] notation for array parameters).
 #define NON_NULL
 
 #endif
+
+#endif /* UTILS_COMPILERS_H */

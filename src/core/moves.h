@@ -1,3 +1,6 @@
+#ifndef CORE_MOVES_H
+#define CORE_MOVES_H
+
 #define MOVE(M, c) compose(c, MOVE_CUBE_ ## M)
 #define PREMOVE(M, c) compose(MOVE_CUBE_ ## M, c)
 
@@ -719,3 +722,5 @@ unniss_error:
 	LOG("[variations] Error writing result.\n");
 	return NISSY_ERROR_BUFFER_SIZE;
 }
+
+#endif /* CORE_MOVES_H */
