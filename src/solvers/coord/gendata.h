@@ -24,16 +24,25 @@ gendata_coord_dispatch(
 	unsigned char *buf
 )
 {
+	size_t r;
 	coord_t *coord;
 	multicoord_t *mcoord;
 
 	parse_coord_and_trans(coordstr, &coord, &mcoord, NULL);
 
-	if (coord != NULL)
-		return gendata_coord(coord, buf);
+	if (coord != NULL) {
+		if (bufsize < gendata_coord(coord, NULL))
+			return NISSY_ERROR_BUFFER_SIZE;
+		r = gendata_coord(coord, buf);
+		return r == 0 ? NISSY_ERROR_UNKNOWN : (long long)r;
+	}
 
-	if (mcoord != NULL)
-		return gendata_multicoord(mcoord, buf);
+	if (mcoord != NULL) {
+		if (bufsize < gendata_multicoord(mcoord, NULL))
+			return NISSY_ERROR_BUFFER_SIZE;
+		r = gendata_multicoord(mcoord, buf);
+		return r == 0 ? NISSY_ERROR_UNKNOWN : (long long)r;
+	}
 
 	LOG("Error: could not parse coordinate '%s'\n", coordstr);
 	return NISSY_ERROR_INVALID_SOLVER;

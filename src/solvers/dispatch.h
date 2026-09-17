@@ -38,6 +38,13 @@ solver_dispatch_t solver_dispatchers[] = {
 	.solve = solve_multicoord_dispatch,
 },
 {
+	.prefix = "twostep",
+	.dataid = dataid_twostep,
+	.gendata = gendata_twostep,
+	.checkdata = checkdata_twostep,
+	.solve = solve_twostep,
+},
+{
 	.prefix = NULL
 }
 };
@@ -67,6 +74,7 @@ const char *solver_aliases[][2] = {
 	{ "htr-drfb", "coord_HTR_BU" },
 	{ "corners", "coord_CORNERS_UF" },
 	{ "cornersx", "coord_CORNERSX_UF" },
+	{ "quick", "twostep" },
 	{ NULL, NULL }
 };
 
