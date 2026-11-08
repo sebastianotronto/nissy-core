@@ -47,7 +47,7 @@ portable_nproc() {
 	OS="$(uname -s)"
 	case "$OS" in
 	"Linux")
-		nproc
+		nproc --all
 		;;
 	"Darwin" | "*BSD")
 		sysctl -n hw.ncpu
