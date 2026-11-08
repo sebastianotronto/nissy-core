@@ -229,3 +229,17 @@ have to manually edit the build script.
 
 I'll leave this one to anyone who actually wants to work on nissy-core
 from Windows.
+
+### API rework
+
+The initial design decision of having a "thin" public API and relying
+on strings for everything had some advantages, but it is causing more
+problems that it solves. The following changes should be considered:
+
+* Instead of passing move strings, pass buffers of bytes to be filled
+  with moves. A move is an 8-bit integer from 0 to 54 with a bit for
+  normal / inverse. This is a big change that requires re-working
+  solvers, but also tools and so on. Utilities to translate an array
+  of moves to a move string can be provided.
+* Solvers and other string-parameters for API functions should be
+  provided as constants, or as enums.
