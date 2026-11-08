@@ -486,6 +486,7 @@ solve_h48_maketasks(
 		tasks[*ntasks].cube = mtarg->cube;
 		tasks[*ntasks].pval =
 		    h48_prune_lookup_nocoord(mtarg->cube, solve_arg);
+		tasks[*ntasks].rank = 0;
 		memcpy(tasks[*ntasks].moves, mtarg->moves,
 		    H48_STARTING_MOVES * sizeof(uint8_t));
 		memcpy(tasks[*ntasks].tmask, mtarg->tmask,
