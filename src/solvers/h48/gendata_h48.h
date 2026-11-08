@@ -308,7 +308,7 @@ gendata_h48_runthread(void *arg)
 		wrapthread_mutex_lock(dfsarg->shortcubes_mutex);
 
 		kv = h48map_nextkvpair(dfsarg->shortcubes, dfsarg->next);
-		if (*dfsarg->next == dfsarg->shortcubes->capacity) {
+		if (kv.val == MAP_UNSET_VAL) {
 			wrapthread_mutex_unlock(dfsarg->shortcubes_mutex);
 			break;
 		}
