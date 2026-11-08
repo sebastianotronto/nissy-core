@@ -4,6 +4,46 @@ This document contains a list of ideas for possible new features or
 improvements to nissy-core. This file used to be private, but it makes
 more sense to have it public, in case someone else wants to contribute.
 
+## Bugs
+
+AI-based code analysis by Arhan showed [a few
+bugs](https://egg-solver.arhan.sh/docs/comparisons/RESULTS.html#bugs-and-issues-found-in-other-solvers-for-the-final-report-the-user-will-report-them-upstream).
+Some have already been fixed. The following remain
+(note: they may be false positives):
+
+### Python binding: gendata leaks and doubles memory
+
+In `python/nissy_module.c:247`:
+
+```
+buf = PyMem_Malloc(size);
+```
+
+then at line 254:
+
+```
+return PyByteArray_FromStringAndSize((char *)buf, size);
+```
+
+That call copies the buffer, and buf is never freed.
+
+Fix: allocate the bytearray first
+(`PyByteArray_FromStringAndSize(NULL, size)`)
+and generate into `PyByteArray_AS_STRING`. Or free buf after the copy.
+
+### H48 gendata: progress logger delays the end
+
+In `src/solvers/h48/gendata_h48.h:262-281`, the main thread sleeps
+`sleeptime = 100*(nshort - velocity)/velocity` milliseconds between
+progress lines.
+
+It reaches `wrapthread_join` (line 287) only after its current sleep.
+This causes a delay of about 3.5 minutes before writing with h48h7,
+8 cores.
+
+Fix: wait on the workers with a timed join or a condition variable,
+instead of a fixed sleep.
+
 ## Priorities
 
 Items in this section are what I consider top priorities. They enable or
