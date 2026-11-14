@@ -2,11 +2,18 @@
 
 This page contains some benchmarks for some of the possible
 configurations of the H48 optimal solver. For comparison we also
-include similar measurements for Andrew Skalski's impressive optimal
-solver [vcube](https://github.com/Voltara/vcube), which has been taken
-as a benchmark reference throughout the development of H48. The two
-solvers differ both in method (although they both use an A* search)
-and implementation.
+include similar measurements for two other optimal solvers:
+
+* Andrew Skalski's [vcube](https://github.com/Voltara/vcube), which
+  is a truly impressive implementation of Tomas Rokicki's 
+  [nxopt](https://github.com/rokicki/cube20src/blob/master/nxopt.md)
+  that has been taken as a reference throughout the development of H48.
+  This solver also uses an A* search, but the search is supported
+  by different pruning tables.
+* Arhan Chaudhary's
+  [egg-solver](https://github.com/ArhanChaudhary/egg-solver), which
+  is an AI-generated implementation of the H48 method with
+  highly-optimized microthreading.
 
 Similar benchmarks can be found:
 
@@ -18,6 +25,8 @@ Similar benchmarks can be found:
 * In Enrico Tenuti's [thesis](https://github.com/enricotenuti/h48thesis),
   also using an old implementation of H48, but including more data and
   nice plots.
+* In [the documentation page](https://egg-solver/arhan.sh/docs/index.html)
+  for egg-solver.
 
 ## Setting
 
@@ -43,8 +52,9 @@ All benchmark tests were done on the following configuration:
 * CPU: AMD Ryzen 7 7700 (8 cores, 16 virtual threads)
 * Memory: 2x Corsair Vengeance 32GB 5600MHz
 * Motherboard: Gigabyte B650M K
-* Operating system: Debian 13 (Linux kernel 6.12.57)
-* Compiler: GCC 14.2.0 for H48 and Clang 19.1.7 for vcube
+* Operating system: Debian 13 (Linux kernel 6.12)
+* Compilers: GCC 14.2.0 for H48, Chhang 19.1.7 for vcube and
+  cargo 1.99.1 for egg-solver
 
 ## Benchmark results
 
@@ -53,11 +63,11 @@ All benchmark tests were done on the following configuration:
 The first test we performed was finding a single optimal solution, and
 we compared the results with vcube.
 
-This test was run in a single-thread configuration, because the two
+This test was run in a single-thread configuration, because the three
 solvers use very different strategies for multithreading: vcube can only
-parallelize by solving one cube per thread, while H48 is able to take
-advantage of multiple threads even when solving a single cube. Therefore
-we prefer to compare their single-threaded performance only.
+parallelize by solving one cube per thread, while H48 and egg-solver can
+take advantage of multiple threads even when solving a single cube.
+Therefore we prefer to compare their single-threaded performance only.
 
 Since the size of the pruning table used by the solver is of utmost
 importance, we include two statistics: time per cube and time per cube
@@ -67,40 +77,52 @@ leads to more even results across the board, although the speed of the
 solvers of the same family does not scale exactly linearly with the size
 of the pruning table.
 
-<!-- The following details block can be found in benchmarks/single_thread_comparison.md -->
+<!-- The following details block can be found in benchmarks/tables_1_thread.md -->
 <details><summary>Results: Single solution, single thread</summary>
 
 Time per cube (in seconds, lower is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
 |vcube 212 |58.2 GiB|    0.11|    0.75|    3.43|   27.28|    19.30|
-|H48 h11   |56.5 GiB|    0.09|    0.50|    2.24|   15.73|    15.55|
+|egg h11   |58.0 GiB|    0.01|    0.06|    0.24|    2.16|     0.14|
+|H48 h11   |56.5 GiB|    0.08|    0.43|    1.86|   12.20|    15.39|
 |vcube 404 |31.8 GiB|    0.23|    1.24|    6.10|   59.33|   268.26|
-|H48 h10   |28.3 GiB|    0.15|    0.76|    3.36|   23.51|    38.05|
+|egg h10   |29.0 GiB|    0.02|    0.10|    0.47|    4.00|     0.23|
+|H48 h10   |28.3 GiB|    0.13|    0.69|    3.37|   23.15|    38.00|
 |vcube 308 |21.2 GiB|    0.17|    1.02|    6.20|   58.70|   604.35|
-|H48 h9    |14.1 GiB|    0.24|    1.48|    6.69|        |         |
+|egg h9    |14.5 GiB|    0.03|    0.19|    0.91|        |         |
+|H48 h9    |14.1 GiB|    0.22|    1.43|    6.56|        |         |
 |vcube 208 | 7.3 GiB|    0.56|    4.36|   20.58|        |         |
-|H48 h8    | 7.1 GiB|    0.46|    3.36|   14.13|        |         |
-|H48 h7    | 3.5 GiB|    0.63|    4.85|   23.25|        |         |
+|egg h8    | 7.2 GiB|    0.07|    0.39|    1.82|        |         |
+|H48 h8    | 7.1 GiB|    0.46|    3.43|   14.18|        |         |
+|egg h7    | 3.6 GiB|    0.11|    0.81|    4.35|        |         |
+|H48 h7    | 3.5 GiB|    0.63|    4.84|   23.31|        |         |
 |vcube 112 | 2.4 GiB|    0.96|    9.29|   40.52|        |         |
-|H48 h6    | 1.8 GiB|    1.25|    9.45|   46.31|        |         |
+|egg h6    | 1.8 GiB|    0.20|    1.53|    8.19|        |         |
+|H48 h6    | 1.8 GiB|    1.26|    9.51|   47.14|        |         |
 
 Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
 |vcube 212 |58.2 GiB|    6.43|   43.80|  199.38| 1587.43|  1122.73|
-|H48 h11   |56.5 GiB|    5.21|   28.28|  126.68|  889.01|   878.77|
+|egg h11   |58.0 GiB|    0.55|    3.31|   13.99|  125.17|     8.04|
+|H48 h11   |56.5 GiB|    4.56|   24.55|  104.96|  689.22|   869.37|
 |vcube 404 |31.8 GiB|    7.40|   39.47|  194.01| 1887.94|  8535.87|
-|H48 h10   |28.3 GiB|    4.22|   21.37|   94.86|  664.22|  1075.08|
+|egg h10   |29.0 GiB|    0.50|    2.90|   13.69|  115.88|     6.80|
+|H48 h10   |28.3 GiB|    3.62|   19.45|   95.15|  654.05|  1073.69|
 |vcube 308 |21.2 GiB|    3.51|   21.71|  131.50| 1245.26| 12819.94|
-|H48 h9    |14.1 GiB|    3.34|   20.97|   94.57|        |         |
+|egg h9    |14.5 GiB|    0.47|    2.74|   13.19|        |         |
+|H48 h9    |14.1 GiB|    3.11|   20.18|   92.68|        |         |
 |vcube 208 | 7.3 GiB|    4.08|   31.74|  149.68|        |         |
-|H48 h8    | 7.1 GiB|    3.25|   23.75|   99.82|        |         |
-|H48 h7    | 3.5 GiB|    2.22|   17.12|   82.14|        |         |
+|egg h8    | 7.2 GiB|    0.48|    2.82|   13.16|        |         |
+|H48 h8    | 7.1 GiB|    3.23|   24.26|  100.15|        |         |
+|egg h7    | 3.6 GiB|    0.39|    2.94|   15.77|        |         |
+|H48 h7    | 3.5 GiB|    2.22|   17.12|   82.35|        |         |
 |vcube 112 | 2.4 GiB|    2.33|   22.53|   98.23|        |         |
-|H48 h6    | 1.8 GiB|    2.21|   16.70|   81.86|        |         |
+|egg h6    | 1.8 GiB|    0.36|    2.76|   14.83|        |         |
+|H48 h6    | 1.8 GiB|    2.24|   16.80|   83.33|        |         |
 
 <img src="img/17moves1thread.png">
 <img src="img/18moves1thread.png">
@@ -108,9 +130,13 @@ Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 <img src="img/20moves1thread.png">
 </details>
 
-As we can see, adjusting for table size, H48 is generally faster than
-vcube.  The gap between the two solvers is larger for scrambles with
-longer optimal solutions.
+As we can see, egg-solver is the clear winner, consistently beating H48 by
+factors of 5.3x-8.8x for 17-19 moves scrambles, comparing tables of similar
+size. Moreover, egg-solver is more than 100 times faster when solving the
+superflip configuration.
+
+Adjusting for table size, H48 is generally faster than vcube. The gap between
+the two solvers is larger for scrambles with longer optimal solutions.
 
 ### Single solution, multiple threads
 
@@ -118,36 +144,48 @@ The same benchmark as before is repeated using 4 and 16 threads (recall
 that the CPU used for these tests has 8 physical cores and 16 virtual
 threads).
 
-As mentioned above, we don't compare these results to vcube. Instead,
-we compare them with the single-threaded results for H48 and we show
-how far the speedup factor is from a theoretically optimal 4x and 16x.
+For the reasons mentioned above, we will only compare H48 and egg-solver
+in this section.
 
 <!-- The following details block can be found in benchmarks/tables_4_threads.md -->
 <details><summary>Results: Single solution, 4 threads</summary>
 
 Time per cube (in seconds, lower is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11   |56.5 GiB|    0.04|    0.14|    0.60|    3.97|     4.19|
-|H48 h10   |28.3 GiB|    0.05|    0.20|    0.91|    6.65|     9.81|
-|H48 h9    |14.1 GiB|    0.07|    0.39|    1.74|   12.54|    18.96|
-|H48 h8    | 7.1 GiB|    0.13|    0.90|    3.71|        |         |
-|H48 h7    | 3.5 GiB|    0.17|    1.28|    6.12|        |         |
-|H48 h6    | 1.8 GiB|    0.33|    2.47|   12.22|        |         |
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
+|egg h11   |58.0 GiB|    0.00|    0.01|    0.06|    0.55|     0.03|
+|H48 h11   |56.5 GiB|    0.03|    0.13|    0.50|    3.24|     4.17|
+|egg h10   |29.0 GiB|    0.00|    0.03|    0.12|    1.05|     0.09|
+|H48 h10   |28.3 GiB|    0.05|    0.18|    0.90|    6.21|     9.85|
+|egg h9    |14.5 GiB|    0.01|    0.05|    0.23|        |         |
+|H48 h9    |14.1 GiB|    0.07|    0.39|    1.73|   12.50|    18.97|
+|egg h8    | 7.2 GiB|    0.02|    0.10|    0.48|        |         |
+|H48 h8    | 7.1 GiB|    0.13|    0.91|    3.71|        |         |
+|egg h7    | 3.6 GiB|    0.03|    0.21|    1.11|        |         |
+|H48 h7    | 3.5 GiB|    0.18|    1.29|    6.19|        |         |
+|egg h6    | 1.8 GiB|    0.05|    0.39|    2.11|        |         |
+|H48 h6    | 1.8 GiB|    0.34|    2.48|   12.33|        |         |
 
 Speed-up factor (higher is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11   |56.5 GiB|    2.55|    3.46|    3.75|    3.96|     3.71|
-|H48 h10   |28.3 GiB|    3.09|    3.71|    3.67|    3.54|     3.88|
-|H48 h9    |14.1 GiB|    3.25|    3.84|    3.85|        |         |
-|H48 h8    | 7.1 GiB|    3.53|    3.72|    3.81|        |         |
-|H48 h7    | 3.5 GiB|    3.60|    3.78|    3.80|        |         |
-|H48 h6    | 1.8 GiB|    3.77|    3.82|    3.79|        |         |
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
+|egg h11   |58.0 GiB|    3.77|    3.90|    3.89|    3.93|     5.42|
+|H48 h11   |56.5 GiB|    2.51|    3.44|    3.75|    3.77|     3.69|
+|egg h10   |29.0 GiB|    3.88|    3.77|    3.98|    3.81|     2.72|
+|H48 h10   |28.3 GiB|    2.79|    3.91|    3.75|    3.73|     3.86|
+|egg h9    |14.5 GiB|    3.90|    3.87|    3.88|        |         |
+|H48 h9    |14.1 GiB|    3.18|    3.66|    3.79|        |         |
+|egg h8    | 7.2 GiB|    3.87|    3.91|    3.81|        |         |
+|H48 h8    | 7.1 GiB|    3.48|    3.78|    3.82|        |         |
+|egg h7    | 3.6 GiB|    3.87|    3.87|    3.93|        |         |
+|H48 h7    | 3.5 GiB|    3.43|    3.75|    3.77|        |         |
+|egg h6    | 1.8 GiB|    3.98|    3.90|    3.87|        |         |
+|H48 h6    | 1.8 GiB|    3.73|    3.84|    3.82|        |         |
 
-<img src="img/4threadsspeedupfactor.png">
+<img src="img/H48_4_threads_speedup_factor.png">
+<img src="img/egg_4_threads_speedup_factor.png">
 
 </details>
 
@@ -156,74 +194,92 @@ Speed-up factor (higher is better).
 
 Time per cube (in seconds, lower is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11   |56.5 GiB|    0.02|    0.06|    0.22|    1.33|     1.84|
-|H48 h10   |28.3 GiB|    0.03|    0.08|    0.33|    2.34|     4.18|
-|H48 h9    |14.1 GiB|    0.04|    0.15|    0.64|    4.45|     8.09|
-|H48 h8    | 7.1 GiB|    0.06|    0.34|    1.36|        |         |
-|H48 h7    | 3.5 GiB|    0.07|    0.47|    2.20|        |         |
-|H48 h6    | 1.8 GiB|    0.13|    0.91|    4.39|        |         |
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
+|egg h11   |58.0 GiB|    0.00|    0.01|    0.03|    0.27|     0.02|
+|H48 h11   |56.5 GiB|    0.02|    0.06|    0.21|    1.16|     1.84|
+|egg h10   |29.0 GiB|    0.00|    0.02|    0.09|    0.77|     0.04|
+|H48 h10   |28.3 GiB|    0.03|    0.08|    0.34|    2.24|     4.21|
+|egg h9    |14.5 GiB|    0.01|    0.04|    0.17|        |         |
+|H48 h9    |14.1 GiB|    0.03|    0.14|    0.64|    4.43|     8.04|
+|egg h8    | 7.2 GiB|    0.01|    0.07|    0.33|        |         |
+|H48 h8    | 7.1 GiB|    0.06|    0.30|    1.36|        |         |
+|egg h7    | 3.6 GiB|    0.02|    0.15|    0.79|        |         |
+|H48 h7    | 3.5 GiB|    0.08|    0.41|    2.20|        |         |
+|egg h6    | 1.8 GiB|    0.04|    0.28|    1.53|        |         |
+|H48 h6    | 1.8 GiB|    0.13|    0.77|    4.37|        |         |
 
 Speed-up factor (higher is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11   |56.5 GiB|    3.90|    8.14|   10.39|   11.86|     8.45|
-|H48 h10   |28.3 GiB|    5.72|    9.00|   10.03|   10.04|     9.09|
-|H48 h9    |14.1 GiB|    6.56|    9.75|   10.53|        |         |
-|H48 h8    | 7.1 GiB|    8.08|    9.91|   10.40|        |         |
-|H48 h7    | 3.5 GiB|    8.59|   10.30|   10.57|        |         |
-|H48 h6    | 1.8 GiB|    9.60|   10.39|   10.54|        |         |
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
+|egg h11   |58.0 GiB|    5.56|    8.03|    8.00|    8.05|     8.45|
+|H48 h11   |56.5 GiB|    3.73|    7.32|    8.87|   10.54|     8.35|
+|egg h10   |29.0 GiB|    5.63|    5.58|    5.53|    5.18|     6.05|
+|H48 h10   |28.3 GiB|    4.76|    8.60|    9.84|   10.34|     9.03|
+|egg h9    |14.5 GiB|    5.46|    5.32|    5.35|        |         |
+|H48 h9    |14.1 GiB|    6.34|   10.07|   10.19|        |         |
+|egg h8    | 7.2 GiB|    5.49|    5.50|    5.53|        |         |
+|H48 h8    | 7.1 GiB|    7.51|   11.36|   10.43|        |         |
+|egg h7    | 3.6 GiB|    5.33|    5.38|    5.48|        |         |
+|H48 h7    | 3.5 GiB|    8.21|   11.75|   10.61|        |         |
+|egg h6    | 1.8 GiB|    5.51|    5.42|    5.35|        |         |
+|H48 h6    | 1.8 GiB|    9.38|   12.31|   10.80|        |         |
 
-<img src="img/16threadsspeedupfactor.png">
+<img src="img/H48_16_threads_speedup_factor.png">
+<img src="img/egg_16_threads_speedup_factor.png">
 
 </details>
 
-We can see that H48 scales pretty well with 4 threads, getting close
-to the 4x theoretical maximum speedup in slower cases (small table or
-long solutions).
+We can see that both egg-solver and H48 scale pretty well with 4 threads,
+getting close to the 4x theoretical maximum speedup in slower cases
+(small table or long solutions). egg-solver managed to beat the 4x
+speedup for the superflip, likely due to single-scramble variance, i.e.
+the thread that found the solution stopped earlier.
 
 In the 16 threads benchmark shows that, although the virtual threads
-help push us beyond the 8x theoretical speedup that would be provided
-by the 8 cores, we are nowhere near a 16x speedup.
+help push H48 beyond the 8x theoretical speedup that would be provided
+by the 8 cores, it is nowhere near a 16x speedup. egg-solver seems
+stuck around 5.5x speedup.
 
 ### All solutions
 
 Finally, we ran a test on finding *all* optimal solutions which, as
-far as I know, is a use case not supported by vcube. For convenience,
-this test is only run on 16 threads.
+far as I know, is a use case not supported by vcube or egg-solver.
+For convenience, this test is only run on 16 threads.
 
-<!-- The following details block can be found in benchmarks/all_solutions.md -->
-<details><summary>Results: All solutions (16 threads)</summary>
+<!-- The following details block can be found in benchmarks/tables_all_solutions.md -->
+<details><summary>Results: All solutions, 16 threads</summary>
 
 Time per cube (in seconds, lower is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11   |56.5 GiB|    0.04|    0.26|    2.22|   18.96|    16.95|
-|H48 h10   |28.3 GiB|    0.05|    0.42|    3.82|   34.42|    36.80|
-|H48 h9    |14.1 GiB|    0.08|    0.73|    7.28|        |         |
-|H48 h8    | 7.1 GiB|    0.15|    1.56|   15.41|        |         |
-|H48 h7    | 3.5 GiB|    0.21|    2.38|   26.52|        |         |
-|H48 h6    | 1.8 GiB|    0.39|    4.67|   53.00|        |         |
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
+|H48 h11   |56.5 GiB|    0.04|    0.24|    1.88|    3.88|     1.86|
+|H48 h10   |28.3 GiB|    0.05|    0.39|    3.51|    7.54|     4.29|
+|H48 h9    |14.1 GiB|    0.08|    0.73|    6.92|        |         |
+|H48 h8    | 7.1 GiB|    0.16|    1.54|   14.78|        |         |
+|H48 h7    | 3.5 GiB|    0.22|    2.37|   25.35|        |         |
+|H48 h6    | 1.8 GiB|    0.40|    4.58|   50.17|        |         |
 
 Time per cube adjusted for table size (in seconds \* GiB, lower is better).
 
-|  Solver  |  Size  |17 moves|18 moves|19 moves|20 moves|Superflip|
-|:---------|:-------|-------:|-------:|-------:|-------:|--------:|
-|H48 h11   |56.5 GiB|    2.11|   14.55|  125.21| 1071.23|   957.47|
-|H48 h10   |28.3 GiB|    1.48|   11.96|  107.83|  972.35|  1039.73|
-|H48 h9    |14.1 GiB|    1.08|   10.29|  102.88|        |         |
-|H48 h8    | 7.1 GiB|    1.03|   10.99|  108.87|        |         |
-|H48 h7    | 3.5 GiB|    0.74|    8.41|   93.69|        |         |
-|H48 h6    | 1.8 GiB|    0.70|    8.25|   93.68|        |         |
+|Solver|Size|17 moves|18 moves|19 moves|20 moves|Superflip|
+|:-----|:---|-------:|-------:|-------:|-------:|--------:|
+|H48 h11   |56.5 GiB|    2.00|   13.40|  106.21|  219.43|   105.10|
+|H48 h10   |28.3 GiB|    1.45|   11.13|   99.17|  212.94|   121.20|
+|H48 h9    |14.1 GiB|    1.13|   10.25|   97.80|        |         |
+|H48 h8    | 7.1 GiB|    1.10|   10.85|  104.41|        |         |
+|H48 h7    | 3.5 GiB|    0.79|    8.38|   89.57|        |         |
+|H48 h6    | 1.8 GiB|    0.71|    8.10|   88.68|        |         |
 
 </details>
 
 ## Other notes
 
-* To repeat the benchmarks, use `./benchmarks/run-h48-benchmarks.sh`.
+* To repeat the benchmarks for H48, use `./benchmarks/run-h48-benchmarks.sh`.
+  Similar scripts for vcube and egg-solver can be found in the `benchmarks`
+  folder.
 * All the measurements above exclude the time needed to load the pruning
   tables into memory, which can be quite significant for large tables.
 * The measurements also excluded the one-off computation of the pruning
