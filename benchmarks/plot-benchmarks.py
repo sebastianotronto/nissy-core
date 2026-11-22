@@ -185,9 +185,9 @@ with open(benchmarks_4_threads, "w") as f:
 	)
 	f.write("\n")
 	f.write(
-        '<img src="img/H48_4_threads_speedup_factor.png">\n'
-        '<img src="img/egg_4_threads_speedup_factor.png">\n'
-    )
+		'<img src="img/H48_4_threads_speedup_factor.png">\n'
+		'<img src="img/egg_4_threads_speedup_factor.png">\n'
+	)
 	f.write("\n")
 	f.write("</details>\n")
 
@@ -223,9 +223,9 @@ with open(benchmarks_16_threads, "w") as f:
 	)
 	f.write("\n")
 	f.write(
-        '<img src="img/H48_16_threads_speedup_factor.png">\n'
-        '<img src="img/egg_16_threads_speedup_factor.png">\n'
-    )
+		'<img src="img/H48_16_threads_speedup_factor.png">\n'
+		'<img src="img/egg_16_threads_speedup_factor.png">\n'
+	)
 	f.write("\n")
 	f.write("</details>\n")
 
@@ -241,14 +241,35 @@ with open(benchmarks_all_solutions, "w") as f:
 	f.write("\n")
 	f.write("Time per cube (in seconds, lower is better).\n")
 	f.write("\n")
-	print_table(f, results_h48.h48_all_solutions, None, None, False, False)
+	print_table(
+		f,
+		results_h48.h48_all_solutions,
+		None,
+		results_egg.egg_all_solutions,
+		False,
+		False,
+	)
 	f.write("\n")
 	f.write(
 		"Time per cube adjusted for table size "
 		"(in seconds \\* GiB, lower is better).\n"
 	)
 	f.write("\n")
-	print_table(f, results_h48.h48_all_solutions, None, None, True, False)
+	print_table(
+		f,
+		results_h48.h48_all_solutions,
+		None,
+		results_egg.egg_all_solutions,
+		True,
+		False
+	)
+	f.write("\n")
+	f.write(
+		'<img src="img/17movesallsolutions16threads.png">\n'
+		'<img src="img/18movesallsolutions16threads.png">\n'
+		'<img src="img/19movesallsolutions16threads.png">\n'
+		'<img src="img/20movesallsolutions16threads.png">\n'
+	)
 	f.write("\n")
 	f.write("</details>\n")
 
@@ -256,20 +277,33 @@ with open(benchmarks_all_solutions, "w") as f:
 
 def plot_comparison(title, hd, vd, ed, key):
 	d = 1 if key == "superflip" else 25
-	h48x = [sizes_h48[m]/(2**30) for m in hd.keys() if key in hd[m]]
-	vcubex = [sizes_vcube[m]/(2**30) for m in vd.keys() if key in vd[m]]
-	eggx = [sizes_egg[m]/(2**30) for m in ed.keys() if key in ed[m]]
-	h48y = [d[key] for _, d in hd.items() if key in d]
-	vcubey = [d[key] for _, d in vd.items() if key in d]
-	eggy = [d[key] for _, d in ed.items() if key in d]
 
 	plt.clf()
 	plt.title(title)
 	plt.xlabel("Table size (GiB)")
 	plt.ylabel("Time to solve (s / cube)")
-	plt.plot(h48x, h48y, "o--", label = "H48")
-	plt.plot(vcubex, vcubey, "o--", label = "vcube")
-	plt.plot(eggx, eggy, "o--", label = "egg")
+
+	if hd is not None:
+		h48x = [
+			sizes_h48[m]/(2**30) for m in hd.keys() if key in hd[m]
+		]
+		h48y = [d[key] for _, d in hd.items() if key in d]
+		plt.plot(h48x, h48y, "o--", label = "H48")
+
+	if vd is not None:
+		vcubex = [
+			sizes_vcube[m]/(2**30) for m in vd.keys() if key in vd[m]
+		]
+		vcubey = [d[key] for _, d in vd.items() if key in d]
+		plt.plot(vcubex, vcubey, "o--", label = "vcube")
+
+	if ed is not None:
+		eggx = [
+			sizes_egg[m]/(2**30) for m in ed.keys() if key in ed[m]
+		]
+		eggy = [d[key] for _, d in ed.items() if key in d]
+		plt.plot(eggx, eggy, "o--", label = "egg")
+
 	plt.legend(loc = "right")
 	filename = title.replace(" ", "").replace(",", "") + ".png"
 	plt.savefig(benchmarks_img_dir / filename, dpi=300)
@@ -278,8 +312,17 @@ def plot_comparison(title, hd, vd, ed, key):
 rh = results_h48.h48_single_thread
 rv = results_vcube.vcube_single_thread
 re = results_egg.egg_single_thread
+rhall = results_h48.h48_all_solutions
+reall = results_egg.egg_all_solutions
 for m in [17, 18, 19, 20]:
 	plot_comparison(f"{m} moves 1 thread", rh, rv, re, m)
+	plot_comparison(
+		f"{m} moves all solutions, 16 threads",
+		rhall,
+		None,
+		reall,
+		m,
+	)
 
 def plot_multithread_scatter(title, slow, fast):
 	plt.clf()
